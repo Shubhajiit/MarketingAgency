@@ -20,18 +20,18 @@ export default function Page() {
     return (
         <div className="min-h-screen font-sans flex flex-col">
             {/* Top Banner 1 - Dark */}
-            <div className="bg-[#333333] text-white text-[11px] md:text-sm py-2 px-2 flex flex-wrap justify-center items-center gap-1.5 md:gap-2 text-center">
-                <span>Celebrating</span>
-                <div className="flex items-center justify-center bg-transparent border-2 border-yellow-500 rounded-full w-8 h-8 text-yellow-500 font-bold text-xs relative shrink-0">
+            <div className="bg-[#333333] text-white text-[11px] md:text-sm py-2 px-2 overflow-x-auto whitespace-nowrap scrollbar-none flex justify-start md:justify-center items-center gap-1.5 md:gap-2 text-center">
+                <span className="inline-flex items-center shrink-0">Celebrating</span>
+                <div className="inline-flex items-center justify-center bg-transparent border-2 border-yellow-500 rounded-full w-8 h-8 text-yellow-500 font-bold text-xs relative shrink-0">
                     <span className="text-sm">12</span>
                     <span className="absolute -top-1 -right-2 text-[8px] bg-[#333333] px-0.5">Years</span>
                 </div>
-                <span>of Trust</span>
-                <span className="text-white">★</span>
-                <span>Upto 65% off</span>
-                <span className="text-white">★</span>
-                <span>Until 23rd May&apos;26</span>
-                <span className="text-white">★</span>
+                <span className="inline-flex items-center shrink-0">of Trust</span>
+                <span className="inline-flex items-center shrink-0 text-white">★</span>
+                <span className="inline-flex items-center shrink-0">Upto 65% off</span>
+                <span className="inline-flex items-center shrink-0 text-white">★</span>
+                <span className="inline-flex items-center shrink-0">Until 23rd May&apos;26</span>
+                <span className="inline-flex items-center shrink-0 text-white">★</span>
             </div>
 
             {/* Top Banner 2 - Orange */}
