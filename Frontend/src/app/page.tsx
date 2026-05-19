@@ -19,20 +19,18 @@ export default function Page() {
 
     return (
         <div className="min-h-screen font-sans flex flex-col">
-            {/* Top Banner 1 - Dark */}
-            <div className="bg-[#333333] text-white text-[11px] md:text-sm py-2 px-2 overflow-x-auto whitespace-nowrap scrollbar-none flex justify-start md:justify-center items-center gap-1.5 md:gap-2 text-center">
-                <span className="inline-flex items-center shrink-0">Celebrating</span>
-                <div className="inline-flex items-center justify-center bg-transparent border-2 border-yellow-500 rounded-full w-8 h-8 text-yellow-500 font-bold text-xs relative shrink-0">
-                    <span className="text-sm">12</span>
-                    <span className="absolute -top-1 -right-2 text-[8px] bg-[#333333] px-0.5">Years</span>
+            <div className="sticky top-0 z-50 w-full flex flex-col bg-white">
+                {/* Top Banner 1 - Dark */}
+                <div className="bg-[#333333] text-white text-[11px] md:text-sm py-2 overflow-hidden flex items-center">
+                    <div className="animate-marquee whitespace-nowrap flex min-w-max">
+                        {/* Repeat the sentence enough times to fill the screen and animate smoothly */}
+                        {[...Array(10)].map((_, i) => (
+                            <span key={i} className="mx-4 text-blue-100 font-semibold tracking-wider">
+                                ★ HURRY! UPTO 50% OFF ON ALL WORKSHOP BOOKINGS ★
+                            </span>
+                        ))}
+                    </div>
                 </div>
-                <span className="inline-flex items-center shrink-0">of Trust</span>
-                <span className="inline-flex items-center shrink-0 text-white">★</span>
-                <span className="inline-flex items-center shrink-0">Upto 65% off</span>
-                <span className="inline-flex items-center shrink-0 text-white">★</span>
-                <span className="inline-flex items-center shrink-0">Until 23rd May&apos;26</span>
-                <span className="inline-flex items-center shrink-0 text-white">★</span>
-            </div>
 
             {/* Top Banner 2 - Orange */}
             <div className="bg-[#fca130] py-1.5 px-4 md:px-36 text-white text-xs md:text-sm flex flex-row justify-between md:justify-end gap-4 md:gap-6 font-medium overflow-x-auto whitespace-nowrap scrollbar-none">
@@ -56,12 +54,8 @@ export default function Page() {
 
             {/* Navbar */}
             <header className="bg-white border-b border-gray-100 py-3 px-4 md:px-36 flex justify-between items-center z-10">
-                <div className="flex flex-col">
-                    <div className="flex items-center">
-                        <span className="text-[#009ee3] font-bold text-2xl tracking-tighter mr-[1px]">D</span>
-                        <span className="text-[#fca130] font-bold text-2xl tracking-tighter">atamites</span>
-                    </div>
-                    <span className="text-[10px] text-gray-500 -mt-1 ml-1">An ISO 9001:2015 Certified Company</span>
+                <div className="flex items-center">
+                    <img src="/Logo/Logo.png" alt="Datamites Logo" className="h-12 w-auto object-contain" />
                 </div>
 
                 <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-gray-800 tracking-wide">
@@ -100,6 +94,7 @@ export default function Page() {
                     <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">COMPANY <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                 </div>
             )}
+            </div>
 
             {/* Hero Section */}
             <section className="relative w-full min-h-[450px] flex items-center">
