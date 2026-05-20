@@ -1,10 +1,41 @@
 "use client";
 import React from 'react';
+import MarqueeTestimonials from "./components/MarqueeTestimonials";
+import ParticlesBg from "@/components/ui/particles-bg";
 
 export default function Page() {
     const [hoveredSection, setHoveredSection] = React.useState<string | null>(null);
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const coursesScrollRef = React.useRef<HTMLDivElement>(null);
+
+    const stats = [
+       
+        {
+      percentage: "80%",
+      label: "manual payment tasks",
+      isIncrease: false,
+      logo: "/customer/netflix.png",
+    },
+    {
+      percentage: "30%",
+      label: "international fees",
+      isIncrease: false,
+      logo: "/customer/vercel.png",
+    },
+    {
+      percentage: "25%",
+      label: "payment reconciliation",
+      isIncrease: false,
+      logo: "/customer/amazon.png",
+    },
+    {
+      percentage: "$100K",
+      label: "saved per year",
+      isIncrease: true,
+      logo: "/customer/alibaba.png",
+    },
+
+    ];
 
     const scrollCourses = (direction: 'left' | 'right') => {
         if (coursesScrollRef.current) {
@@ -97,9 +128,11 @@ export default function Page() {
             </div>
 
             {/* Hero Section */}
-            <section className="relative w-full min-h-[450px] flex items-center">
+            <section className="relative isolate w-full min-h-[450px] flex items-center overflow-hidden">
+                <ParticlesBg />
+
                 {/* Background Image & Overlay */}
-                <div className="absolute inset-0 w-full h-full bg-zinc-900 overflow-hidden">
+                <div className="absolute inset-0 z-0 w-full h-full bg-zinc-900 overflow-hidden">
                     <img
                         src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
                         alt="Professional Woman"
@@ -110,7 +143,7 @@ export default function Page() {
                 </div>
 
                 {/* Hero Content */}
-                <div className="relative z-10 w-full px-4 md:px-36 text-white flex flex-col pt-6">
+                <div className="relative z-20 w-full px-4 md:px-36 text-white flex flex-col pt-6">
                     <h1 className="text-[26px] md:text-[32px] font-semibold tracking-wide mb-3 uppercase">
                         AI For Marketing Professionals Course
                     </h1>
@@ -190,6 +223,45 @@ export default function Page() {
                     </div>
                 </div>
             </section>
+
+            {/* Stats Marquee Section */}
+            <div className="bg-gray-50 w-full py-5 border-b border-gray-200 overflow-hidden flex items-center">
+                <div className="animate-marquee-reverse whitespace-nowrap flex min-w-max items-center gap-16 px-4">
+                    {[...stats, ...stats, ...stats, ...stats].map((stat, index) => (
+                        <React.Fragment key={index}>
+                            <div
+                                className="flex items-center gap-4 group cursor-pointer shrink-0"
+                            >
+                                <img
+                                    src={`https://pro-section.ui-layouts.com${stat.logo}`}
+                                    alt={stat.label}
+                                    className="h-8 w-auto object-contain grayscale opacity-60 group-hover:opacity-100 transition-opacity"
+                                />
+                                <div className="flex items-center gap-1.5">
+                                    {stat.isIncrease ? (
+                                        <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                                            <polyline points="5 12 12 5 19 12"></polyline>
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <polyline points="19 12 12 19 5 12"></polyline>
+                                        </svg>
+                                    )}
+                                    <span className="text-3xl font-bold text-gray-800">
+                                        {stat.percentage}
+                                    </span>
+                                </div>
+                                <p className="text-gray-600 text-lg font-medium capitalize">
+                                    {stat.label}
+                                </p>
+                            </div>
+                            <div className="w-px h-10 bg-gray-300"></div>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
 
             {/* Breadcrumb Section */}
             <div className="bg-[#f8f9fa] py-3 px-4 md:px-36 text-[13px] text-gray-500 border-b border-gray-200 flex flex-wrap gap-1">
@@ -1147,10 +1219,11 @@ export default function Page() {
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
+
+            <MarqueeTestimonials />
         </div>
     );
 }
