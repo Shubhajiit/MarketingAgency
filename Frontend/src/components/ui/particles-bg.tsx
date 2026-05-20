@@ -22,8 +22,9 @@ export default function ParticlesBg() {
     const oldCanvas = document.querySelector("#particles-js canvas");
     if (oldCanvas) oldCanvas.remove();
 
-    if (window.pJSDom?.length > 0) {
-      window.pJSDom.forEach((instance) => instance.pJS.fn.vendors.destroypJS());
+    const particleInstances = window.pJSDom ?? [];
+    if (particleInstances.length > 0) {
+      particleInstances.forEach((instance) => instance.pJS.fn.vendors.destroypJS());
       window.pJSDom = [];
     }
 
