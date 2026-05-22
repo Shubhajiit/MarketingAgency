@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useGoogleLogin } from "@react-oauth/google";
 
 interface PupilProps {
   size?: number;
@@ -182,13 +183,34 @@ function SearchParamsSync({ setIsSignUp }: { setIsSignUp: React.Dispatch<React.S
 
 function LoginPageContent() {
   const router = useRouter();
-  const { login, register, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { login, register, googleLogin, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
       router.replace('/');
     }
   }, [isAuthLoading, isAuthenticated, router]);
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setError("");
+      setIsLoading(true);
+      try {
+        const res = await googleLogin(tokenResponse.access_token);
+        if (res?.data?.user?.role === 'admin') {
+          router.push('/admin/workshops');
+        } else {
+          router.push(res?.data?.user?._id ? `/dashboard/${res.data.user._id}` : "/dashboard");
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Google login failed. Please try again.");
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      setError("Google login failed. Please try again.");
+    }
+  });
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -388,11 +410,12 @@ function LoginPageContent() {
         }}
       >
         <div className="relative z-20">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold w-fit text-slate-950">
-            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Sparkles className="size-4" />
-            </div>
-            <span>AI Scale</span>
+          <Link href="/" className="flex items-center w-fit">
+            <img
+              src="/Logo/Logo.png"
+              alt="Logo"
+              className="h-12 w-auto object-contain"
+            />
           </Link>
         </div>
 
@@ -588,43 +611,40 @@ function LoginPageContent() {
       <div className="flex items-center justify-center p-8 bg-white text-slate-900">
         <div className="w-full max-w-[420px] overflow-hidden">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2 text-lg font-semibold mb-8">
-            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Sparkles className="size-4" />
-            </div>
-            <span>AI Scale</span>
+          <div className="lg:hidden flex items-center justify-center mb-8">
+            <Link href="/" className="flex items-center">
+              <img
+                src="/Logo/Logo.png"
+                alt="Logo"
+                className="h-12 w-auto object-contain"
+              />
+            </Link>
           </div>
 
           {/* Header */}
-          <div className="text-center mb-8 h-18 select-none relative">
+          <div className="mb-8 select-none relative h-10">
             {/* Login Header */}
             <div
               className={cn(
-                "absolute inset-0 transition-all duration-500 ease-in-out flex flex-col justify-center",
+                "absolute inset-y-0 left-0 right-0 transition-all duration-500 ease-in-out flex flex-col justify-end text-left",
                 isSignUp ? "opacity-0 translate-y-2 pointer-events-none" : "opacity-100 translate-y-0"
               )}
             >
-              <h1 className="text-3xl font-bold tracking-tight mb-1 text-slate-950">
-                Welcome back!
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
+                Log In
               </h1>
-              <p className="text-slate-500 text-sm">
-                Please enter your details
-              </p>
             </div>
 
             {/* SignUp Header */}
             <div
               className={cn(
-                "absolute inset-0 transition-all duration-500 ease-in-out flex flex-col justify-center",
+                "absolute inset-y-0 left-0 right-0 transition-all duration-500 ease-in-out flex flex-col justify-end text-left",
                 isSignUp ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
               )}
             >
-              <h1 className="text-3xl font-bold tracking-tight mb-1 text-slate-950">
-                Create your account
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
+                Create Account
               </h1>
-              <p className="text-slate-500 text-sm">
-                Please enter your details to sign up
-              </p>
             </div>
           </div>
 
@@ -632,8 +652,8 @@ function LoginPageContent() {
           <form onSubmit={handleSubmit} className="space-y-5 text-slate-900">
             {/* Sliding Inputs Wrapper */}
             <div 
-              className="relative overflow-hidden transition-all duration-500 ease-in-out"
-              style={{ maxHeight: isSignUp ? '410px' : '230px' }}
+              className="relative overflow-hidden transition-all duration-500 ease-in-out pt-1 pb-2"
+              style={{ maxHeight: isSignUp ? '420px' : '240px' }}
             >
               <div 
                 className="flex transition-transform duration-500 ease-in-out w-[200%]"
@@ -642,12 +662,12 @@ function LoginPageContent() {
                 {/* Panel 1: Login Form Fields */}
                 <div 
                   className={cn(
-                    "w-1/2 pr-4 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
+                    "w-1/2 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
                     isSignUp ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
                   )}
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-sm font-medium text-slate-700">Email</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-email" className="text-sm font-normal text-slate-600">Email Address</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -658,12 +678,12 @@ function LoginPageContent() {
                       onFocus={() => setIsTyping(true)}
                       onBlur={() => setIsTyping(false)}
                       required={!isSignUp}
-                      className="h-12 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                      className="h-12 px-5 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-medium text-slate-700">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-password" className="text-sm font-normal text-slate-600">Password</Label>
                     <div className="relative">
                       <Input
                         id="login-password"
@@ -672,12 +692,12 @@ function LoginPageContent() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required={!isSignUp}
-                        className="h-12 pr-10 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                        className="h-12 pl-5 pr-12 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                       >
                         {showPassword ? (
                           <EyeOff className="size-5" />
@@ -690,17 +710,20 @@ function LoginPageContent() {
 
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="remember" className="border-slate-300 text-primary focus:ring-primary" />
+                      <Checkbox 
+                        id="remember" 
+                        className="h-4 w-4 rounded border-slate-300 text-slate-950 focus:ring-slate-950 data-[state=checked]:bg-slate-950 data-[state=checked]:text-white" 
+                      />
                       <Label
                         htmlFor="remember"
                         className="text-sm font-normal cursor-pointer text-slate-600 select-none"
                       >
-                        Remember for 30 days
+                        Remember me
                       </Label>
                     </div>
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-primary hover:underline font-medium"
+                      className="text-sm text-slate-950 hover:underline font-bold underline"
                     >
                       Forgot password?
                     </Link>
@@ -710,12 +733,12 @@ function LoginPageContent() {
                 {/* Panel 2: Registration Form Fields */}
                 <div 
                   className={cn(
-                    "w-1/2 pl-4 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
+                    "w-1/2 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
                     isSignUp ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"
                   )}
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name" className="text-sm font-medium text-slate-700">Full Name</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="register-name" className="text-sm font-normal text-slate-600">Full Name</Label>
                     <Input
                       id="register-name"
                       type="text"
@@ -726,12 +749,12 @@ function LoginPageContent() {
                       onFocus={() => setIsTyping(true)}
                       onBlur={() => setIsTyping(false)}
                       required={isSignUp}
-                      className="h-12 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                      className="h-12 px-5 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="register-email" className="text-sm font-medium text-slate-700">Email Address</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="register-email" className="text-sm font-normal text-slate-600">Email Address</Label>
                     <Input
                       id="register-email"
                       type="email"
@@ -742,12 +765,12 @@ function LoginPageContent() {
                       onFocus={() => setIsTyping(true)}
                       onBlur={() => setIsTyping(false)}
                       required={isSignUp}
-                      className="h-12 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                      className="h-12 px-5 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password" className="text-sm font-medium text-slate-700">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="register-password" className="text-sm font-normal text-slate-600">Password</Label>
                     <Input
                       id="register-password"
                       type="password"
@@ -755,12 +778,12 @@ function LoginPageContent() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required={isSignUp}
-                      className="h-12 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                      className="h-12 px-5 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="register-confirm" className="text-sm font-medium text-slate-700">Confirm Password</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="register-confirm" className="text-sm font-normal text-slate-600">Confirm Password</Label>
                     <Input
                       id="register-confirm"
                       type="password"
@@ -768,7 +791,7 @@ function LoginPageContent() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required={isSignUp}
-                      className="h-12 bg-white border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary text-slate-900 placeholder-slate-400"
+                      className="h-12 px-5 bg-white border border-slate-200 hover:border-slate-300 rounded-full focus:border-slate-400 focus:ring-0 focus-visible:ring-1 focus-visible:ring-slate-950 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-400 outline-none transition-all shadow-none"
                     />
                   </div>
                 </div>
@@ -776,15 +799,14 @@ function LoginPageContent() {
             </div>
 
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg transition-all">
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl transition-all animate-in fade-in slide-in-from-top-1">
                 {error}
               </div>
             )}
 
             <Button 
               type="submit" 
-              className="w-full h-12 text-base font-medium bg-[#009ee3] hover:bg-[#009ee3]/90 text-white transition-all relative overflow-hidden" 
-              size="lg" 
+              className="w-full h-12 text-base font-semibold bg-slate-950 hover:bg-slate-900 text-white rounded-full transition-all relative overflow-hidden shadow-none" 
               disabled={isLoading}
             >
               <div className="relative w-full h-full flex items-center justify-center">
@@ -811,15 +833,57 @@ function LoginPageContent() {
             </Button>
           </form>
 
-          {/* Social Login */}
-          <div className="mt-6">
+          {/* Divider */}
+          <div className="relative my-6 select-none">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-100" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-slate-400 font-medium lowercase">or</span>
+            </div>
+          </div>
+
+          {/* Social Login Grid */}
+          <div className="grid grid-cols-2 gap-3 mt-4">
             <Button 
               variant="outline" 
-              className="w-full h-12 bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
+              className="h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
+              type="button"
+              onClick={() => handleGoogleLogin()}
+              disabled={isLoading}
+            >
+              {/* Google G SVG logo */}
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#EA4335"
+                  d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.323 2.673 1.34 6.57l3.926 3.195z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M23.49 12.273c0-.818-.073-1.609-.209-2.373H12v4.582h6.445c-.277 1.482-1.114 2.736-2.373 3.582l3.7 2.873c2.164-1.99 3.418-4.927 3.418-8.664z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M16.073 18.064A7.077 7.077 0 0 1 12 19.091a7.077 7.077 0 0 1-6.734-4.856L1.34 17.43C3.323 21.327 7.33 24 12 24c3.21 0 6.136-1.045 8.218-2.855l-4.145-3.08z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.266 14.235A7.045 7.045 0 0 1 4.909 12c0-.79.136-1.545.357-2.235L1.34 6.57A11.968 11.968 0 0 0 0 12c0 1.927.455 3.745 1.264 5.373l4.002-3.138z"
+                />
+              </svg>
+              <span className="truncate">Continue with Google</span>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
               type="button"
             >
-              <Mail className="mr-2 size-5" />
-              Log in with Google
+              {/* Facebook SVG logo */}
+              <svg className="w-4 h-4 shrink-0 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+              <span className="truncate">Continue with Facebook</span>
             </Button>
           </div>
 
@@ -835,9 +899,9 @@ function LoginPageContent() {
               <button 
                 type="button" 
                 onClick={() => handleToggleMode(false)}
-                className="text-slate-900 font-medium hover:underline focus:outline-none cursor-pointer ml-1"
+                className="text-slate-950 font-bold underline hover:text-slate-800 focus:outline-none cursor-pointer ml-1"
               >
-                Sign In
+                Log in
               </button>
             </div>
             <div
@@ -850,9 +914,9 @@ function LoginPageContent() {
               <button 
                 type="button" 
                 onClick={() => handleToggleMode(true)}
-                className="text-slate-900 font-medium hover:underline focus:outline-none cursor-pointer ml-1"
+                className="text-slate-950 font-bold underline hover:text-slate-800 focus:outline-none cursor-pointer ml-1"
               >
-                Sign Up
+                Create an Account
               </button>
             </div>
           </div>

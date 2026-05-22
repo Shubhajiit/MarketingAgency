@@ -75,3 +75,7 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Force pointer cursor for all clickable elements globally */
+a, button, [role="button"], input[type="submit"], input[type="button"], input[type="reset"], [tabindex="0"] {
+  cursor: pointer;
+}

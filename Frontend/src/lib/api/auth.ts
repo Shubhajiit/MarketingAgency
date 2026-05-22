@@ -41,6 +41,14 @@ export const authApi = {
     return res.data;
   },
 
+  googleLogin: async (token: string) => {
+    const res = await apiClient.post<AuthResponse>('/auth/google', { token });
+    if (res.data.data?.accessToken) {
+      setAccessToken(res.data.data.accessToken);
+    }
+    return res.data;
+  },
+
   logout: async () => {
     const res = await apiClient.post('/auth/logout');
     setAccessToken(null);

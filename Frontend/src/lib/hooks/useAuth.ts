@@ -53,12 +53,24 @@ export function useAuth() {
     }
   }, [setAuth, clearAuth, setLoading]);
 
+  const googleLogin = useCallback(
+    async (token: string) => {
+      const response = await authApi.googleLogin(token);
+      if (response.data?.user) {
+        setAuth(response.data.user);
+      }
+      return response;
+    },
+    [setAuth]
+  );
+
   return {
     user,
     isAuthenticated,
     isLoading,
     login,
     register,
+    googleLogin,
     logout,
     checkAuth,
   };

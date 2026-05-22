@@ -231,16 +231,16 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Webinar 1 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#eaf4ff] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative">
+              <div className="w-16 h-16 bg-[#eaf4ff] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
                 <p className="text-[8px] font-bold text-blue-900 text-center leading-tight mb-2">Getting Started with Wireframing</p>
                 <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#8b5cf6] mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
                 <h3 className="font-bold text-gray-900 mb-1">Getting started design with Wireframing</h3>
-                <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 16, 2022
@@ -252,22 +252,22 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <button className="bg-[#2db39b] hover:bg-[#259b86] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+            <button className="bg-[#2db39b] hover:bg-[#259b86] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap self-start sm:self-auto">
               Join Now
             </button>
           </div>
 
           {/* Webinar 2 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#ebf7d3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative">
+              <div className="w-16 h-16 bg-[#ebf7d3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
                 <p className="text-[8px] font-bold text-green-900 text-center leading-tight mb-2 max-w-[40px]">UI Designer Tasks and Functions</p>
                 <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#2db39b] mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
                 <h3 className="font-bold text-gray-900 mb-1">UI Designer Tasks and Functions</h3>
-                <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 20, 2022
@@ -279,22 +279,22 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider">
+            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>
 
           {/* Webinar 3 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#f6f7fb] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative">
+              <div className="w-16 h-16 bg-[#f6f7fb] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
                 <p className="text-[8px] font-bold text-gray-900 text-center leading-tight mb-2 max-w-[40px]">Starting Career as an UX Writer</p>
                 <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#8b5cf6] mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
                 <h3 className="font-bold text-gray-900 mb-1">Starting Career as an UX Writer</h3>
-                <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 19, 2022
@@ -306,22 +306,22 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider">
+            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>
 
           {/* Webinar 4 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#e8f6f3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative">
+              <div className="w-16 h-16 bg-[#e8f6f3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
                 <p className="text-[8px] font-bold text-green-900 text-center leading-tight mb-2 max-w-[40px]">How to become UI Designer</p>
                 <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#2db39b] mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
                 <h3 className="font-bold text-gray-900 mb-1">How to become UI Designer</h3>
-                <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 22, 2022
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider">
+            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>

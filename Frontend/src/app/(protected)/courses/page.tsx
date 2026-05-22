@@ -214,7 +214,7 @@ function CoursesContent() {
 
       {/* Info banner for search or label filters */}
       {(labelFilter || searchQuery) && (
-        <div className="flex items-center justify-between bg-[#f0fcf9] border border-[#a2dcd1] rounded-xl px-4 py-3 text-sm text-gray-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#f0fcf9] border border-[#a2dcd1] rounded-xl px-4 py-3 text-sm text-gray-800 gap-2">
           <div className="flex items-center gap-2">
             <span>
               Showing {filteredCourses.length} courses matching{' '}
@@ -233,7 +233,7 @@ function CoursesContent() {
           </div>
           <button
             onClick={() => router.push('/courses')}
-            className="text-xs font-bold text-[#2db39b] hover:underline"
+            className="text-xs font-bold text-[#2db39b] hover:underline self-start sm:self-auto shrink-0"
           >
             Reset Filters
           </button>

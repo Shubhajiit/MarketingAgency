@@ -1,12 +1,15 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { z } = require('zod');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const { env } = require('../config/env');
 const { getRedis } = require('../config/redis');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
+
+const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 // Validation schemas
 const registerSchema = z.object({
@@ -252,6 +255,78 @@ const resetPassword = asyncHandler(async (req, res) => {
   return ApiResponse.success(res, null, 'Password reset successful');
 });
 
+// ─── Google Login ──────────────────────────────────────────
+const googleLoginSchema = z.object({
+  token: z.string().min(1, 'Google token is required'),
+});
+
+const googleLogin = asyncHandler(async (req, res) => {
+  const { token } = googleLoginSchema.parse(req.body);
+
+  let payload;
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch user info from Google');
+    }
+    payload = await response.json();
+  } catch (error) {
+    logger.error(`Google token verification failed: ${error.message}`);
+    return ApiResponse.unauthorized(res, 'Invalid Google token');
+  }
+
+  const { email, name, sub: googleId, picture } = payload;
+
+  let user = await User.findOne({ email }).select('+passwordHash +refreshTokens');
+
+  if (user) {
+    // Link the oauthId if it's not present
+    if (!user.oauthId) {
+      user.oauthId = googleId;
+      user.oauthProvider = 'google';
+      if (!user.avatar && picture) user.avatar = picture;
+      // Note: We don't save immediately here to avoid an extra DB call, 
+      // we'll save it when we push the refresh token below.
+    }
+  } else {
+    // User does not exist, create a new one
+    user = new User({
+      name,
+      email,
+      oauthProvider: 'google',
+      oauthId: googleId,
+      avatar: picture || '',
+      isEmailVerified: true, // Trusted from Google
+      refreshTokens: [],
+    });
+    logger.info(`New user registered via Google: ${email}`);
+  }
+
+  const { accessToken, refreshToken } = generateTokens(user._id);
+
+  // Store refresh token
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  user.refreshTokens.push({
+    token: crypto.createHash('sha256').update(refreshToken).digest('hex'),
+    expiresAt,
+    userAgent: req.headers['user-agent'] || '',
+  });
+
+  user.cleanRefreshTokens();
+  await user.save();
+
+  setRefreshCookie(res, refreshToken);
+
+  logger.info(`User logged in via Google: ${email}`);
+
+  return ApiResponse.success(res, {
+    user: user.toJSON(),
+    accessToken,
+  }, 'Google login successful');
+});
+
 module.exports = {
   register,
   login,
@@ -259,6 +334,8 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  googleLogin,
   registerSchema,
   loginSchema,
+  googleLoginSchema,
 };
