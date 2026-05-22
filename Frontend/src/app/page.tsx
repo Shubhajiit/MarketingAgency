@@ -1,41 +1,25 @@
 "use client";
 import React from 'react';
+import Link from 'next/link';
 import MarqueeTestimonials from "./components/MarqueeTestimonials";
 import ParticlesBg from "@/components/ui/particles-bg";
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function Page() {
     const [hoveredSection, setHoveredSection] = React.useState<string | null>(null);
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+    const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+    const { user, isAuthenticated } = useAuth();
     const coursesScrollRef = React.useRef<HTMLDivElement>(null);
 
-    const stats = [
-       
-        {
-      percentage: "80%",
-      label: "manual payment tasks",
-      isIncrease: false,
-      logo: "/customer/netflix.png",
-    },
-    {
-      percentage: "30%",
-      label: "international fees",
-      isIncrease: false,
-      logo: "/customer/vercel.png",
-    },
-    {
-      percentage: "25%",
-      label: "payment reconciliation",
-      isIncrease: false,
-      logo: "/customer/amazon.png",
-    },
-    {
-      percentage: "$100K",
-      label: "saved per year",
-      isIncrease: true,
-      logo: "/customer/alibaba.png",
-    },
-
-    ];
+        const stats = [
+                { percentage: "", label: "Canva", isIncrease: false, logo: "/Logo/ScrollingLogo/canva.webp" },
+                { percentage: "", label: "ChatGPT", isIncrease: false, logo: "/Logo/ScrollingLogo/chatgpt.png" },
+                { percentage: "", label: "Claude", isIncrease: false, logo: "/Logo/ScrollingLogo/Claude.webp" },
+                { percentage: "", label: "Gemini", isIncrease: false, logo: "/Logo/ScrollingLogo/Gemini.webp" },
+                { percentage: "", label: "Grok", isIncrease: false, logo: "/Logo/ScrollingLogo/Grok.webp" },
+                { percentage: "", label: "Perplexity", isIncrease: false, logo: "/Logo/ScrollingLogo/Perplexity.webp" },
+        ];
 
     const scrollCourses = (direction: 'left' | 'right') => {
         if (coursesScrollRef.current) {
@@ -95,8 +79,32 @@ export default function Page() {
                     <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">CLASSROOM <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                     <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                     <a href="#" className="hover:text-[#009ee3]">REVIEWS</a>
-                    <a href="#" className="hover:text-[#009ee3]">BLOG</a>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">COMPANY <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
+                    {isAuthenticated && user ? (
+                        <div className="relative">
+                            <button 
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                className="w-9 h-9 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase hover:bg-blue-600 transition-colors"
+                            >
+                                {user.email.charAt(0)}
+                            </button>
+                            {isProfileOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
+                                    <div className="px-4 py-2 border-b border-gray-100 text-sm text-gray-500 truncate">
+                                        {user.email}
+                                    </div>
+                                    <Link 
+                                        href="/dashboard" 
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#009ee3]"
+                                        onClick={() => setIsProfileOpen(false)}
+                                    >
+                                        Go to dashboard
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <Link href="/login" className="px-5 py-2 bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors">Login</Link>
+                    )}
                 </nav>
                 <button 
                     onClick={() => setIsMenuOpen(!isMenuOpen)} 
@@ -120,9 +128,31 @@ export default function Page() {
                     <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">COURSES <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                     <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">CLASSROOM <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                     <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">REVIEWS</a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">BLOG</a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">COMPANY <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
+                    <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
+                    {isAuthenticated && user ? (
+                        <>
+                            <div className="py-2.5 border-t border-gray-100 mt-2 flex justify-between items-center relative">
+                                <button 
+                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                    className="w-8 h-8 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase"
+                                >
+                                    {user.email.charAt(0)}
+                                </button>
+                                <span className="text-gray-600 truncate ml-3 flex-1">{user.email}</span>
+                            </div>
+                            {isProfileOpen && (
+                                <Link 
+                                    href="/dashboard" 
+                                    className="py-2.5 text-center bg-gray-50 text-[#009ee3] border border-gray-200 rounded hover:bg-gray-100 transition-colors mt-2"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Go to dashboard
+                                </Link>
+                            )}
+                        </>
+                    ) : (
+                        <Link href="/login" className="py-2.5 text-center bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors mt-2">Login</Link>
+                    )}
                 </div>
             )}
             </div>
@@ -226,34 +256,31 @@ export default function Page() {
 
             {/* Stats Marquee Section */}
             <div className="bg-gray-50 w-full py-5 border-b border-gray-200 overflow-hidden flex items-center">
-                <div className="animate-marquee-reverse whitespace-nowrap flex min-w-max items-center gap-16 px-4">
+                <div className="animate-marquee-reverse whitespace-nowrap flex min-w-max items-center gap-12 px-4">
                     {[...stats, ...stats, ...stats, ...stats].map((stat, index) => (
                         <React.Fragment key={index}>
                             <div
-                                className="flex items-center gap-4 group cursor-pointer shrink-0"
+                                className="flex items-center justify-center gap-3 group cursor-pointer shrink-0 w-[180px]"
                             >
                                 <img
-                                    src={`https://pro-section.ui-layouts.com${stat.logo}`}
+                                    src={stat.logo}
                                     alt={stat.label}
-                                    className="h-8 w-auto object-contain grayscale opacity-60 group-hover:opacity-100 transition-opacity"
+                                    className="h-9 md:h-10 w-auto object-contain transition-opacity"
                                 />
-                                <div className="flex items-center gap-1.5">
-                                    {stat.isIncrease ? (
-                                        <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <line x1="12" y1="19" x2="12" y2="5"></line>
-                                            <polyline points="5 12 12 5 19 12"></polyline>
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <polyline points="19 12 12 19 5 12"></polyline>
-                                        </svg>
-                                    )}
-                                    <span className="text-3xl font-bold text-gray-800">
-                                        {stat.percentage}
-                                    </span>
-                                </div>
-                                <p className="text-gray-600 text-lg font-medium capitalize">
+                                {(stat.percentage || stat.isIncrease) && (
+                                    <div className="flex items-center gap-1.5">
+                                        {stat.isIncrease && (
+                                            <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="12" y1="19" x2="12" y2="5"></line>
+                                                <polyline points="5 12 12 5 19 12"></polyline>
+                                            </svg>
+                                        )}
+                                        <span className="text-3xl font-bold text-gray-800 google-sans-stats">
+                                            {stat.percentage}
+                                        </span>
+                                    </div>
+                                )}
+                                <p className="text-gray-800 text-xl md:text-2xl capitalize mulish-logo-text">
                                     {stat.label}
                                 </p>
                             </div>
