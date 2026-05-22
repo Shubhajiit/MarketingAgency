@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function DashboardPage() {
 
@@ -9,90 +10,134 @@ export default function DashboardPage() {
       {/* Course Overview */}
       <section>
         <h2 className="text-2xl font-bold text-[#0a192f] mb-6 tracking-tight">Course Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="flex overflow-x-auto md:grid md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 pb-4 md:pb-0 no-scrollbar snap-x snap-mandatory">
           {/* Card 1 */}
-          <div className="bg-[#e8f6f3] border border-[#a2dcd1] rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#2db39b]">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+          <div className="bg-[#e8f6f3] border border-[#a2dcd1] rounded-2xl flex flex-col relative overflow-hidden group shrink-0 w-[calc(50%-8px)] md:w-auto snap-start">
+            {/* Bottom-right concentric curves */}
+            <svg className="absolute bottom-0 right-0 w-32 h-32 text-[#2db39b] opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-500 origin-bottom-right" viewBox="0 0 100 100" fill="none">
+              <circle cx="100" cy="100" r="40" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="65" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="1" />
+            </svg>
+
+            <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
+                <Image 
+                  src="/UserDashBoard/StatsLogo/Total-Course.png" 
+                  alt="Total Course" 
+                  width={36} 
+                  height={36} 
+                  className="object-contain w-8 h-8 sm:w-9 sm:h-9"
+                />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#0a192f]">10</p>
-                <p className="text-sm font-medium text-gray-500">Total Course</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#0a192f]">10</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Total Course</p>
               </div>
             </div>
-            <Link href="/courses" className="text-sm font-semibold text-[#2db39b] flex items-center gap-1 mt-auto relative z-10">
-              See Details
-              <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <div className="border-t border-[#a2dcd1] w-full relative z-10 mt-auto"></div>
+
+            <Link href="/courses" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2db39b] flex items-center justify-between relative z-10 hover:bg-[#2db39b]/5 transition-colors">
+              <span>See Details</span>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-[#f0edff] border border-[#beb0ff] rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/30 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#7e5bff]">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
+          <div className="bg-[#f0edff] border border-[#beb0ff] rounded-2xl flex flex-col relative overflow-hidden group shrink-0 w-[calc(50%-8px)] md:w-auto snap-start">
+            {/* Bottom-right concentric curves */}
+            <svg className="absolute bottom-0 right-0 w-32 h-32 text-[#7e5bff] opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-500 origin-bottom-right" viewBox="0 0 100 100" fill="none">
+              <circle cx="100" cy="100" r="40" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="65" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="1" />
+            </svg>
+
+            <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
+                <Image 
+                  src="/UserDashBoard/StatsLogo/Total-Workshop.png" 
+                  alt="Total Workshop" 
+                  width={36} 
+                  height={36} 
+                  className="object-contain w-8 h-8 sm:w-9 sm:h-9"
+                />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#0a192f]">4</p>
-                <p className="text-sm font-medium text-gray-500">Total Workshop</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#0a192f]">4</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Total Workshop</p>
               </div>
             </div>
-            <Link href="/workshops" className="text-sm font-semibold text-[#7e5bff] flex items-center gap-1 mt-auto relative z-10">
-              See Details
-              <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <div className="border-t border-[#beb0ff] w-full relative z-10 mt-auto"></div>
+
+            <Link href="/workshops" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#7e5bff] flex items-center justify-between relative z-10 hover:bg-[#7e5bff]/5 transition-colors">
+              <span>See Details</span>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-[#fff3e7] border border-[#fbd3b1] rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#ff9838]">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-[#fff3e7] border border-[#fbd3b1] rounded-2xl flex flex-col relative overflow-hidden group shrink-0 w-[calc(50%-8px)] md:w-auto snap-start">
+            {/* Bottom-right concentric curves */}
+            <svg className="absolute bottom-0 right-0 w-32 h-32 text-[#ff9838] opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-500 origin-bottom-right" viewBox="0 0 100 100" fill="none">
+              <circle cx="100" cy="100" r="40" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="65" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="1" />
+            </svg>
+
+            <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#ff9838] shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#0a192f]">8/10</p>
-                <p className="text-sm font-medium text-gray-500">Average Quiz Score</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#0a192f]">8/10</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Average Quiz Score</p>
               </div>
             </div>
-            <Link href="#" className="text-sm font-semibold text-[#ff9838] flex items-center gap-1 mt-auto relative z-10">
-              See Details
-              <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <div className="border-t border-[#fbd3b1] w-full relative z-10 mt-auto"></div>
+
+            <Link href="#" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#ff9838] flex items-center justify-between relative z-10 hover:bg-[#ff9838]/5 transition-colors">
+              <span>See Details</span>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>
           </div>
 
           {/* Card 4 */}
-          <div className="bg-[#eaf4ff] border border-[#a8d3ff] rounded-2xl p-5 flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#2b96ff]">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="bg-[#eaf4ff] border border-[#a8d3ff] rounded-2xl flex flex-col relative overflow-hidden group shrink-0 w-[calc(50%-8px)] md:w-auto snap-start">
+            {/* Bottom-right concentric curves */}
+            <svg className="absolute bottom-0 right-0 w-32 h-32 text-[#2b96ff] opacity-25 pointer-events-none group-hover:scale-105 transition-transform duration-500 origin-bottom-right" viewBox="0 0 100 100" fill="none">
+              <circle cx="100" cy="100" r="40" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="65" stroke="currentColor" strokeWidth="1" />
+              <circle cx="100" cy="100" r="90" stroke="currentColor" strokeWidth="1" />
+            </svg>
+
+            <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-[#2b96ff] shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#0a192f]">3</p>
-                <p className="text-sm font-medium text-gray-500">Total Certificates</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#0a192f]">3</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Total Certificates</p>
               </div>
             </div>
-            <Link href="#" className="text-sm font-semibold text-[#2b96ff] flex items-center gap-1 mt-auto relative z-10">
-              See Details
-              <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <div className="border-t border-[#a8d3ff] w-full relative z-10 mt-auto"></div>
+
+            <Link href="#" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2b96ff] flex items-center justify-between relative z-10 hover:bg-[#2b96ff]/5 transition-colors">
+              <span>See Details</span>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </Link>

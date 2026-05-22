@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import MarqueeTestimonials from "./components/MarqueeTestimonials";
+import Footer from "./components/common/Footer";
 import ParticlesBg from "@/components/ui/particles-bg";
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -1206,51 +1207,136 @@ export default function Page() {
 
             {/* Meet Your Workshop Expert Section */}
             <section className="bg-[#f8fafc] text-[#0f172a] w-full py-12 px-4 md:px-36 relative overflow-hidden border-t border-gray-100">
-                <div className="max-w-5xl mx-auto flex flex-col items-start w-full">
+                <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
                     
                     {/* Header */}
-                    <h2 className="text-3xl md:text-[36px] font-semibold text-left text-[#1e293b] mb-10 tracking-tight">
-                        Meet Your Workshop Expert
-                    </h2>
+                    <div className="text-center w-full mb-8 flex flex-col items-center">
+                        <h2 className="text-3xl md:text-[36px] font-bold text-gray-900 mb-3 tracking-tight">
+                            Meet Your Workshop Expert
+                        </h2>
+                        <p className="text-gray-500 text-sm md:text-base max-w-2xl leading-relaxed">
+                            We are thrilled to introduce our workshop leaders who bring a wealth of experience, creativity, and passion to our organization.
+                        </p>
+                    </div>
 
-                    {/* Expert Profile Card */}
-                    <div className="w-full flex flex-col md:flex-row gap-10 md:gap-14 items-center md:items-start max-w-5xl">
+                    {/* Cards Grid */}
+                    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
                         
-                        {/* Profile Image Column */}
-                        <div className="shrink-0 relative">
-                            <div className="w-48 h-48 md:w-[220px] md:h-[220px] rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-100 flex items-center justify-center">
+                        {/* Card 1 - Founder (Agata) */}
+                        <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col md:flex-row w-full group md:h-[220px]">
+                            
+                            {/* Left Image Section */}
+                            <div className="w-full md:w-[42%] bg-[#e2f0d9] flex items-end justify-center overflow-hidden h-[220px] md:h-full relative shrink-0">
                                 <img 
-                                    src="/agata.png" 
+                                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" 
                                     alt="Agata Chudzińska" 
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                                 />
                             </div>
-                        </div>
 
-                        {/* Profile Details Column */}
-                        <div className="flex flex-col text-center md:text-left pt-1 md:pt-2">
-                            <h3 className="text-2xl md:text-[28px] font-bold text-[#0f172a] tracking-tight mb-1">
-                                Agata Chudzińska
-                            </h3>
-                            <p className="text-slate-500 italic text-[14px] md:text-[15px] font-normal mb-4 leading-normal">
-                                CTO &amp; AI Solutions Architect at theBlue.ai
-                            </p>
-                            <p className="text-slate-600 text-[14.5px] md:text-[15.5px] leading-relaxed font-normal mb-6 max-w-4xl">
-                                With over eight years of experience in AI and data science, Agata helps organizations transform complex AI concepts into practical business value. She specializes in machine learning, natural language processing (NLP), and AI implementation strategy, having guided both startups and global enterprises through successful AI adoption. Her workshops are known for being clear, interactive, and hands-on – helping teams move from curiosity to confident AI application.
-                            </p>
-                            
-                            {/* Contact Button */}
-                            <div className="flex justify-center md:justify-start w-full sm:w-auto">
-                                <button className="w-full sm:w-auto px-10 py-3 bg-[#0038a8] hover:bg-[#002d87] text-white text-[15px] font-semibold rounded shadow-md transition-all duration-200 uppercase tracking-wide">
-                                    Contact us
-                                </button>
+                            {/* Right Text Section */}
+                            <div className="w-full md:w-[58%] p-4 md:p-5 flex flex-col justify-between">
+                                <div>
+                                    {/* Name & Role Header */}
+                                    <div className="flex flex-row justify-between items-start gap-3 mb-2">
+                                        <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight leading-tight">
+                                            Agata Chudzińska
+                                        </h3>
+                                        <span className="text-[11px] font-semibold text-[#6366f1] text-right mt-1 shrink-0">
+                                            Founder
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Description */}
+                                    <p className="text-gray-550 text-[12.5px] md:text-[13px] leading-relaxed mb-3 font-normal">
+                                        With over eight years of experience, Agata helps organizations transform complex AI concepts into practical business value. She specializes in machine learning, NLP, and AI implementation strategy.
+                                    </p>
+                                </div>
+
+                                {/* Social Links */}
+                                <div className="flex items-center gap-3 text-[#6366f1] text-[17px] pt-2 border-t border-gray-50">
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="X (Twitter)">
+                                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="Instagram">
+                                        <svg className="w-[17px] h-[17px] stroke-current fill-none" strokeWidth="2" viewBox="0 0 24 24">
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="LinkedIn">
+                                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Card 2 - Co-Founder (Mia) */}
+                        <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col md:flex-row w-full group md:h-[220px]">
+                            
+                            {/* Left Image Section */}
+                            <div className="w-full md:w-[42%] bg-[#d9e2ec] flex items-end justify-center overflow-hidden h-[220px] md:h-full relative shrink-0">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600" 
+                                    alt="Mia Thompson" 
+                                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                                />
+                            </div>
+
+                            {/* Right Text Section */}
+                            <div className="w-full md:w-[58%] p-4 md:p-5 flex flex-col justify-between">
+                                <div>
+                                    {/* Name & Role Header */}
+                                    <div className="flex flex-row justify-between items-start gap-3 mb-2">
+                                        <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight leading-tight">
+                                            Mia Thompson
+                                        </h3>
+                                        <span className="text-[11px] font-semibold text-[#6366f1] text-right mt-1 shrink-0">
+                                            Co-Founder
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Description */}
+                                    <p className="text-gray-550 text-[12.5px] md:text-[13px] leading-relaxed mb-3 font-normal">
+                                        Our relentless commitment to innovation drives us to continually enhance our programs, ensuring maximum business value. Mia leads strategic partnerships, helping teams transition to confident execution.
+                                    </p>
+                                </div>
+
+                                {/* Social Links */}
+                                <div className="flex items-center gap-3 text-[#6366f1] text-[17px] pt-2 border-t border-gray-50">
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="X (Twitter)">
+                                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="Instagram">
+                                        <svg className="w-[17px] h-[17px] stroke-current fill-none" strokeWidth="2" viewBox="0 0 24 24">
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="LinkedIn">
+                                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>
 
+
             <MarqueeTestimonials />
+            <Footer />
         </div>
     );
 }

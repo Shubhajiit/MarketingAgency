@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, Play, Menu } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 interface UserDashboardHeaderProps {
   onMenuClick?: () => void;
@@ -26,12 +26,20 @@ export default function UserDashboardHeader({ onMenuClick }: UserDashboardHeader
       <div className="flex items-center gap-4 flex-1">
         <button
           onClick={onMenuClick}
-          className="text-gray-400 hover:text-gray-600 block md:hidden p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          className="block md:hidden p-1 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
         >
-          <Menu className="w-6 h-6" />
+          <img
+            src="/UserDashBoard/SidebarLogo/SidebarMenu.png"
+            alt="Menu"
+            className="w-6 h-6 object-contain"
+          />
         </button>
         <form onSubmit={handleSearchSubmit} className="flex-1 max-w-xl relative hidden md:flex items-center">
-          <Search className="w-5 h-5 text-gray-400 absolute left-4 pointer-events-none" />
+          <img
+            src="/UserDashBoard/HeaderLogo/Search.png"
+            alt="Search"
+            className="w-5 h-5 absolute left-4 pointer-events-none object-contain"
+          />
           <input
             type="text"
             value={searchVal}
@@ -48,7 +56,11 @@ export default function UserDashboardHeader({ onMenuClick }: UserDashboardHeader
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
         <button className="flex items-center gap-2 bg-[#2db39b] hover:bg-[#259b86] text-white px-3 py-2 md:px-4 md:py-2 rounded-lg font-medium text-sm transition-colors">
-          <Play className="w-4 h-4 fill-current" />
+          <img
+            src="/UserDashBoard/HeaderLogo/VideoPlay.png"
+            alt="Play"
+            className="w-4 h-4 object-contain"
+          />
           <span className="hidden md:inline">See Tutorial</span>
         </button>
       </div>
