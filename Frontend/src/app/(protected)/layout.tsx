@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import UserDashboardSidebar from '@/app/components/UserDashboardComponent/common/UserDashboardSidebar';
-import UserDashboardHeader from '@/app/components/UserDashboardComponent/common/UserDashboardHeader';
+import UserDashboardSidebar from '@/components/UserDashboardComponent/common/UserDashboardSidebar';
+import UserDashboardHeader from '@/components/UserDashboardComponent/common/UserDashboardHeader';
 
 export default function ProtectedLayout({
   children,

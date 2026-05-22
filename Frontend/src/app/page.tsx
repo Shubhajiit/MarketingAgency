@@ -1,26 +1,23 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import MarqueeTestimonials from "./components/MarqueeTestimonials";
-import Footer from "./components/common/Footer";
+import MarqueeTestimonials from "@/components/ui/MarqueeTestimonials";
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
 import ParticlesBg from "@/components/ui/particles-bg";
-import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function Page() {
     const [hoveredSection, setHoveredSection] = React.useState<string | null>(null);
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-    const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-    const { user, isAuthenticated } = useAuth();
     const coursesScrollRef = React.useRef<HTMLDivElement>(null);
 
-        const stats = [
-                { percentage: "", label: "Canva", isIncrease: false, logo: "/Logo/ScrollingLogo/canva.webp" },
-                { percentage: "", label: "ChatGPT", isIncrease: false, logo: "/Logo/ScrollingLogo/chatgpt.png" },
-                { percentage: "", label: "Claude", isIncrease: false, logo: "/Logo/ScrollingLogo/Claude.webp" },
-                { percentage: "", label: "Gemini", isIncrease: false, logo: "/Logo/ScrollingLogo/Gemini.webp" },
-                { percentage: "", label: "Grok", isIncrease: false, logo: "/Logo/ScrollingLogo/Grok.webp" },
-                { percentage: "", label: "Perplexity", isIncrease: false, logo: "/Logo/ScrollingLogo/Perplexity.webp" },
-        ];
+    const stats = [
+        { percentage: "", label: "Canva", isIncrease: false, logo: "/Logo/ScrollingLogo/canva.webp" },
+        { percentage: "", label: "ChatGPT", isIncrease: false, logo: "/Logo/ScrollingLogo/chatgpt.png" },
+        { percentage: "", label: "Claude", isIncrease: false, logo: "/Logo/ScrollingLogo/Claude.webp" },
+        { percentage: "", label: "Gemini", isIncrease: false, logo: "/Logo/ScrollingLogo/Gemini.webp" },
+        { percentage: "", label: "Grok", isIncrease: false, logo: "/Logo/ScrollingLogo/Grok.webp" },
+        { percentage: "", label: "Perplexity", isIncrease: false, logo: "/Logo/ScrollingLogo/Perplexity.webp" },
+    ];
 
     const scrollCourses = (direction: 'left' | 'right') => {
         if (coursesScrollRef.current) {
@@ -48,114 +45,27 @@ export default function Page() {
                     </div>
                 </div>
 
-            {/* Top Banner 2 - Orange */}
-            <div className="bg-[#fca130] py-1.5 px-4 md:px-36 text-white text-xs md:text-sm flex flex-row justify-between md:justify-end gap-4 md:gap-6 font-medium overflow-x-auto whitespace-nowrap scrollbar-none">
-                <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    Refer & Earn
-                </a>
-                <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                    Bootcamp
-                </a>
-                <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    Demo Class
-                </a>
-                <a href="#" className="flex items-center gap-1.5 hover:underline font-bold shrink-0">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    1800 4122 6965
-                </a>
-            </div>
-
-            {/* Navbar */}
-            <header className="bg-white border-b border-gray-100 py-3 px-4 md:px-36 flex justify-between items-center z-10">
-                <div className="flex items-center">
-                    <img src="/Logo/Logo.png" alt="Datamites Logo" className="h-12 w-auto object-contain" />
+                {/* Top Banner 2 - Orange */}
+                <div className="bg-[#fca130] py-1.5 px-4 md:px-36 text-white text-xs md:text-sm flex flex-row justify-between md:justify-end gap-4 md:gap-6 font-medium overflow-x-auto whitespace-nowrap scrollbar-none">
+                    <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                        Refer & Earn
+                    </a>
+                    <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        Bootcamp
+                    </a>
+                    <a href="#" className="flex items-center gap-1.5 hover:underline shrink-0">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        Demo Class
+                    </a>
+                    <a href="#" className="flex items-center gap-1.5 hover:underline font-bold shrink-0">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        1800 4122 6965
+                    </a>
                 </div>
 
-                <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-gray-800 tracking-wide">
-                    <a href="#" className="hover:text-[#009ee3]">HOME</a>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">COURSES <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">CLASSROOM <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3]">REVIEWS</a>
-                    {isAuthenticated && user ? (
-                        <div className="relative">
-                            <button 
-                                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="w-9 h-9 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase hover:bg-blue-600 transition-colors"
-                            >
-                                {user.email.charAt(0)}
-                            </button>
-                            {isProfileOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
-                                    <div className="px-4 py-2 border-b border-gray-100 text-sm text-gray-500 truncate">
-                                        {user.email}
-                                    </div>
-                                    <Link 
-                                        href="/dashboard" 
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#009ee3]"
-                                        onClick={() => setIsProfileOpen(false)}
-                                    >
-                                        Go to dashboard
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <Link href="/login" className="px-5 py-2 bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors">Login</Link>
-                    )}
-                </nav>
-                <button 
-                    onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                    className="md:hidden text-gray-800 focus:outline-none ml-auto p-1 hover:bg-gray-50 rounded"
-                    aria-label="Toggle menu"
-                >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {isMenuOpen ? (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        ) : (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        )}
-                    </svg>
-                </button>
-            </header>
-
-            {/* Mobile Menu Dropdown */}
-            {isMenuOpen && (
-                <div className="md:hidden bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-20">
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">COURSES <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">CLASSROOM <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
-                    {isAuthenticated && user ? (
-                        <>
-                            <div className="py-2.5 border-t border-gray-100 mt-2 flex justify-between items-center relative">
-                                <button 
-                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    className="w-8 h-8 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase"
-                                >
-                                    {user.email.charAt(0)}
-                                </button>
-                                <span className="text-gray-600 truncate ml-3 flex-1">{user.email}</span>
-                            </div>
-                            {isProfileOpen && (
-                                <Link 
-                                    href="/dashboard" 
-                                    className="py-2.5 text-center bg-gray-50 text-[#009ee3] border border-gray-200 rounded hover:bg-gray-100 transition-colors mt-2"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Go to dashboard
-                                </Link>
-                            )}
-                        </>
-                    ) : (
-                        <Link href="/login" className="py-2.5 text-center bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors mt-2">Login</Link>
-                    )}
-                </div>
-            )}
+                <Navbar />
             </div>
 
             {/* Hero Section */}
@@ -301,7 +211,7 @@ export default function Page() {
             {/* Course Details Sections */}
             <main className="bg-[#fafafa] py-14 px-4 md:px-36 flex flex-col gap-14 flex-1">
                 <div className="max-w-6xl w-full mx-auto flex flex-col gap-14">
-                    
+
                     {/* Lead Mentors Section */}
                     <section className="flex flex-col gap-6">
                         <div className="flex items-center">
@@ -313,23 +223,23 @@ export default function Page() {
 
                         <div className="flex flex-col md:flex-row gap-6 items-start bg-white p-6 rounded-lg border border-gray-155 shadow-sm max-w-4xl">
                             <div className="w-[140px] h-[140px] shrink-0 overflow-hidden rounded border border-gray-200 shadow-sm bg-gray-50">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=256&h=256&q=80" 
-                                    alt="Ashok Veda" 
+                                <img
+                                    src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=256&h=256&q=80"
+                                    alt="Ashok Veda"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-3">
                                     <span className="text-[17px] font-bold text-gray-900">Ashok Veda</span>
-                                    <a 
-                                        href="https://www.linkedin.com" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                    <a
+                                        href="https://www.linkedin.com"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-block bg-[#0077b5] text-white p-0.5 rounded-sm hover:bg-[#005582] transition-colors leading-none"
                                     >
                                         <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                                         </svg>
                                     </a>
                                 </div>
@@ -350,12 +260,12 @@ export default function Page() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-                            
+
                             {/* Card 1 - Live Virtual */}
                             <div className="bg-white rounded-lg border border-gray-150 shadow-md flex flex-col items-center pt-8 pb-8 px-6 relative overflow-hidden transition-all duration-300 hover:shadow-lg">
                                 <h3 className="text-[23px] font-semibold text-[#009ee3]">Live Virtual</h3>
                                 <span className="text-[13px] font-medium text-[#009ee3] mt-1">Instructor Led Live Online</span>
-                                
+
                                 <div className="flex items-center justify-center gap-6 py-4 mt-2 w-full">
                                     <span className="text-gray-500 line-through text-sm font-semibold">₹ 55,000</span>
                                     <span className="text-[#fca130] text-xl font-bold">₹ 41,559</span>
@@ -410,7 +320,7 @@ export default function Page() {
 
                                 <h3 className="text-[23px] font-semibold text-[#009ee3]">Blended Learning</h3>
                                 <span className="text-[13px] font-medium text-[#009ee3] mt-1">Self Learning + Live Mentoring</span>
-                                
+
                                 <div className="flex items-center justify-center gap-6 py-4 mt-2 w-full">
                                     <span className="text-gray-500 line-through text-sm font-semibold">₹ 41,000</span>
                                     <span className="text-[#fca130] text-xl font-bold">₹ 31,140</span>
@@ -460,7 +370,7 @@ export default function Page() {
                             <div className="bg-white rounded-lg border border-gray-150 shadow-md flex flex-col items-center pt-8 pb-8 px-6 relative overflow-hidden transition-all duration-300 hover:shadow-lg">
                                 <h3 className="text-[23px] font-semibold text-[#009ee3]">Classroom</h3>
                                 <span className="text-[13px] font-medium text-[#009ee3] mt-1">In - Person Classroom Training</span>
-                                
+
                                 <div className="flex items-center justify-center gap-6 py-4 mt-2 w-full">
                                     <span className="text-gray-500 line-through text-sm font-semibold">₹ 55,000</span>
                                     <span className="text-[#fca130] text-xl font-bold">₹ 47,347</span>
@@ -531,7 +441,7 @@ export default function Page() {
                             const freq = 4 + (i % 3);
                             const phase = (i * Math.PI) / 6;
                             const amp = 6 + (i % 3) * 2;
-                            
+
                             for (let step = 0; step <= steps; step++) {
                                 const angle = (step / steps) * Math.PI * 2;
                                 const r = radiusBase + Math.sin(angle * freq + phase) * amp;
@@ -539,7 +449,7 @@ export default function Page() {
                                 const y = 200 + r * Math.sin(angle);
                                 points.push(`${step === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
                             }
-                            
+
                             return (
                                 <path
                                     key={i}
@@ -585,7 +495,7 @@ export default function Page() {
                             const freq = 5 + (i % 3);
                             const phase = (i * Math.PI) / 9;
                             const amp = 8 + (i % 4) * 2;
-                            
+
                             for (let step = 0; step <= steps; step++) {
                                 const angle = (step / steps) * Math.PI * 2;
                                 const r = radiusBase + Math.sin(angle * freq + phase) * amp;
@@ -593,7 +503,7 @@ export default function Page() {
                                 const y = 200 + r * Math.sin(angle);
                                 points.push(`${step === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
                             }
-                            
+
                             return (
                                 <path
                                     key={i}
@@ -613,81 +523,6 @@ export default function Page() {
                 </div>
             </section>
 
-            {/* Search For Top Courses Section */}
-            <section className="bg-white py-12 px-4 md:px-36 border-t border-gray-100">
-                <div className="max-w-6xl mx-auto flex flex-col gap-6">
-                    {/* Header */}
-                    <div className="flex flex-col">
-                        <div className="flex items-center">
-                            <div className="w-1.5 h-6 bg-[#009ee3] mr-3 rounded-sm"></div>
-                            <h2 className="text-[20px] font-bold text-gray-800 tracking-wide uppercase">
-                                Search For Top Courses
-                            </h2>
-                        </div>
-                        <div className="h-[1px] bg-gray-200 w-full mt-3"></div>
-                    </div>
-
-                    {/* Search Form */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                        {/* Course */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-gray-700">Course</label>
-                            <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:outline-none focus:border-[#009ee3] transition-colors">
-                                <option>Select Course</option>
-                                <option>AI for Marketing Professionals</option>
-                                <option>Certified Data Scientist</option>
-                                <option>Artificial Intelligence Foundation</option>
-                                <option>Machine Learning Expert</option>
-                                <option>Python for Data Science</option>
-                            </select>
-                        </div>
-
-                        {/* Country */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-gray-700">Country</label>
-                            <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:outline-none focus:border-[#009ee3] transition-colors">
-                                <option>Select Country</option>
-                                <option>India</option>
-                                <option>United States</option>
-                                <option>United Kingdom</option>
-                                <option>Germany</option>
-                                <option>Poland</option>
-                            </select>
-                        </div>
-
-                        {/* City */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-gray-700">City</label>
-                            <select className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-800 text-sm focus:outline-none focus:border-[#009ee3] transition-colors">
-                                <option>Select City</option>
-                                <option>Bangalore</option>
-                                <option>Mumbai</option>
-                                <option>Delhi</option>
-                                <option>New York</option>
-                                <option>London</option>
-                                <option>Berlin</option>
-                                <option>Warsaw</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-4 mt-4 w-full sm:w-auto">
-                        <button className="w-full sm:w-auto px-6 py-2 bg-[#009ee3] hover:bg-blue-600 transition-colors text-white text-sm font-semibold rounded-full shadow-sm flex items-center justify-center gap-2">
-                            <span>Reset</span>
-                            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.283 8H18" />
-                            </svg>
-                        </button>
-                        <button className="w-full sm:w-auto px-6 py-2 bg-[#fca130] hover:bg-[#e08e20] transition-colors text-white text-sm font-semibold rounded-full shadow-sm flex items-center justify-center gap-2">
-                            <span>Search</span>
-                            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </section>
 
             {/* Offered AI for Marketing Professionals Courses Section */}
             <section className="bg-[#f8f9fa] py-16 px-4 md:px-36 border-t border-b border-gray-100 relative overflow-hidden">
@@ -705,7 +540,7 @@ export default function Page() {
                     {/* Carousel Container with Arrows on Left and Right */}
                     <div className="relative w-full px-0 md:px-8">
                         {/* Left Arrow Button */}
-                        <button 
+                        <button
                             onClick={() => scrollCourses('left')}
                             className="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 rounded shadow-md hidden md:flex items-center justify-center text-gray-800 hover:text-[#009ee3] transition-all duration-200"
                             aria-label="Previous Courses"
@@ -716,7 +551,7 @@ export default function Page() {
                         </button>
 
                         {/* Card Scroll Viewport */}
-                        <div 
+                        <div
                             ref={coursesScrollRef}
                             className="flex overflow-x-auto gap-6 pb-6 pt-2 scrollbar-none snap-x snap-mandatory"
                             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -751,7 +586,7 @@ export default function Page() {
                                     rating: "16,123"
                                 }
                             ].map((course, idx) => (
-                                <div 
+                                <div
                                     key={idx}
                                     className="w-[270px] sm:w-[280px] md:w-[265px] lg:w-[275px] flex-shrink-0 snap-start bg-white border border-gray-100 rounded-lg p-6 flex flex-col justify-between items-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300 relative group"
                                 >
@@ -809,7 +644,7 @@ export default function Page() {
                         </div>
 
                         {/* Right Arrow Button */}
-                        <button 
+                        <button
                             onClick={() => scrollCourses('right')}
                             className="absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white hover:bg-gray-50 border border-gray-200 rounded shadow-md hidden md:flex items-center justify-center text-gray-800 hover:text-[#009ee3] transition-all duration-200"
                             aria-label="Next Courses"
@@ -827,7 +662,8 @@ export default function Page() {
             {/* What to expect from the AI Workshop Section */}
             <section className="bg-white text-slate-900 w-full py-20 px-4 md:px-36 relative overflow-hidden">
                 {/* CSS Floating Animations Style Block */}
-                <style dangerouslySetInnerHTML={{__html: `
+                <style dangerouslySetInnerHTML={{
+                    __html: `
                     @keyframes float-slow {
                         0%, 100% { transform: translateY(0px) rotate(0deg); }
                         50% { transform: translateY(-15px) rotate(3deg); }
@@ -924,7 +760,7 @@ export default function Page() {
 
                 {/* Main Grid Container */}
                 <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center">
-                    
+
                     {/* Header Details */}
                     <div className="w-full text-left mb-12">
                         <h2 className="text-3xl md:text-[36px] font-bold tracking-tight text-[#0f172a] mb-5 leading-tight">
@@ -937,10 +773,10 @@ export default function Page() {
 
                     {/* Two Column Content: List on Left, Empty space on Right (allowing room for decorative floating shapes in wider viewports) */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
-                        
+
                         {/* Left Side: 1-6 List */}
                         <div className="lg:col-span-8 flex flex-col gap-7">
-                            
+
                             {/* Item 1 */}
                             <div className="flex gap-4 items-start">
                                 <div className="w-[36px] h-[36px] shrink-0 bg-[#0055c5] flex items-center justify-center text-white font-bold text-sm rounded shadow-sm">
@@ -1032,7 +868,7 @@ export default function Page() {
                             </div>
 
                         </div>
-                        
+
                         {/* Right Side: Spacer for large screens to allow 3D floating shapes to display beautifully alongside the text */}
                         <div className="hidden lg:block lg:col-span-4 h-full min-h-[450px]"></div>
 
@@ -1066,7 +902,7 @@ export default function Page() {
                             const freq = 4 + (i % 2);
                             const phase = (i * Math.PI) / 5;
                             const amp = 6 + (i % 3) * 2;
-                            
+
                             for (let step = 0; step <= steps; step++) {
                                 const angle = (step / steps) * Math.PI * 2;
                                 const r = radiusBase + Math.sin(angle * freq + phase) * amp;
@@ -1074,7 +910,7 @@ export default function Page() {
                                 const y = 200 + r * Math.sin(angle);
                                 points.push(`${step === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
                             }
-                            
+
                             return (
                                 <path
                                     key={i}
@@ -1104,14 +940,14 @@ export default function Page() {
                             const points: string[] = [];
                             const steps = 90;
                             const phase = (i * Math.PI) / 11;
-                            
+
                             for (let step = 0; step <= steps; step++) {
                                 const t = step / steps;
                                 const y = t * 700;
                                 const x = 250 + Math.sin(t * Math.PI * 2 + phase) * 80 + Math.cos(t * Math.PI * 4) * 20;
                                 points.push(`${step === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
                             }
-                            
+
                             return (
                                 <path
                                     key={i}
@@ -1208,7 +1044,7 @@ export default function Page() {
             {/* Meet Your Workshop Expert Section */}
             <section className="bg-[#f8fafc] text-[#0f172a] w-full py-12 px-4 md:px-36 relative overflow-hidden border-t border-gray-100">
                 <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
-                    
+
                     {/* Header */}
                     <div className="text-center w-full mb-8 flex flex-col items-center">
                         <h2 className="text-3xl md:text-[36px] font-bold text-gray-900 mb-3 tracking-tight">
@@ -1221,15 +1057,15 @@ export default function Page() {
 
                     {/* Cards Grid */}
                     <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
-                        
+
                         {/* Card 1 - Founder (Agata) */}
                         <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col md:flex-row w-full group md:h-[220px]">
-                            
+
                             {/* Left Image Section */}
                             <div className="w-full md:w-[42%] bg-[#e2f0d9] flex items-end justify-center overflow-hidden h-[220px] md:h-full relative shrink-0">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" 
-                                    alt="Agata Chudzińska" 
+                                <img
+                                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600"
+                                    alt="Agata Chudzińska"
                                     className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                                 />
                             </div>
@@ -1246,7 +1082,7 @@ export default function Page() {
                                             Founder
                                         </span>
                                     </div>
-                                    
+
                                     {/* Description */}
                                     <p className="text-gray-550 text-[12.5px] md:text-[13px] leading-relaxed mb-3 font-normal">
                                         With over eight years of experience, Agata helps organizations transform complex AI concepts into practical business value. She specializes in machine learning, NLP, and AI implementation strategy.
@@ -1257,7 +1093,7 @@ export default function Page() {
                                 <div className="flex items-center gap-3 text-[#6366f1] text-[17px] pt-2 border-t border-gray-50">
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="X (Twitter)">
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                         </svg>
                                     </a>
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="Instagram">
@@ -1269,7 +1105,7 @@ export default function Page() {
                                     </a>
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="LinkedIn">
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                                         </svg>
                                     </a>
                                 </div>
@@ -1278,12 +1114,12 @@ export default function Page() {
 
                         {/* Card 2 - Co-Founder (Mia) */}
                         <div className="bg-white border border-gray-150 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col md:flex-row w-full group md:h-[220px]">
-                            
+
                             {/* Left Image Section */}
                             <div className="w-full md:w-[42%] bg-[#d9e2ec] flex items-end justify-center overflow-hidden h-[220px] md:h-full relative shrink-0">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600" 
-                                    alt="Mia Thompson" 
+                                <img
+                                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600"
+                                    alt="Mia Thompson"
                                     className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                                 />
                             </div>
@@ -1300,7 +1136,7 @@ export default function Page() {
                                             Co-Founder
                                         </span>
                                     </div>
-                                    
+
                                     {/* Description */}
                                     <p className="text-gray-550 text-[12.5px] md:text-[13px] leading-relaxed mb-3 font-normal">
                                         Our relentless commitment to innovation drives us to continually enhance our programs, ensuring maximum business value. Mia leads strategic partnerships, helping teams transition to confident execution.
@@ -1311,7 +1147,7 @@ export default function Page() {
                                 <div className="flex items-center gap-3 text-[#6366f1] text-[17px] pt-2 border-t border-gray-50">
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="X (Twitter)">
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                         </svg>
                                     </a>
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="Instagram">
@@ -1323,7 +1159,7 @@ export default function Page() {
                                     </a>
                                     <a href="#" className="hover:text-indigo-800 transition-colors" aria-label="LinkedIn">
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                                         </svg>
                                     </a>
                                 </div>

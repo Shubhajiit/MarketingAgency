@@ -113,7 +113,8 @@ export default function MarqueeTestimonials({
 }) {
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .marquee-track--primary {
           animation: marqueeScroll var(--marquee-duration) linear infinite reverse;
         }
@@ -136,7 +137,7 @@ export default function MarqueeTestimonials({
           0% { transform: translateX(0%); }
           100% { transform: translateX(-50%); }
         }
-      `}</style>
+      `}} />
 
       <div className="w-full bg-white px-2 py-12 md:px-4">
         <div className="mx-auto mb-6 max-w-3xl text-center">

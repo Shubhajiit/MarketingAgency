@@ -30,15 +30,15 @@ export default function ParticlesBg() {
 
     const colors = isDark
       ? {
-          particles: "#00f5ff",
-          lines: "#00d9ff",
-          accent: "#0096c7",
-        }
+        particles: "#00f5ff",
+        lines: "#00d9ff",
+        accent: "#0096c7",
+      }
       : {
-          particles: "#0277bd",
-          lines: "#0288d1",
-          accent: "#039be5",
-        };
+        particles: "#0277bd",
+        lines: "#0288d1",
+        accent: "#039be5",
+      };
 
     window.particlesJS?.("particles-js", {
       particles: {
