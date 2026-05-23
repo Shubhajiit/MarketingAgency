@@ -7,7 +7,7 @@ const adminRoutes = require('./routes/admin.routes');
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'https://scaleai-ashy.vercel.app', process.env.CLIENT_URL].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());
