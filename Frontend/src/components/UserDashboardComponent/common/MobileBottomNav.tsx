@@ -53,7 +53,7 @@ export default function MobileBottomNav() {
 		<>
 			{/* Profile Popup Overlay */}
 			<div
-				className={`fixed inset-x-0 top-0 bottom-16 bg-white z-30 flex flex-col md:hidden transition-all duration-300 ease-in-out ${
+				className={`fixed inset-0 pb-16 bg-white z-30 flex flex-col md:hidden transition-all duration-300 ease-in-out ${
 					isProfileOpen
 						? 'translate-y-0 opacity-100 pointer-events-auto'
 						: 'translate-y-4 opacity-0 pointer-events-none'
