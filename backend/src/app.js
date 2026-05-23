@@ -26,6 +26,21 @@ app.use(helmet());
 
 // ─── CORS ───────────────────────────────────────────────────
 const allowedOrigins = env.FRONTEND_URL.split(',').map(url => url.trim());
+
+// Handle preflight for all routes
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, postman)
@@ -91,12 +106,9 @@ apiRouter.use('/admin', adminRoutes);
 // Standard API path
 app.use('/api/v1', apiRouter);
 
-// Fallbacks for Vercel serverless quirks (Vercel strips /api from req.url for files in api/ directory)
+// Fallback: Vercel serverless strips /api prefix from req.url when serving from api/index.js
+// So /api/v1/auth/login arrives as /v1/auth/login
 app.use('/v1', apiRouter);
-
-// Fallbacks for frontend misconfigurations (e.g., missing /api/v1 in NEXT_PUBLIC_API_URL)
-app.use('/api', apiRouter);
-app.use('/', apiRouter);
 
 // ─── 404 handler ────────────────────────────────────────────
 app.use('*', (req, res) => {

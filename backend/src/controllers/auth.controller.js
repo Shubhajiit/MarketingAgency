@@ -49,12 +49,18 @@ const generateTokens = (userId) => {
 
 /**
  * Set refresh token as httpOnly cookie.
+ * In production (cross-origin), cookies MUST be:
+ *   - secure: true  (HTTPS only)
+ *   - sameSite: 'none'  (required for cross-site cookies)
+ * In development, use lax to work with localhost without HTTPS.
  */
+const isProduction = env.NODE_ENV === 'production';
+
 const setRefreshCookie = (res, refreshToken) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     path: '/',
   });
@@ -127,8 +133,8 @@ const refresh = asyncHandler(async (req, res) => {
   if (!refreshToken) {
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
     return ApiResponse.unauthorized(res, 'Refresh token not found');
@@ -140,8 +146,8 @@ const refresh = asyncHandler(async (req, res) => {
   } catch {
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
     return ApiResponse.unauthorized(res, 'Invalid refresh token');
@@ -160,8 +166,8 @@ const refresh = asyncHandler(async (req, res) => {
   if (!storedToken) {
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
     return ApiResponse.unauthorized(res, 'Refresh token expired or revoked');
@@ -199,8 +205,8 @@ const logout = asyncHandler(async (req, res) => {
 
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/',
   });
 
