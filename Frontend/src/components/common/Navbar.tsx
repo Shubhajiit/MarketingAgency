@@ -414,151 +414,146 @@ export default function Navbar() {
                         )}
                     </svg>
                 </button>
-            </header>
 
-            {/* Mobile Menu Dropdown */}
-            {isMenuOpen && (
-                <div className="md:hidden bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-20 w-full">
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</a>
+                {/* Mobile Menu Dropdown */}
+                {isMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-50 w-full shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
+                        <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</a>
 
-                    <button
-                        onClick={() => setIsMobileCoursesOpen(!isMobileCoursesOpen)}
-                        className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800"
-                    >
-                        COURSES
-                        <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileCoursesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    {isMobileCoursesOpen && (
-                        <div className="pl-4 py-2 flex flex-col gap-4 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
-                            {/* Pro & Specialist */}
-                            <div>
-                                <div className="flex items-center gap-1.5 mb-1.5">
+                        <button
+                            onClick={() => setIsMobileCoursesOpen(!isMobileCoursesOpen)}
+                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800"
+                        >
+                            COURSES
+                            <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileCoursesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        {isMobileCoursesOpen && (
+                            <div className="pl-4 py-2 flex flex-col gap-4 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
+                                {/* Pro & Specialist */}
+                                <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-full h-full bg-white rounded-full" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-900">Pro & Specialist Courses</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2 pl-5">
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
+                                            DMI Pro
+                                            <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">Popular</span>
+                                        </a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Marketing</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Strategy & Leadership</a>
+                                    </div>
+                                </div>
+                                {/* Advanced */}
+                                <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#10b981] to-[#06b6d4] flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-full h-full bg-white rounded-full" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-900">Advanced Courses</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2 pl-5">
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">DMI Expert</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Postgraduate Diploma In Digital Marketing</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Masters (MSc) In Digital Marketing</a>
+                                    </div>
+                                </div>
+                                {/* Short */}
+                                <div>
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#eab308] to-[#10b981] flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-full h-full bg-white rounded-full" />
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-900">Short Courses</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2 pl-5">
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
+                                            Advanced AI
+                                            <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">NEW</span>
+                                        </a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Engine Optimization (SEO)</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Paid Search (PPC)</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
+                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Digital Strategy</a>
+                                        <a href="#" className="text-xs font-semibold text-[#1e2245] hover:text-[#009ee3]">More...</a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={() => {
+                                setIsMobileWorkshopsOpen(!isMobileWorkshopsOpen);
+                                fetchLiveWorkshops();
+                            }}
+                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
+                        >
+                            LIVE WORKSHOPS
+                            <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        {isMobileWorkshopsOpen && (
+                            <div className="pl-4 py-2 flex flex-col gap-3 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
+                                <div className="flex items-center gap-1.5 mb-1">
                                     <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
                                         <div className="w-full h-full bg-white rounded-full" />
                                     </div>
-                                    <span className="text-xs font-bold text-gray-900">Pro & Specialist Courses</span>
+                                    <span className="text-xs font-bold text-gray-900">Upcoming Workshops</span>
+                                    {showLoader && (
+                                        <div className="ml-1 w-3 h-3 border-2 border-gray-300 border-t-[#009ee3] rounded-full animate-spin" />
+                                    )}
                                 </div>
                                 <div className="flex flex-col gap-2 pl-5">
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
-                                        DMI Pro
-                                        <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">Popular</span>
-                                    </a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Marketing</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Strategy & Leadership</a>
+                                    {liveWorkshops.length > 0 ? (
+                                        liveWorkshops.map((w) => (
+                                            <Link
+                                                key={w._id}
+                                                href={`/workshops/${w.slug}`}
+                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
+                                                onClick={() => setIsMenuOpen(false)}
+                                            >
+                                                {w.title}
+                                                {w.batchNumber && (
+                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{w.batchNumber}</span>
+                                                )}
+                                            </Link>
+                                        ))
+                                    ) : workshopsLoaded ? (
+                                        <span className="text-xs text-gray-400">No workshops available</span>
+                                    ) : null}
                                 </div>
                             </div>
-                            {/* Advanced */}
-                            <div>
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#10b981] to-[#06b6d4] flex-shrink-0 flex items-center justify-center">
-                                        <div className="w-full h-full bg-white rounded-full" />
+                        )}
+                        <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
+                        <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
+                        {isAuthenticated && user ? (
+                            <>
+                                <div className="py-2.5 border-t border-gray-100 mt-2 flex justify-between items-center relative">
+                                    <div className="w-8 h-8 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase">
+                                        {user.email.charAt(0)}
                                     </div>
-                                    <span className="text-xs font-bold text-gray-900">Advanced Courses</span>
+                                    <span className="text-gray-600 truncate ml-3 flex-1">{user.email}</span>
                                 </div>
-                                <div className="flex flex-col gap-2 pl-5">
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">DMI Expert</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Postgraduate Diploma In Digital Marketing</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Masters (MSc) In Digital Marketing</a>
-                                </div>
-                            </div>
-                            {/* Short */}
-                            <div>
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#eab308] to-[#10b981] flex-shrink-0 flex items-center justify-center">
-                                        <div className="w-full h-full bg-white rounded-full" />
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-900">Short Courses</span>
-                                </div>
-                                <div className="flex flex-col gap-2 pl-5">
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
-                                        Advanced AI
-                                        <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">NEW</span>
-                                    </a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Engine Optimization (SEO)</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Paid Search (PPC)</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
-                                    <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Digital Strategy</a>
-                                    <a href="#" className="text-xs font-semibold text-[#1e2245] hover:text-[#009ee3]">More...</a>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <button 
-                        onClick={() => {
-                            setIsMobileWorkshopsOpen(!isMobileWorkshopsOpen);
-                            fetchLiveWorkshops();
-                        }}
-                        className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
-                    >
-                        LIVE WORKSHOPS
-                        <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    {isMobileWorkshopsOpen && (
-                        <div className="pl-4 py-2 flex flex-col gap-3 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
-                                    <div className="w-full h-full bg-white rounded-full" />
-                                </div>
-                                <span className="text-xs font-bold text-gray-900">Upcoming Workshops</span>
-                                {showLoader && (
-                                    <div className="ml-1 w-3 h-3 border-2 border-gray-300 border-t-[#009ee3] rounded-full animate-spin" />
-                                )}
-                            </div>
-                            <div className="flex flex-col gap-2 pl-5">
-                                {liveWorkshops.length > 0 ? (
-                                    liveWorkshops.map((w) => (
-                                        <Link
-                                            key={w._id}
-                                            href={`/workshops/${w.slug}`}
-                                            className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            {w.title}
-                                            {w.batchNumber && (
-                                                <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{w.batchNumber}</span>
-                                            )}
-                                        </Link>
-                                    ))
-                                ) : workshopsLoaded ? (
-                                    <span className="text-xs text-gray-400">No workshops available</span>
-                                ) : null}
-                            </div>
-                        </div>
-                    )}
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
-                    {isAuthenticated && user ? (
-                        <>
-                            <div className="py-2.5 border-t border-gray-100 mt-2 flex justify-between items-center relative">
-                                <button
-                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    className="w-8 h-8 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase"
-                                >
-                                    {user.email.charAt(0)}
-                                </button>
-                                <span className="text-gray-600 truncate ml-3 flex-1">{user.email}</span>
-                            </div>
-                            {isProfileOpen && (
                                 <Link
                                     href={dashboardHref}
-                                    className="py-2.5 text-center bg-gray-50 text-[#009ee3] border border-gray-200 rounded hover:bg-gray-100 transition-colors mt-2 w-full"
+                                    className="py-2.5 text-center bg-gray-50 text-[#009ee3] border border-gray-200 rounded hover:bg-gray-100 transition-colors mt-2 w-full font-bold"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     Go to dashboard
                                 </Link>
-                            )}
-                        </>
-                    ) : (
-                        <Link href="/login" className="py-2.5 text-center bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors mt-2 w-full">Login</Link>
-                    )}
-                </div>
-            )}
+                            </>
+                        ) : (
+                            <Link href="/login" className="py-2.5 text-center bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors mt-2 w-full">Login</Link>
+                        )}
+                    </div>
+                )}
+            </header>
         </>
     );
 }

@@ -23,6 +23,18 @@ export default function MobileBottomNav() {
 
 	const isActive = (href: string) => pathname === href;
 
+	React.useEffect(() => {
+		if (isProfileOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'unset';
+		}
+
+		return () => {
+			document.body.style.overflow = 'unset';
+		};
+	}, [isProfileOpen]);
+
 	const tabs = [
 		{ label: 'COURSES', href: '/dashboard/activecourse', icon: Book },
 		{ label: 'WEBINARS', href: '/dashboard/workshops', icon: Video },
