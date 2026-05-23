@@ -3,7 +3,7 @@ const { z } = require('zod');
 const envSchema = z.object({
   PORT: z.string().default('5000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
+  FRONTEND_URL: z.string().default('http://localhost:3000'),
 
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
 
