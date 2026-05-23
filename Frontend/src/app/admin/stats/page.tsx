@@ -506,15 +506,6 @@ export default function AdminStatsPage() {
           {/* Bar Chart Canvas */}
           <div className="flex-1 w-full relative">
             <Bar data={overviewData} options={overviewOptions} />
-            
-            {/* Tuesday Tooltip Mockup Badge (exactly as shown in the picture: "o $47K") */}
-            <div className="absolute left-[50.2%] top-[25%] -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-10 hidden sm:flex flex-col items-center animate-bounce-slow">
-              <div className="bg-[#1f2937] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-md flex items-center gap-1 border border-gray-700/50">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8f8af4]"></span>
-                <span>$47K</span>
-              </div>
-              <div className="w-1.5 h-1.5 bg-[#1f2937] transform rotate-45 -mt-0.75"></div>
-            </div>
           </div>
         </div>
 
@@ -558,28 +549,6 @@ export default function AdminStatsPage() {
           {/* Line Chart Canvas */}
           <div className="flex-1 w-full relative">
             <Line data={studentAnalysisData} options={studentAnalysisOptions} />
-            
-            {/* Sunday Tooltip Marker Mockup Badge (exactly as shown in the picture: Enrolled 5,567, Left 98) */}
-            <div className="absolute left-[20%] top-[20%] -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-10 hidden sm:flex flex-col items-center">
-              {/* Tooltip Card */}
-              <div className="bg-white text-[#1f2937] text-[10px] p-2.5 rounded-xl shadow-lg border border-gray-100 flex flex-col gap-1 w-28">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#8f8af4]"></span>
-                  <span className="text-gray-400">Enrolled:</span>
-                  <span className="font-bold ml-auto text-gray-800">5,567</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                  <span className="text-gray-400">Left:</span>
-                  <span className="font-bold ml-auto text-gray-800">98</span>
-                </div>
-              </div>
-              
-              {/* Tooltip dot & vertical indicator line */}
-              <div className="w-[1.5px] h-20 bg-gradient-to-b from-gray-200 to-transparent flex flex-col items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#8f8af4] border-2 border-white -mt-1 shadow-sm"></div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

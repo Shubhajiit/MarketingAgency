@@ -5,6 +5,8 @@
 @theme {
   --animate-marquee: marquee 20s linear infinite;
   --animate-marquee-reverse: marquee-reverse 40s linear infinite;
+  --animate-shimmer: shimmer 2s infinite;
+  --animate-bounce-slow: bounce-slow 3s infinite;
   --color-primary: #009ee3;
   --color-primary-foreground: #ffffff;
   --color-accent: #f1f5f9;
@@ -32,6 +34,24 @@
 
     100% {
       transform: translateX(0%);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
     }
   }
 }

@@ -31,7 +31,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'dummy_client_id'}>
       <QueryClientProvider client={queryClient}>
         <AuthHydration>{children}</AuthHydration>
       </QueryClientProvider>

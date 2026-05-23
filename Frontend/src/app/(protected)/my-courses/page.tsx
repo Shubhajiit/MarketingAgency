@@ -133,7 +133,7 @@ function CoursesContent() {
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-sm font-medium mb-2">
             <span
-              onClick={() => router.push('/courses')}
+              onClick={() => router.push('/my-courses')}
               className="text-[#2db39b] hover:underline cursor-pointer"
             >
               All Courses
@@ -201,7 +201,7 @@ function CoursesContent() {
 
               {labelFilter && (
                 <button
-                  onClick={() => router.push('/courses')}
+                  onClick={() => router.push('/my-courses')}
                   className="w-full text-center text-xs font-semibold text-red-500 hover:text-red-600 pt-2 border-t mt-2"
                 >
                   Clear Category Filter
@@ -232,7 +232,7 @@ function CoursesContent() {
             </span>
           </div>
           <button
-            onClick={() => router.push('/courses')}
+            onClick={() => router.push('/my-courses')}
             className="text-xs font-bold text-[#2db39b] hover:underline self-start sm:self-auto shrink-0"
           >
             Reset Filters
@@ -571,7 +571,7 @@ function CoursesContent() {
           </p>
           <button
             onClick={() => {
-              router.push('/courses');
+              router.push('/my-courses');
               setSelectedLevel('all');
             }}
             className="bg-[#2db39b] hover:bg-[#239580] text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-colors"

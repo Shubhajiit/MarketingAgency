@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
             <div className="border-t border-[#a2dcd1] w-full relative z-10 mt-auto"></div>
 
-            <Link href="/courses" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2db39b] flex items-center justify-between relative z-10 hover:bg-[#2db39b]/5 transition-colors">
+            <Link href="/my-courses" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2db39b] flex items-center justify-between relative z-10 hover:bg-[#2db39b]/5 transition-colors">
               <span>See Details</span>
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />

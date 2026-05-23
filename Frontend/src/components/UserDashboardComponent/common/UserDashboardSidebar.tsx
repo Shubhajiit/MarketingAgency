@@ -17,7 +17,7 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
   const pathname = usePathname();
 
   const isDashboardActive = pathname.startsWith('/dashboard');
-  const isCoursesActive = pathname.startsWith('/courses');
+  const isCoursesActive = pathname.startsWith('/my-courses');
   const isWorkshopsActive = pathname.startsWith('/workshops');
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
               My Progress
             </Link>
             <Link
-              href="/courses"
+              href="/my-courses"
               className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
                 isCoursesActive
                   ? 'bg-[#2db39b] text-white'
@@ -125,11 +125,11 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
             </button>
           </div>
           <div className="space-y-1">
-            <Link href="/courses?label=ui-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+            <Link href="/my-courses?label=ui-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
               <div className="w-2 h-2 rounded-full bg-[#009ee3]" />
               UI Design
             </Link>
-            <Link href="/courses?label=ux-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+            <Link href="/my-courses?label=ux-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
               <div className="w-2 h-2 rounded-full bg-purple-500" />
               UX Design
             </Link>
