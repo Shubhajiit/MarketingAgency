@@ -2,24 +2,31 @@ const mongoose = require('mongoose');
 const { env } = require('./env');
 const logger = require('../utils/logger');
 
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
-  }
-  if (mongoose.connection.readyState === 2) {
-    logger.info('MongoDB is connecting...');
-    return mongoose.connection;
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  try {
-    const conn = await mongoose.connect(env.MONGODB_URI, {
+  if (!cached.promise) {
+    logger.info('Initializing new MongoDB connection...');
+    const opts = {
       maxPoolSize: 10,
       minPoolSize: 2,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-    });
+      bufferCommands: false, // Fail fast if connection drops
+    };
 
-    logger.info(`MongoDB connected: ${conn.connection.host}`);
+    cached.promise = mongoose.connect(env.MONGODB_URI, opts).then((mongoose) => {
+      logger.info(`MongoDB connected: ${mongoose.connection.host}`);
+      return mongoose;
+    });
 
     mongoose.connection.on('error', (err) => {
       logger.error('MongoDB connection error:', err);
@@ -27,14 +34,16 @@ const connectDB = async () => {
 
     mongoose.connection.on('disconnected', () => {
       logger.warn('MongoDB disconnected. Attempting reconnect...');
+      cached.conn = null;
+      cached.promise = null;
     });
+  }
 
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-    });
-
-    return conn;
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (error) {
+    cached.promise = null;
     logger.error('MongoDB connection failed:', error.message);
     throw error;
   }

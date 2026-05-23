@@ -36,7 +36,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional().default(''),
 
   SENTRY_DSN: z.string().optional().default(''),
-  
+
   GOOGLE_CLIENT_ID: z.string().optional().default(''),
 });
 
