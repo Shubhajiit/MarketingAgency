@@ -1,110 +1,61 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Name is required'],
-      trim: true,
-      maxlength: 100,
-    },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    passwordHash: {
-      type: String,
-      minlength: 6,
-      select: false, // Never returned in queries by default
-    },
-    avatar: {
-      type: String,
-      default: '',
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    oauthProvider: {
-      type: String,
-      enum: ['google', 'local', null],
-      default: 'local',
-    },
-    oauthId: {
-      type: String,
-      default: null,
-    },
-    stripeCustomerId: {
-      type: String,
-      default: null,
-    },
-    purchasedVideos: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Video',
-      },
-    ],
-    refreshTokens: [
-      {
-        token: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now },
-        expiresAt: { type: Date, required: true },
-        userAgent: { type: String, default: '' },
-      },
-    ],
-    passwordResetToken: { type: String, default: null },
-    passwordResetExpires: { type: Date, default: null },
-    emailVerificationToken: { type: String, default: null },
-    emailVerificationExpires: { type: Date, default: null },
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
   },
-  {
-    timestamps: true,
-    toJSON: {
-      transform(doc, ret) {
-        delete ret.passwordHash;
-        delete ret.refreshTokens;
-        delete ret.__v;
-        return ret;
-      },
+  password: {
+    type: String,
+    required: function() {
+      // password is required if googleId is not present
+      return !this.googleId;
     },
-  }
-);
+    minlength: 6,
+    select: false // Don't return password by default
+  },
+  googleId: {
+    type: String
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  avatar: {
+    type: String
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  purchasedVideos: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Video'
+  }]
+}, { timestamps: true });
 
-// Indexes
-userSchema.index({ stripeCustomerId: 1 }, { sparse: true });
-userSchema.index({ oauthId: 1, oauthProvider: 1 }, { sparse: true });
-
-// Hash password before save
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('passwordHash')) return next();
-  if (this.passwordHash) {
-    this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) {
+    return next();
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Instance method: compare password
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  if (!this.passwordHash) return false;
-  return bcrypt.compare(candidatePassword, this.passwordHash);
+// Method to compare password
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Instance method: clean refresh tokens (remove expired)
-userSchema.methods.cleanRefreshTokens = function () {
-  this.refreshTokens = this.refreshTokens.filter(
-    (rt) => rt.expiresAt > new Date()
-  );
-};
-
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

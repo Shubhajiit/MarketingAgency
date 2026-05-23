@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from '@react-oauth/google';
 
 interface PupilProps {
   size?: number;
@@ -20,8 +20,8 @@ interface PupilProps {
   forceLookY?: number;
 }
 
-const Pupil = ({ 
-  size = 12, 
+const Pupil = ({
+  size = 12,
   maxDistance = 5,
   pupilColor = "black",
   forceLookX,
@@ -94,9 +94,9 @@ interface EyeBallProps {
   forceLookY?: number;
 }
 
-const EyeBall = ({ 
-  size = 48, 
-  pupilSize = 16, 
+const EyeBall = ({
+  size = 48,
+  pupilSize = 16,
   maxDistance = 10,
   eyeColor = "white",
   pupilColor = "black",
@@ -183,34 +183,44 @@ function SearchParamsSync({ setIsSignUp }: { setIsSignUp: React.Dispatch<React.S
 
 function LoginPageContent() {
   const router = useRouter();
-  const { login, register, googleLogin, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { user, login, register, googleLogin, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      router.replace('/');
+    if (!isAuthLoading && isAuthenticated && user) {
+      if (user.role === 'admin') {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/dashboard');
+      }
     }
-  }, [isAuthLoading, isAuthenticated, router]);
+  }, [isAuthLoading, isAuthenticated, user, router]);
 
-  const handleGoogleLogin = useGoogleLogin({
+  const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setError("");
       setIsLoading(true);
       try {
         const res = await googleLogin(tokenResponse.access_token);
-        if (res?.data?.user?.role === 'admin') {
-          router.push('/admin/workshops');
+        if (res?.user?.role === 'admin') {
+          router.replace('/admin/dashboard');
         } else {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       } catch (err: any) {
-        setError(err.response?.data?.message || "Google login failed. Please try again.");
+        setError(err.response?.data?.message || err.message || "Google login failed. Please try again.");
         setIsLoading(false);
       }
     },
     onError: () => {
-      setError("Google login failed. Please try again.");
+      setError("Google Login Failed");
+      setIsLoading(false);
     }
   });
+
+  const handleGoogleLoginClick = () => {
+    setIsLoading(true);
+    loginWithGoogle();
+  };
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -363,16 +373,16 @@ function LoginPageContent() {
         await register(name, email, password);
         // Automatically login on success
         const res = await login(email, password);
-        if (res?.data?.user?.role === 'admin') {
-          router.push('/admin/workshops');
+        if (res?.user?.role === 'admin') {
+          router.push('/admin/dashboard');
         } else {
           router.push('/dashboard');
         }
       } else {
         // Login the user
         const res = await login(email, password);
-        if (res?.data?.user?.role === 'admin') {
-          router.push('/admin/workshops');
+        if (res?.user?.role === 'admin') {
+          router.push('/admin/dashboard');
         } else {
           router.push('/dashboard');
         }
@@ -380,7 +390,7 @@ function LoginPageContent() {
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       setError(
-        axiosError.response?.data?.message || 
+        axiosError.response?.data?.message ||
         (isSignUp ? "Registration failed. Please try again." : "Login failed. Please try again.")
       );
     } finally {
@@ -402,7 +412,7 @@ function LoginPageContent() {
         <SearchParamsSync setIsSignUp={setIsSignUp} />
       </Suspense>
       {/* Left Content Section */}
-      <div 
+      <div
         className="relative hidden lg:flex flex-col justify-between bg-slate-50 p-12 text-slate-800 border-r border-slate-100 overflow-hidden"
         style={{
           backgroundImage: 'radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px)',
@@ -423,7 +433,7 @@ function LoginPageContent() {
           {/* Cartoon Characters */}
           <div className="relative" style={{ width: '550px', height: '400px' }}>
             {/* Purple tall rectangle character - Back layer */}
-            <div 
+            <div
               ref={purpleRef}
               className="absolute bottom-0 transition-all duration-700 ease-in-out"
               style={{
@@ -436,35 +446,35 @@ function LoginPageContent() {
                 transform: (password.length > 0 && showPassword)
                   ? `skewX(0deg)`
                   : (isTyping || (password.length > 0 && !showPassword))
-                    ? `skewX(${(purplePos.bodySkew || 0) - 12}deg) translateX(40px)` 
+                    ? `skewX(${(purplePos.bodySkew || 0) - 12}deg) translateX(40px)`
                     : `skewX(${purplePos.bodySkew || 0}deg)`,
                 transformOrigin: 'bottom center',
               }}
             >
               {/* Eyes */}
-              <div 
+              <div
                 className="absolute flex gap-8 transition-all duration-700 ease-in-out"
                 style={{
                   left: (password.length > 0 && showPassword) ? `${20}px` : isLookingAtEachOther ? `${55}px` : `${45 + purplePos.faceX}px`,
                   top: (password.length > 0 && showPassword) ? `${35}px` : isLookingAtEachOther ? `${65}px` : `${40 + purplePos.faceY}px`,
                 }}
               >
-                <EyeBall 
-                  size={18} 
-                  pupilSize={7} 
-                  maxDistance={5} 
-                  eyeColor="white" 
-                  pupilColor="#2D2D2D" 
+                <EyeBall
+                  size={18}
+                  pupilSize={7}
+                  maxDistance={5}
+                  eyeColor="white"
+                  pupilColor="#2D2D2D"
                   isBlinking={isPurpleBlinking}
                   forceLookX={(password.length > 0 && showPassword) ? (isPurplePeeking ? 4 : -4) : isLookingAtEachOther ? 3 : undefined}
                   forceLookY={(password.length > 0 && showPassword) ? (isPurplePeeking ? 5 : -4) : isLookingAtEachOther ? 4 : undefined}
                 />
-                <EyeBall 
-                  size={18} 
-                  pupilSize={7} 
-                  maxDistance={5} 
-                  eyeColor="white" 
-                  pupilColor="#2D2D2D" 
+                <EyeBall
+                  size={18}
+                  pupilSize={7}
+                  maxDistance={5}
+                  eyeColor="white"
+                  pupilColor="#2D2D2D"
                   isBlinking={isPurpleBlinking}
                   forceLookX={(password.length > 0 && showPassword) ? (isPurplePeeking ? 4 : -4) : isLookingAtEachOther ? 3 : undefined}
                   forceLookY={(password.length > 0 && showPassword) ? (isPurplePeeking ? 5 : -4) : isLookingAtEachOther ? 4 : undefined}
@@ -473,7 +483,7 @@ function LoginPageContent() {
             </div>
 
             {/* Black tall rectangle character - Middle layer */}
-            <div 
+            <div
               ref={blackRef}
               className="absolute bottom-0 transition-all duration-700 ease-in-out"
               style={{
@@ -488,35 +498,35 @@ function LoginPageContent() {
                   : isLookingAtEachOther
                     ? `skewX(${(blackPos.bodySkew || 0) * 1.5 + 10}deg) translateX(20px)`
                     : (isTyping || (password.length > 0 && !showPassword))
-                      ? `skewX(${(blackPos.bodySkew || 0) * 1.5}deg)` 
+                      ? `skewX(${(blackPos.bodySkew || 0) * 1.5}deg)`
                       : `skewX(${blackPos.bodySkew || 0}deg)`,
                 transformOrigin: 'bottom center',
               }}
             >
               {/* Eyes */}
-              <div 
+              <div
                 className="absolute flex gap-6 transition-all duration-700 ease-in-out"
                 style={{
                   left: (password.length > 0 && showPassword) ? `${10}px` : isLookingAtEachOther ? `${32}px` : `${26 + blackPos.faceX}px`,
                   top: (password.length > 0 && showPassword) ? `${28}px` : isLookingAtEachOther ? `${12}px` : `${32 + blackPos.faceY}px`,
                 }}
               >
-                <EyeBall 
-                  size={16} 
-                  pupilSize={6} 
-                  maxDistance={4} 
-                  eyeColor="white" 
-                  pupilColor="#2D2D2D" 
+                <EyeBall
+                  size={16}
+                  pupilSize={6}
+                  maxDistance={4}
+                  eyeColor="white"
+                  pupilColor="#2D2D2D"
                   isBlinking={isBlackBlinking}
                   forceLookX={(password.length > 0 && showPassword) ? -4 : isLookingAtEachOther ? 0 : undefined}
                   forceLookY={(password.length > 0 && showPassword) ? -4 : isLookingAtEachOther ? -4 : undefined}
                 />
-                <EyeBall 
-                  size={16} 
-                  pupilSize={6} 
-                  maxDistance={4} 
-                  eyeColor="white" 
-                  pupilColor="#2D2D2D" 
+                <EyeBall
+                  size={16}
+                  pupilSize={6}
+                  maxDistance={4}
+                  eyeColor="white"
+                  pupilColor="#2D2D2D"
                   isBlinking={isBlackBlinking}
                   forceLookX={(password.length > 0 && showPassword) ? -4 : isLookingAtEachOther ? 0 : undefined}
                   forceLookY={(password.length > 0 && showPassword) ? -4 : isLookingAtEachOther ? -4 : undefined}
@@ -525,7 +535,7 @@ function LoginPageContent() {
             </div>
 
             {/* Orange semi-circle character - Front left */}
-            <div 
+            <div
               ref={orangeRef}
               className="absolute bottom-0 transition-all duration-700 ease-in-out"
               style={{
@@ -540,7 +550,7 @@ function LoginPageContent() {
               }}
             >
               {/* Eyes - just pupils, no white */}
-              <div 
+              <div
                 className="absolute flex gap-8 transition-all duration-200 ease-out"
                 style={{
                   left: (password.length > 0 && showPassword) ? `${50}px` : `${82 + (orangePos.faceX || 0)}px`,
@@ -553,7 +563,7 @@ function LoginPageContent() {
             </div>
 
             {/* Yellow tall rectangle character - Front right */}
-            <div 
+            <div
               ref={yellowRef}
               className="absolute bottom-0 transition-all duration-700 ease-in-out"
               style={{
@@ -568,7 +578,7 @@ function LoginPageContent() {
               }}
             >
               {/* Eyes - just pupils, no white */}
-              <div 
+              <div
                 className="absolute flex gap-6 transition-all duration-200 ease-out"
                 style={{
                   left: (password.length > 0 && showPassword) ? `${20}px` : `${52 + (yellowPos.faceX || 0)}px`,
@@ -579,7 +589,7 @@ function LoginPageContent() {
                 <Pupil size={12} maxDistance={5} pupilColor="#2D2D2D" forceLookX={(password.length > 0 && showPassword) ? -5 : undefined} forceLookY={(password.length > 0 && showPassword) ? -4 : undefined} />
               </div>
               {/* Horizontal line for mouth */}
-              <div 
+              <div
                 className="absolute w-20 h-[4px] bg-[#2D2D2D] rounded-full transition-all duration-200 ease-out"
                 style={{
                   left: (password.length > 0 && showPassword) ? `${10}px` : `${40 + (yellowPos.faceX || 0)}px`,
@@ -651,16 +661,16 @@ function LoginPageContent() {
           {/* Login / Register Form */}
           <form onSubmit={handleSubmit} className="space-y-5 text-slate-900">
             {/* Sliding Inputs Wrapper */}
-            <div 
+            <div
               className="relative overflow-hidden transition-all duration-500 ease-in-out pt-1 pb-2"
               style={{ maxHeight: isSignUp ? '420px' : '240px' }}
             >
-              <div 
+              <div
                 className="flex transition-transform duration-500 ease-in-out w-[200%]"
                 style={{ transform: `translateX(${isSignUp ? '-50%' : '0%'})` }}
               >
                 {/* Panel 1: Login Form Fields */}
-                <div 
+                <div
                   className={cn(
                     "w-1/2 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
                     isSignUp ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
@@ -710,9 +720,9 @@ function LoginPageContent() {
 
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="remember" 
-                        className="h-4 w-4 rounded border-slate-300 text-slate-950 focus:ring-slate-950 data-[state=checked]:bg-slate-950 data-[state=checked]:text-white" 
+                      <Checkbox
+                        id="remember"
+                        className="h-4 w-4 rounded border-slate-300 text-slate-950 focus:ring-slate-950 data-[state=checked]:bg-slate-950 data-[state=checked]:text-white"
                       />
                       <Label
                         htmlFor="remember"
@@ -731,7 +741,7 @@ function LoginPageContent() {
                 </div>
 
                 {/* Panel 2: Registration Form Fields */}
-                <div 
+                <div
                   className={cn(
                     "w-1/2 space-y-4 shrink-0 transition-all duration-500 ease-in-out",
                     isSignUp ? "opacity-100 scale-100" : "opacity-0 pointer-events-none scale-95"
@@ -804,9 +814,9 @@ function LoginPageContent() {
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base font-semibold bg-slate-950 hover:bg-slate-900 text-white rounded-full transition-all relative overflow-hidden shadow-none" 
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-semibold bg-slate-950 hover:bg-slate-900 text-white rounded-full transition-all relative overflow-hidden shadow-none"
               disabled={isLoading}
             >
               <div className="relative w-full h-full flex items-center justify-center">
@@ -819,7 +829,7 @@ function LoginPageContent() {
                 >
                   {isLoading ? "Signing in..." : "Log in"}
                 </span>
-                
+
                 {/* SignUp state text */}
                 <span
                   className={cn(
@@ -845,11 +855,11 @@ function LoginPageContent() {
 
           {/* Social Login Grid */}
           <div className="flex justify-center gap-4 mt-4 sm:grid sm:grid-cols-2 sm:gap-3">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-12 sm:w-full h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full p-0 sm:px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
               type="button"
-              onClick={() => handleGoogleLogin()}
+              onClick={() => handleGoogleLoginClick()}
               disabled={isLoading}
             >
               {/* Google G SVG logo */}
@@ -874,8 +884,8 @@ function LoginPageContent() {
               <span className="hidden sm:inline truncate">Continue with Google</span>
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-12 sm:w-full h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full p-0 sm:px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
               type="button"
             >
@@ -896,8 +906,8 @@ function LoginPageContent() {
               )}
             >
               Already have an account?{" "}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => handleToggleMode(false)}
                 className="text-slate-950 font-bold underline hover:text-slate-800 focus:outline-none cursor-pointer ml-1"
               >
@@ -911,8 +921,8 @@ function LoginPageContent() {
               )}
             >
               Don&apos;t have an account?{" "}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => handleToggleMode(true)}
                 className="text-slate-950 font-bold underline hover:text-slate-800 focus:outline-none cursor-pointer ml-1"
               >

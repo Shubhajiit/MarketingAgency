@@ -10,7 +10,7 @@ export default function DashboardRedirect() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (user?._id) {
+      if (user?.id) {
         if (user.role === 'admin') {
           router.replace('/admin/workshops');
         } else {

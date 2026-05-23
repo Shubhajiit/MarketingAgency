@@ -6,7 +6,8 @@ interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setAuth: (user: AuthUser) => void;
+  token: string | null;
+  setAuth: (user: AuthUser, token?: string) => void;
   clearAuth: () => void;
   setLoading: (loading: boolean) => void;
 }
@@ -17,19 +18,22 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: true, // Start as loading until we check auth status
+      token: null,
 
-      setAuth: (user) =>
-        set({
+      setAuth: (user, token) =>
+        set((state) => ({
           user,
           isAuthenticated: true,
           isLoading: false,
-        }),
+          token: token !== undefined ? token : state.token,
+        })),
 
       clearAuth: () =>
         set({
           user: null,
           isAuthenticated: false,
           isLoading: false,
+          token: null,
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
@@ -39,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        token: state.token,
       }),
     }
   )

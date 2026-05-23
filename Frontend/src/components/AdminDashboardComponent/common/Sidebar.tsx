@@ -31,7 +31,7 @@ export default function Sidebar() {
     <aside className="w-68 bg-white border-r border-[#e9ebf0] flex flex-col fixed h-full z-30 transition-all duration-300">
       {/* Logo */}
       <div className="px-6 py-6 flex items-center justify-between border-b border-[#f4f5f8]">
-        <Link href="/admin/stats" className="flex items-center">
+        <Link href="/admin/dashboard" className="flex items-center">
           <img
             src="/Logo/Logo.png"
             alt="Logo"
@@ -48,7 +48,7 @@ export default function Sidebar() {
         <div>
           <p className="px-3 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Menu</p>
           <nav className="space-y-1">
-            <Link href="/admin/stats" className={isActive('/admin/stats') ? activeClass : inactiveClass}>
+            <Link href="/admin/dashboard" className={isActive('/admin/dashboard') ? activeClass : inactiveClass}>
               <LayoutDashboard size={18} />
               <span>Dashboards</span>
             </Link>

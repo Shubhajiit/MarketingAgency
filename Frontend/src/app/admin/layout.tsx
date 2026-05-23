@@ -27,7 +27,7 @@ export default function AdminLayout({
     if (!isLoading) {
       if (isLoginRoute) {
         if (isAuthenticated && user?.role === 'admin') {
-          router.replace('/admin/stats');
+          router.replace('/admin/dashboard');
         } else if (isAuthenticated && user?.role !== 'admin') {
           router.replace('/dashboard');
         }

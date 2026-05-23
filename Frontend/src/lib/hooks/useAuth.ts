@@ -1,68 +1,97 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/lib/api/auth';
-import { setAccessToken } from '@/lib/api/client';
+import Cookies from 'js-cookie';
 
 export function useAuth() {
-  const { user, isAuthenticated, isLoading, setAuth, clearAuth, setLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, setAuth, clearAuth, setLoading, token } = useAuthStore();
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const response = await authApi.login({ email, password });
-      if (response.data?.user) {
-        setAuth(response.data.user);
+      setLoading(true);
+      try {
+        const { data } = await authApi.login(email, password);
+        Cookies.set('refreshToken', data.session.access_token);
+        setAuth(data.user, data.session.access_token);
+        setLoading(false);
+        return data;
+      } catch (error: any) {
+        setLoading(false);
+        throw error;
       }
-      return response;
     },
-    [setAuth]
+    [setAuth, setLoading]
   );
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
-      const response = await authApi.register({ name, email, password });
-      return response;
+      setLoading(true);
+      try {
+        const { data } = await authApi.register(name, email, password);
+        Cookies.set('refreshToken', data.session.access_token);
+        setAuth(data.user, data.session.access_token);
+        setLoading(false);
+        return data;
+      } catch (error: any) {
+        setLoading(false);
+        throw error;
+      }
     },
-    []
+    [setAuth, setLoading]
   );
 
   const logout = useCallback(async () => {
-    try {
-      await authApi.logout();
-    } catch {
-      // Even if API call fails, clear local state
-    }
-    setAccessToken(null);
+    Cookies.remove('refreshToken');
     clearAuth();
   }, [clearAuth]);
 
   const checkAuth = useCallback(async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     try {
-      // Try to refresh the token (uses httpOnly cookie)
-      await authApi.refresh();
-      const meResponse = await authApi.getMe();
-      if (meResponse.data?.user) {
-        setAuth(meResponse.data.user);
+      const { data } = await authApi.getMe();
+      if (data?.user) {
+        setAuth(data.user, token);
       } else {
         clearAuth();
       }
     } catch {
       clearAuth();
+    } finally {
+      setLoading(false);
     }
-  }, [setAuth, clearAuth, setLoading]);
+  }, [setAuth, clearAuth, setLoading, token]);
 
   const googleLogin = useCallback(
-    async (token: string) => {
-      const response = await authApi.googleLogin(token);
-      if (response.data?.user) {
-        setAuth(response.data.user);
+    async (googleToken: string) => {
+      setLoading(true);
+      try {
+        const { data } = await authApi.googleLogin(googleToken);
+        Cookies.set('refreshToken', data.session.access_token);
+        setAuth(data.user, data.session.access_token);
+        setLoading(false);
+        return data;
+      } catch (error: any) {
+        setLoading(false);
+        throw error;
       }
-      return response;
     },
-    [setAuth]
+    [setAuth, setLoading]
   );
+
+  useEffect(() => {
+    if (token && !user) {
+      checkAuth();
+    } else if (!token) {
+      setLoading(false);
+    }
+  }, [token, user, checkAuth, setLoading]);
 
   return {
     user,

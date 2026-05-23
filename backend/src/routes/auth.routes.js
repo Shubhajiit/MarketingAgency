@@ -1,17 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, refresh, logout, forgotPassword, resetPassword, googleLogin } = require('../controllers/auth.controller');
-const { rateLimiter } = require('../middleware/rateLimiter');
+const authController = require('../controllers/auth.controller');
+const { protect } = require('../middlewares/auth.middleware');
 
-// Rate limit auth endpoints more strictly
-const authLimiter = rateLimiter({ windowMs: 60000, max: 10, prefix: 'auth-rate' });
-
-router.post('/register', authLimiter, register);
-router.post('/login', authLimiter, login);
-router.post('/google', authLimiter, googleLogin);
-router.post('/refresh', refresh);
-router.post('/logout', logout);
-router.post('/forgot-password', authLimiter, forgotPassword);
-router.post('/reset-password', authLimiter, resetPassword);
+router.post('/signup', authController.signUp);
+router.post('/login', authController.login);
+router.post('/google', authController.googleLogin);
+router.get('/me', protect, authController.getMe);
 
 module.exports = router;

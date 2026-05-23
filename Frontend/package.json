@@ -12,6 +12,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-oauth/google": "^0.13.5",
+    "@supabase/supabase-js": "^2.106.1",
     "@tanstack/react-query": "^5.100.11",
     "axios": "^1.16.1",
     "chart.js": "^4.5.1",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
