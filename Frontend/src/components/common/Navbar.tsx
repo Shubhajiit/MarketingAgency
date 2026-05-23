@@ -23,6 +23,7 @@ export default function Navbar() {
     const workshopsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const { user, isAuthenticated } = useAuth();
     const pathname = usePathname();
+    const dashboardHref = '/dashboard';
 
     React.useEffect(() => {
         setIsMenuOpen(false);
@@ -148,7 +149,7 @@ export default function Navbar() {
                                         {user.email}
                                     </div>
                                     <Link
-                                        href="/dashboard"
+                                        href={dashboardHref}
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#009ee3]"
                                         onClick={() => setIsProfileOpen(false)}
                                     >
@@ -545,7 +546,7 @@ export default function Navbar() {
                             </div>
                             {isProfileOpen && (
                                 <Link
-                                    href="/dashboard"
+                                    href={dashboardHref}
                                     className="py-2.5 text-center bg-gray-50 text-[#009ee3] border border-gray-200 rounded hover:bg-gray-100 transition-colors mt-2 w-full"
                                     onClick={() => setIsMenuOpen(false)}
                                 >

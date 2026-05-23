@@ -102,7 +102,7 @@ export default function Sidebar() {
         </div>
         <div className="flex items-center gap-1">
           <Link 
-            href={user?._id ? `/dashboard/${user._id}` : '/dashboard'} 
+            href="/dashboard" 
             title="Go to User Dashboard"
             className="p-1.5 rounded-lg text-gray-400 hover:text-[#6366f1] hover:bg-gray-50 transition-all duration-200"
           >

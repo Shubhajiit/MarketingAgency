@@ -7,11 +7,8 @@ export default function MyVideosPage() {
   const videos = data?.data?.videos || [];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Videos</h1>
-        <p className="text-sm text-gray-500 mt-1">Access all your purchased video content.</p>
-      </div>
+    <div className="max-w-6xl mx-auto space-y-6 pt-6">
+      <p className="text-sm text-gray-500 -mt-2">Access all your purchased video content.</p>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">

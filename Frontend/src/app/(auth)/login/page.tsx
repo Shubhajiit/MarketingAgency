@@ -200,7 +200,7 @@ function LoginPageContent() {
         if (res?.data?.user?.role === 'admin') {
           router.push('/admin/workshops');
         } else {
-          router.push(res?.data?.user?._id ? `/dashboard/${res.data.user._id}` : "/dashboard");
+          router.push('/dashboard');
         }
       } catch (err: any) {
         setError(err.response?.data?.message || "Google login failed. Please try again.");
@@ -366,7 +366,7 @@ function LoginPageContent() {
         if (res?.data?.user?.role === 'admin') {
           router.push('/admin/workshops');
         } else {
-          router.push(res?.data?.user?._id ? `/dashboard/${res.data.user._id}` : "/dashboard");
+          router.push('/dashboard');
         }
       } else {
         // Login the user
@@ -374,7 +374,7 @@ function LoginPageContent() {
         if (res?.data?.user?.role === 'admin') {
           router.push('/admin/workshops');
         } else {
-          router.push(res?.data?.user?._id ? `/dashboard/${res.data.user._id}` : "/dashboard");
+          router.push('/dashboard');
         }
       }
     } catch (err: unknown) {

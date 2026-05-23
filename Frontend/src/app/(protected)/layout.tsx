@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import UserDashboardSidebar from '@/components/UserDashboardComponent/common/UserDashboardSidebar';
 import UserDashboardHeader from '@/components/UserDashboardComponent/common/UserDashboardHeader';
+import UserDashboardSidebar from '@/components/UserDashboardComponent/common/UserDashboardSidebar';
+import MobileBottomNav from '@/components/UserDashboardComponent/common/MobileBottomNav';
 
 export default function ProtectedLayout({
   children,
@@ -13,7 +14,6 @@ export default function ProtectedLayout({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -51,27 +51,18 @@ export default function ProtectedLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex font-sans relative overflow-x-hidden">
-      {/* Backdrop overlay for mobile drawer */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 md:hidden transition-opacity duration-300"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <UserDashboardSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
+      <UserDashboardSidebar />
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 ml-0 flex flex-col min-h-screen min-w-0 transition-all duration-300">
-        {/* Top Navigation */}
-        <UserDashboardHeader onMenuClick={() => setIsSidebarOpen(true)} />
+      <div className="flex-1 md:pl-64 pl-0 flex flex-col min-h-screen min-w-0 transition-all duration-300">
+        {/* Top Navigation - Global top header */}
+        <UserDashboardHeader />
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <main className="flex-1 p-6 md:p-12 pt-0 md:pt-0 pb-20 md:pb-0 overflow-x-hidden">
           {children}
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }
