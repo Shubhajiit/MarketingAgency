@@ -79,13 +79,21 @@ app.get('/api/v1/health', (req, res) => {
 });
 
 // ─── API Routes ─────────────────────────────────────────────
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/workshops', workshopRoutes);
-app.use('/api/v1/bookings', bookingRoutes);
-app.use('/api/v1/payments', paymentRoutes);
-app.use('/api/v1/videos', videoRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/admin', adminRoutes);
+const apiRouter = express.Router();
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/workshops', workshopRoutes);
+apiRouter.use('/bookings', bookingRoutes);
+apiRouter.use('/payments', paymentRoutes);
+apiRouter.use('/videos', videoRoutes);
+apiRouter.use('/users', userRoutes);
+apiRouter.use('/admin', adminRoutes);
+
+// Standard API path
+app.use('/api/v1', apiRouter);
+
+// Fallbacks for frontend misconfigurations (e.g., missing /api/v1 in NEXT_PUBLIC_API_URL)
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // ─── 404 handler ────────────────────────────────────────────
 app.use('*', (req, res) => {
