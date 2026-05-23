@@ -14,8 +14,8 @@ const PORT = parseInt(env.PORT, 10) || 5000;
 
 if (!process.env.VERCEL) {
   const server = app.listen(PORT, () => {
-    logger.info(`🚀 Server running on port ${PORT} in ${env.NODE_ENV} mode`);
-    logger.info(`📋 Health check: http://localhost:${PORT}/api/v1/health`);
+    logger.info(`Server running on port ${PORT} in ${env.NODE_ENV} mode`);
+    logger.info(`Health check: http://localhost:${PORT}/api/v1/health`);
   });
 
   // Graceful shutdown

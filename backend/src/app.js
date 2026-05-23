@@ -91,6 +91,9 @@ apiRouter.use('/admin', adminRoutes);
 // Standard API path
 app.use('/api/v1', apiRouter);
 
+// Fallbacks for Vercel serverless quirks (Vercel strips /api from req.url for files in api/ directory)
+app.use('/v1', apiRouter);
+
 // Fallbacks for frontend misconfigurations (e.g., missing /api/v1 in NEXT_PUBLIC_API_URL)
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
