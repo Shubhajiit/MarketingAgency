@@ -3,6 +3,14 @@ const { env } = require('./env');
 const logger = require('../utils/logger');
 
 const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  if (mongoose.connection.readyState === 2) {
+    logger.info('MongoDB is connecting...');
+    return mongoose.connection;
+  }
+
   try {
     const conn = await mongoose.connect(env.MONGODB_URI, {
       maxPoolSize: 10,

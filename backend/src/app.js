@@ -51,6 +51,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ─── Global rate limiter ────────────────────────────────────
 app.use(rateLimiter({ windowMs: 60000, max: 100, prefix: 'global-rate' }));
 
+// ─── Root Route ─────────────────────────────────────────────
+app.get('/', (req, res) => {
+  ApiResponse.success(res, {
+    name: 'AI Scale API',
+    version: '1.0.0',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+  }, 'Welcome to the AI Scale API');
+});
+
 // ─── Health check ───────────────────────────────────────────
 app.get('/api/v1/health', (req, res) => {
   ApiResponse.success(res, {
