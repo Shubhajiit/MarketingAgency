@@ -27,15 +27,15 @@ export default function AdminLayout({
     if (!isLoading) {
       if (isLoginRoute) {
         if (isAuthenticated && user?.role === 'admin') {
-          router.push('/admin/stats');
+          router.replace('/admin/stats');
         } else if (isAuthenticated && user?.role !== 'admin') {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       } else {
         if (!isAuthenticated) {
-          router.push('/admin');
+          router.replace('/admin');
         } else if (user?.role !== 'admin') {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       }
     }

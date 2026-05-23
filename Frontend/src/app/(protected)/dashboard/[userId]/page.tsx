@@ -22,11 +22,11 @@ export default function DashboardPage() {
 
             <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
               <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
-                <Image 
-                  src="/UserDashBoard/StatsLogo/Total-Course.png" 
-                  alt="Total Course" 
-                  width={36} 
-                  height={36} 
+                <Image
+                  src="/UserDashBoard/StatsLogo/Total-Course.png"
+                  alt="Total Course"
+                  width={36}
+                  height={36}
                   className="object-contain w-8 h-8 sm:w-9 sm:h-9"
                 />
               </div>
@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
             <div className="border-t border-[#a2dcd1] w-full relative z-10 mt-auto"></div>
 
-            <Link href="/my-courses" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2db39b] flex items-center justify-between relative z-10 hover:bg-[#2db39b]/5 transition-colors">
+            <Link href="/all-course" className="px-3 sm:px-5 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-[#2db39b] flex items-center justify-between relative z-10 hover:bg-[#2db39b]/5 transition-colors">
               <span>See Details</span>
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -57,11 +57,11 @@ export default function DashboardPage() {
 
             <div className="p-3 sm:p-5 flex items-center gap-2 sm:gap-4 relative z-10">
               <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
-                <Image 
-                  src="/UserDashBoard/StatsLogo/Total-Workshop.png" 
-                  alt="Total Workshop" 
-                  width={36} 
-                  height={36} 
+                <Image
+                  src="/UserDashBoard/StatsLogo/Total-Workshop.png"
+                  alt="Total Workshop"
+                  width={36}
+                  height={36}
                   className="object-contain w-8 h-8 sm:w-9 sm:h-9"
                 />
               </div>
@@ -146,36 +146,37 @@ export default function DashboardPage() {
       </section>
 
       {/* Recent Enrolled Course */}
-      <section className="bg-white border text-[#0a192f] border-gray-100 rounded-2xl p-6 shadow-sm">
+      <section className="bg-white border text-[#0a192f] border-gray-100 rounded-2xl p-4 sm:p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold">Recent Enrolled Course (12)</h2>
-          <Link href="#" className="bg-[#f2fcf9] text-[#2db39b] font-medium text-sm px-4 py-2 rounded-lg hover:bg-[#e6f9f4] transition-colors">
+          <h2 className="text-lg font-bold">Recent Enrolled Course</h2>
+          <Link href="#" className="bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-normal text-xs sm:text-sm px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors">
             View All
           </Link>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {/* Item 1 */}
           <div className="border border-gray-100 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
-            <div className="bg-[#f6f7fb] h-40 flex items-center justify-center relative p-4">
-              <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <div className="w-4 h-4 bg-red-400 rounded-full" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-gray-800">Nothing great is</p>
-                <p className="text-xs text-gray-500">made alone.</p>
+            <div className="relative h-28 sm:h-36 md:h-40 w-full overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=600"
+                alt="Figma for Beginners"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow-sm z-10">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-400 rounded-full" />
               </div>
             </div>
-            <div className="p-5 flex flex-col flex-1 bg-white">
-              <p className="text-xs font-medium text-gray-500 mb-2">A Course by Richardino Gueva</p>
-              <h3 className="font-bold text-gray-900 mb-6 leading-snug line-clamp-2">Figma for Beginners: Fundamentals of Figma App</h3>
+            <div className="p-3 sm:p-5 flex flex-col flex-1 bg-white">
+              <p className="text-[10px] sm:text-xs font-medium text-gray-500 mb-1.5 sm:mb-2">A Course by Richardino Gueva</p>
+              <h3 className="text-xs sm:text-sm md:text-base font-normal text-gray-900 mb-3 sm:mb-6 leading-snug line-clamp-2">Figma for Beginners: Fundamentals of Figma App</h3>
               <div className="mt-auto">
-                <div className="flex items-center justify-between text-sm font-bold text-[#2db39b] mb-2">
-                  <span>25%</span>
-                  <span className="text-gray-400 font-medium text-xs border border-gray-100 py-[2px] px-2 rounded-full">4/20 lessons</span>
+                <div className="flex items-center justify-between text-xs sm:text-sm font-normal text-slate-600 mb-1.5 sm:mb-2">
+                  <span className="text-[#1e3a8a] font-medium">25%</span>
+                  <span className="text-gray-400 font-medium text-[9px] sm:text-xs border border-gray-100 py-[2px] px-1.5 sm:px-2 rounded-full">4/20 lessons</span>
                 </div>
-                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#2db39b] h-full" style={{ width: '25%' }}></div>
+                <div className="w-full bg-gray-100 h-1 sm:h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-[#1e3a8a] h-full" style={{ width: '25%' }}></div>
                 </div>
               </div>
             </div>
@@ -183,25 +184,26 @@ export default function DashboardPage() {
 
           {/* Item 2 */}
           <div className="border border-gray-100 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
-            <div className="bg-[#f6f7fb] h-40 flex items-center justify-center relative p-4">
-              <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <div className="w-4 h-4 bg-blue-500 rounded-sm" />
-              </div>
-              <div className="w-full h-full border-2 border-dashed border-gray-300 rounded flex gap-2 p-2">
-                <div className="flex-1 bg-gray-200 rounded"></div>
-                <div className="flex-1 bg-gray-200 rounded"></div>
+            <div className="relative h-28 sm:h-36 md:h-40 w-full overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=600"
+                alt="Complete Web Design"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow-sm z-10">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded-sm" />
               </div>
             </div>
-            <div className="p-5 flex flex-col flex-1 bg-white">
-              <p className="text-xs font-medium text-gray-500 mb-2">A Course by Richardino Gueva</p>
-              <h3 className="font-bold text-gray-900 mb-6 leading-snug line-clamp-2">Complete Web Design: from Figma to Webflow</h3>
+            <div className="p-3 sm:p-5 flex flex-col flex-1 bg-white">
+              <p className="text-[10px] sm:text-xs font-medium text-gray-500 mb-1.5 sm:mb-2">A Course by Richardino Gueva</p>
+              <h3 className="text-xs sm:text-sm md:text-base font-normal text-gray-900 mb-3 sm:mb-6 leading-snug line-clamp-2">Complete Web Design: from Figma to Webflow</h3>
               <div className="mt-auto">
-                <div className="flex items-center justify-between text-sm font-bold text-[#2db39b] mb-2">
-                  <span>50%</span>
-                  <span className="text-gray-400 font-medium text-xs border border-gray-100 py-[2px] px-2 rounded-full">10/20 lessons</span>
+                <div className="flex items-center justify-between text-xs sm:text-sm font-normal text-slate-600 mb-1.5 sm:mb-2">
+                  <span className="text-[#1e3a8a] font-medium">50%</span>
+                  <span className="text-gray-400 font-medium text-[9px] sm:text-xs border border-gray-100 py-[2px] px-1.5 sm:px-2 rounded-full">10/20 lessons</span>
                 </div>
-                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#2db39b] h-full" style={{ width: '50%' }}></div>
+                <div className="w-full bg-gray-100 h-1 sm:h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-[#1e3a8a] h-full" style={{ width: '50%' }}></div>
                 </div>
               </div>
             </div>
@@ -209,25 +211,26 @@ export default function DashboardPage() {
 
           {/* Item 3 */}
           <div className="border border-gray-100 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
-            <div className="bg-[#f6f7fb] h-40 flex items-center justify-center relative p-4">
-              <div className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <div className="w-4 h-4 bg-red-400 rounded-full" />
-              </div>
-              <div className="bg-white border shadow-sm p-4 w-full max-w-[80%] text-center rounded">
-                <p className="text-xs font-bold text-gray-800">Become UI Designer in 3 Months</p>
-                <div className="w-16 h-3 bg-[#2db39b] mx-auto mt-2 rounded-sm" />
+            <div className="relative h-28 sm:h-36 md:h-40 w-full overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80&w=600"
+                alt="Figma 2023 Beginner to Pro"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow-sm z-10">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-400 rounded-full" />
               </div>
             </div>
-            <div className="p-5 flex flex-col flex-1 bg-white">
-              <p className="text-xs font-medium text-gray-500 mb-2">A Course by Richardino Gueva</p>
-              <h3 className="font-bold text-gray-900 mb-6 leading-snug line-clamp-2">Figma 2023: The Absolute Beginner to Pro Class in und...</h3>
+            <div className="p-3 sm:p-5 flex flex-col flex-1 bg-white">
+              <p className="text-[10px] sm:text-xs font-medium text-gray-500 mb-1.5 sm:mb-2">A Course by Richardino Gueva</p>
+              <h3 className="text-xs sm:text-sm md:text-base font-normal text-gray-900 mb-3 sm:mb-6 leading-snug line-clamp-2">Figma 2023: The Absolute Beginner to Pro Class in und...</h3>
               <div className="mt-auto">
-                <div className="flex items-center justify-between text-sm font-bold text-[#2db39b] mb-2">
-                  <span>89%</span>
-                  <span className="text-gray-400 font-medium text-xs border border-gray-100 py-[2px] px-2 rounded-full">29/30 lessons</span>
+                <div className="flex items-center justify-between text-xs sm:text-sm font-normal text-slate-600 mb-1.5 sm:mb-2">
+                  <span className="text-[#1e3a8a] font-medium">89%</span>
+                  <span className="text-gray-400 font-medium text-[9px] sm:text-xs border border-gray-100 py-[2px] px-1.5 sm:px-2 rounded-full">29/30 lessons</span>
                 </div>
-                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#2db39b] h-full" style={{ width: '89%' }}></div>
+                <div className="w-full bg-gray-100 h-1 sm:h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-[#1e3a8a] h-full" style={{ width: '89%' }}></div>
                 </div>
               </div>
             </div>
@@ -235,29 +238,26 @@ export default function DashboardPage() {
 
           {/* Item 4 */}
           <div className="border border-gray-100 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
-            <div className="bg-[#f6f7fb] h-40 flex items-center justify-center relative p-4">
-              <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <div className="w-4 h-4 bg-black rounded" />
-              </div>
-              <div className="bg-white border rounded shadow-sm p-3 w-full h-full flex flex-col items-center justify-center">
-                 <div className="flex gap-1 mb-2">
-                   <div className="w-3 h-6 bg-gray-800 rounded-sm"></div>
-                   <div className="w-3 h-6 bg-gray-800 rounded-sm"></div>
-                   <div className="w-3 h-6 bg-gray-800 rounded-sm"></div>
-                 </div>
-                 <p className="text-[10px] font-bold">Notion for everyone</p>
+            <div className="relative h-28 sm:h-36 md:h-40 w-full overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=600"
+                alt="Managing Project with Notion"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow-sm z-10">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded" />
               </div>
             </div>
-            <div className="p-5 flex flex-col flex-1 bg-white">
-              <p className="text-xs font-medium text-gray-500 mb-2">A Course by Richardino Gueva</p>
-              <h3 className="font-bold text-gray-900 mb-6 leading-snug line-clamp-2">Mastering Managing Project with Notion</h3>
+            <div className="p-3 sm:p-5 flex flex-col flex-1 bg-white">
+              <p className="text-[10px] sm:text-xs font-medium text-gray-500 mb-1.5 sm:mb-2">A Course by Richardino Gueva</p>
+              <h3 className="text-xs sm:text-sm md:text-base font-normal text-gray-900 mb-3 sm:mb-6 leading-snug line-clamp-2">Mastering Managing Project with Notion</h3>
               <div className="mt-auto">
-                <div className="flex items-center justify-between text-sm font-bold text-[#2db39b] mb-2">
-                  <span>80%</span>
-                  <span className="text-gray-400 font-medium text-xs border border-gray-100 py-[2px] px-2 rounded-full">8/10 lessons</span>
+                <div className="flex items-center justify-between text-xs sm:text-sm font-normal text-slate-600 mb-1.5 sm:mb-2">
+                  <span className="text-[#1e3a8a] font-medium">80%</span>
+                  <span className="text-gray-400 font-medium text-[9px] sm:text-xs border border-gray-100 py-[2px] px-1.5 sm:px-2 rounded-full">8/10 lessons</span>
                 </div>
-                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#2db39b] h-full" style={{ width: '80%' }}></div>
+                <div className="w-full bg-gray-100 h-1 sm:h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-[#1e3a8a] h-full" style={{ width: '80%' }}></div>
                 </div>
               </div>
             </div>
@@ -268,117 +268,121 @@ export default function DashboardPage() {
       {/* Recent Enrolled Webinar */}
       <section className="bg-white border text-[#0a192f] border-gray-100 rounded-2xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold">Recent Enrolled Webinar (8)</h2>
-          <Link href="#" className="bg-[#f2fcf9] text-[#2db39b] font-medium text-sm px-4 py-2 rounded-lg hover:bg-[#e6f9f4] transition-colors">
+          <h2 className="text-lg font-bold">Recent Enrolled Webinar</h2>
+          <Link href="#" className="bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-normal text-xs sm:text-sm px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors">
             View All
           </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Webinar 1 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#eaf4ff] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
-                <p className="text-[8px] font-bold text-blue-900 text-center leading-tight mb-2">Getting Started with Wireframing</p>
-                <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
-              </div>
+          <div className="border border-gray-100 rounded-xl p-3 sm:p-4 flex flex-row items-center justify-between gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <img
+                src="https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=120&h=120&q=80"
+                alt="Getting Started with Wireframing"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0"
+              />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#8b5cf6] mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
-                <h3 className="font-bold text-gray-900 mb-1">Getting started design with Wireframing</h3>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                <p className="text-[10px] sm:text-xs font-normal text-[#0a192f] mb-0.5 sm:mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
+                <h3 className="font-bold text-xs sm:text-base text-gray-900 mb-0.5 sm:mb-1 truncate">Getting started design with Wireframing</h3>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[9px] sm:text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 16, 2022
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     09.00 - 12.00
                   </span>
                 </div>
               </div>
             </div>
-            <button className="bg-[#2db39b] hover:bg-[#259b86] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap self-start sm:self-auto">
+            <button className="bg-[#1e3a8a] hover:bg-[#1e40af] text-white px-3 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-normal transition-colors whitespace-nowrap shrink-0">
               Join Now
             </button>
           </div>
 
           {/* Webinar 2 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#ebf7d3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
-                <p className="text-[8px] font-bold text-green-900 text-center leading-tight mb-2 max-w-[40px]">UI Designer Tasks and Functions</p>
-                <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
-              </div>
+          <div className="border border-gray-100 rounded-xl p-3 sm:p-4 flex flex-row items-center justify-between gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <img
+                src="https://images.unsplash.com/photo-1541462608141-2ff030a64e43?auto=format&fit=crop&w=120&h=120&q=80"
+                alt="UI Designer Tasks and Functions"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0"
+              />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#2db39b] mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
-                <h3 className="font-bold text-gray-900 mb-1">UI Designer Tasks and Functions</h3>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                <p className="text-[10px] sm:text-xs font-normal text-[#0a192f] mb-0.5 sm:mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
+                <h3 className="font-bold text-xs sm:text-base text-gray-900 mb-0.5 sm:mb-1 truncate">UI Designer Tasks and Functions</h3>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[9px] sm:text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 20, 2022
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     09.00 - 12.00
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-white border border-[#1e3a8a]/20 text-[#1e3a8a] rounded-lg text-[10px] sm:text-sm font-normal tracking-wider shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>
 
           {/* Webinar 3 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#f6f7fb] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
-                <p className="text-[8px] font-bold text-gray-900 text-center leading-tight mb-2 max-w-[40px]">Starting Career as an UX Writer</p>
-                <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
-              </div>
+          <div className="border border-gray-100 rounded-xl p-3 sm:p-4 flex flex-row items-center justify-between gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <img
+                src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=120&h=120&q=80"
+                alt="Starting Career as an UX Writer"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0"
+              />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#8b5cf6] mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
-                <h3 className="font-bold text-gray-900 mb-1">Starting Career as an UX Writer</h3>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                <p className="text-[10px] sm:text-xs font-normal text-[#0a192f] mb-0.5 sm:mb-1">UX Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
+                <h3 className="font-bold text-xs sm:text-base text-gray-900 mb-0.5 sm:mb-1 truncate">Starting Career as an UX Writer</h3>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[9px] sm:text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 19, 2022
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     09.00 - 12.00
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-white border border-[#1e3a8a]/20 text-[#1e3a8a] rounded-lg text-[10px] sm:text-sm font-normal tracking-wider shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>
 
           {/* Webinar 4 */}
-          <div className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#e8f6f3] rounded-lg overflow-hidden flex flex-col items-center justify-center p-2 relative shrink-0">
-                <p className="text-[8px] font-bold text-green-900 text-center leading-tight mb-2 max-w-[40px]">How to become UI Designer</p>
-                <div className="w-5 h-5 bg-gray-300 rounded-full absolute bottom-1"></div>
-              </div>
+          <div className="border border-gray-100 rounded-xl p-3 sm:p-4 flex flex-row items-center justify-between gap-2.5 sm:gap-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <img
+                src="https://images.unsplash.com/photo-1561070791-26c113006238?auto=format&fit=crop&w=120&h=120&q=80"
+                alt="How to become UI Designer"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0"
+              />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#2db39b] mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
-                <h3 className="font-bold text-gray-900 mb-1">How to become UI Designer</h3>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                <p className="text-[10px] sm:text-xs font-normal text-[#0a192f] mb-0.5 sm:mb-1">UI Design <span className="text-gray-400 font-medium mx-1">• By Richardino Gueva</span></p>
+                <h3 className="font-bold text-xs sm:text-base text-gray-900 mb-0.5 sm:mb-1 truncate">How to become UI Designer</h3>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[9px] sm:text-xs text-gray-500 font-medium">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Dec 22, 2022
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     09.00 - 12.00
                   </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 px-3 py-2 bg-[#0a192f] text-white rounded-lg text-sm font-bold tracking-wider self-start sm:self-auto shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-white border border-[#1e3a8a]/20 text-[#1e3a8a] rounded-lg text-[10px] sm:text-sm font-normal tracking-wider shrink-0">
               <span>12</span>:<span>03</span>:<span>49</span>
             </div>
           </div>

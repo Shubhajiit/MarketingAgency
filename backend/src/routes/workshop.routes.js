@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { listWorkshops, getWorkshop, createWorkshop, updateWorkshop, deleteWorkshop } = require('../controllers/workshop.controller');
+const { listWorkshops, getWorkshop, getWorkshopBySlug, createWorkshop, updateWorkshop, deleteWorkshop } = require('../controllers/workshop.controller');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/requireRole');
 const { cacheMiddleware } = require('../middleware/cache');
 
 // Public routes
 router.get('/', cacheMiddleware('workshop:list', 300), listWorkshops);
+router.get('/slug/:slug', cacheMiddleware('workshop:slug', 600, (req) => req.params.slug), getWorkshopBySlug);
 router.get('/:id', cacheMiddleware('workshop', 600, (req) => req.params.id), getWorkshop);
 
 // Admin routes

@@ -17,7 +17,7 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
   const pathname = usePathname();
 
   const isDashboardActive = pathname.startsWith('/dashboard');
-  const isCoursesActive = pathname.startsWith('/my-courses');
+  const isCoursesActive = pathname.startsWith('/all-course');
   const isWorkshopsActive = pathname.startsWith('/workshops');
 
   useEffect(() => {
@@ -27,9 +27,8 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
   }, [pathname]);
 
   return (
-    <aside className={`w-64 bg-[#0a192f] text-white flex flex-col fixed h-full z-30 transition-transform duration-300 ${
-      isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-    }`}>
+    <aside className={`w-64 bg-[#0a192f] text-white flex flex-col fixed h-full z-30 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
       {/* Logo */}
       <div className="px-6 py-6 flex items-center justify-between gap-2">
         <Link href="/" className="flex items-center">
@@ -73,11 +72,10 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
           <div className="space-y-1">
             <Link
               href={user?._id ? `/dashboard/${user._id}` : '/dashboard'}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                isDashboardActive
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${isDashboardActive
                   ? 'bg-[#2db39b] text-white'
                   : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -85,12 +83,11 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
               My Progress
             </Link>
             <Link
-              href="/my-courses"
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                isCoursesActive
+              href="/all-course"
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${isCoursesActive
                   ? 'bg-[#2db39b] text-white'
                   : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -99,11 +96,10 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
             </Link>
             <Link
               href="/workshops"
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                isWorkshopsActive
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${isWorkshopsActive
                   ? 'bg-[#2db39b] text-white'
                   : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -114,24 +110,27 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
           </div>
         </div>
 
-        {/* Labels */}
+        {/* Categories */}
         <div className="px-4">
           <div className="flex items-center justify-between px-2 mb-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Labels</p>
-            <button className="text-gray-400 hover:text-white">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Categories</p>
           </div>
           <div className="space-y-1">
-            <Link href="/my-courses?label=ui-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
-              <div className="w-2 h-2 rounded-full bg-[#009ee3]" />
-              UI Design
+            <Link href="/all-course?category=popular" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+              <div className="w-2 h-2 rounded-full bg-[#00c58d]" />
+              Popular
             </Link>
-            <Link href="/my-courses?label=ux-design" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+            <Link href="/all-course?category=pro-specialist" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+              <div className="w-2 h-2 rounded-full bg-[#e52d6a]" />
+              Pro & Specialist
+            </Link>
+            <Link href="/all-course?category=short" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              Short Courses
+            </Link>
+            <Link href="/all-course?category=advanced" className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg text-sm transition-colors">
               <div className="w-2 h-2 rounded-full bg-purple-500" />
-              UX Design
+              Advanced
             </Link>
           </div>
         </div>
@@ -155,7 +154,7 @@ export default function UserDashboardSidebar({ isOpen, onClose }: UserDashboardS
         <button
           onClick={async () => {
             await logout();
-            router.push('/login');
+            router.replace('/login');
           }}
           className="w-full flex items-center gap-3 px-4 py-2 mt-4 text-gray-300 hover:text-red-400 hover:bg-white/5 rounded-lg text-sm transition-colors"
         >

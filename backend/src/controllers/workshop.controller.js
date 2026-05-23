@@ -7,12 +7,52 @@ const { invalidateCache } = require('../middleware/cache');
 // Validation schemas
 const createWorkshopSchema = z.object({
   title: z.string().min(1).max(200),
+  subtitle: z.string().max(500).optional().default(''),
   description: z.string().min(1).max(5000),
   instructor: z.string().min(1),
   price: z.number().min(0),
   currency: z.enum(['INR', 'USD', 'EUR', 'GBP']).default('INR'),
   thumbnail: z.string().optional().default(''),
   tags: z.array(z.string()).optional().default([]),
+
+  // Detail page fields
+  batchNumber: z.string().optional().default(''),
+  startDate: z.string().optional().nullable().transform((v) => (v ? new Date(v) : null)),
+  duration: z.string().optional().default(''),
+  durationDetail: z.string().optional().default(''),
+  fee: z.string().optional().default(''),
+  feeNote: z.string().optional().default(''),
+  eligibility: z.string().optional().default(''),
+  eligibilityDetail: z.string().optional().default(''),
+  applicationDeadline: z.string().optional().nullable().transform((v) => (v ? new Date(v) : null)),
+  heroImage: z.string().optional().default(''),
+  brochureUrl: z.string().optional().default(''),
+
+  // Rich content arrays
+  highlights: z.array(z.object({
+    title: z.string().min(1),
+    description: z.string().optional().default(''),
+  })).optional().default([]),
+
+  modules: z.array(z.object({
+    title: z.string().min(1),
+    content: z.array(z.string()).optional().default([]),
+  })).optional().default([]),
+
+  targetAudience: z.array(z.object({
+    title: z.string().min(1),
+    description: z.string().optional().default(''),
+  })).optional().default([]),
+
+  learningOutcomes: z.array(z.string()).optional().default([]),
+
+  experts: z.array(z.object({
+    name: z.string().min(1),
+    role: z.string().optional().default(''),
+    image: z.string().optional().default(''),
+  })).optional().default([]),
+
+  // Slots
   slots: z.array(z.object({
     date: z.string().transform((v) => new Date(v)),
     startTime: z.string(),
@@ -51,9 +91,23 @@ const listWorkshops = asyncHandler(async (req, res) => {
   });
 });
 
-// ─── Get Workshop Detail ────────────────────────────────────
+// ─── Get Workshop Detail by ID ──────────────────────────────
 const getWorkshop = asyncHandler(async (req, res) => {
   const workshop = await Workshop.findById(req.params.id).lean();
+
+  if (!workshop) {
+    return ApiResponse.notFound(res, 'Workshop not found');
+  }
+
+  return ApiResponse.success(res, { workshop });
+});
+
+// ─── Get Workshop Detail by Slug ────────────────────────────
+const getWorkshopBySlug = asyncHandler(async (req, res) => {
+  const workshop = await Workshop.findOne({
+    slug: req.params.slug,
+    isActive: true,
+  }).lean();
 
   if (!workshop) {
     return ApiResponse.notFound(res, 'Workshop not found');
@@ -76,15 +130,15 @@ const createWorkshop = asyncHandler(async (req, res) => {
 
 // ─── Update Workshop (Admin) ────────────────────────────────
 const updateWorkshop = asyncHandler(async (req, res) => {
-  const workshop = await Workshop.findByIdAndUpdate(
-    req.params.id,
-    { $set: req.body },
-    { new: true, runValidators: true }
-  );
+  const workshop = await Workshop.findById(req.params.id);
 
   if (!workshop) {
     return ApiResponse.notFound(res, 'Workshop not found');
   }
+
+  // Update fields
+  Object.assign(workshop, req.body);
+  await workshop.save(); // triggers pre-save hook for slug regeneration if title changed
 
   await invalidateCache(`workshop:${req.params.id}`, 'workshop:list');
 
@@ -111,6 +165,7 @@ const deleteWorkshop = asyncHandler(async (req, res) => {
 module.exports = {
   listWorkshops,
   getWorkshop,
+  getWorkshopBySlug,
   createWorkshop,
   updateWorkshop,
   deleteWorkshop,

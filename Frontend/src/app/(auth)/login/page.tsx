@@ -393,7 +393,7 @@ function LoginPageContent() {
     setIsSignUp(signUpMode);
     // Update the URL without a full page reload so it stays consistent
     const newUrl = signUpMode ? "/login?signup=true" : "/login";
-    router.push(newUrl, { scroll: false });
+    router.replace(newUrl, { scroll: false });
   };
 
   return (
@@ -844,10 +844,10 @@ function LoginPageContent() {
           </div>
 
           {/* Social Login Grid */}
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="flex justify-center gap-4 mt-4 sm:grid sm:grid-cols-2 sm:gap-3">
             <Button 
               variant="outline" 
-              className="h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
+              className="w-12 sm:w-full h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full p-0 sm:px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
               type="button"
               onClick={() => handleGoogleLogin()}
               disabled={isLoading}
@@ -871,19 +871,19 @@ function LoginPageContent() {
                   d="M5.266 14.235A7.045 7.045 0 0 1 4.909 12c0-.79.136-1.545.357-2.235L1.34 6.57A11.968 11.968 0 0 0 0 12c0 1.927.455 3.745 1.264 5.373l4.002-3.138z"
                 />
               </svg>
-              <span className="truncate">Continue with Google</span>
+              <span className="hidden sm:inline truncate">Continue with Google</span>
             </Button>
 
             <Button 
               variant="outline" 
-              className="h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
+              className="w-12 sm:w-full h-12 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-full p-0 sm:px-2 text-xs md:text-sm font-medium flex items-center justify-center gap-2 shadow-none transition-colors"
               type="button"
             >
               {/* Facebook SVG logo */}
               <svg className="w-4 h-4 shrink-0 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
-              <span className="truncate">Continue with Facebook</span>
+              <span className="hidden sm:inline truncate">Continue with Facebook</span>
             </Button>
           </div>
 

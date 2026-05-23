@@ -259,11 +259,11 @@ export default function WorkshopsPage() {
   const filteredWorkshops = selectedCategory === 'All Categories'
     ? WORKSHOPS_DATA
     : WORKSHOPS_DATA.filter(w => {
-        if (selectedCategory === 'Business') {
-          return w.category === 'Business' || w.category === 'Finance & Accounting';
-        }
-        return w.category.toLowerCase().includes(selectedCategory.toLowerCase());
-      });
+      if (selectedCategory === 'Business') {
+        return w.category === 'Business' || w.category === 'Finance & Accounting';
+      }
+      return w.category.toLowerCase().includes(selectedCategory.toLowerCase());
+    });
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-16 w-full overflow-hidden">
@@ -276,11 +276,10 @@ export default function WorkshopsPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`whitespace-nowrap px-5 py-2.5 text-xs font-semibold rounded-lg border transition-all duration-200 cursor-pointer ${
-                  isActive
+                className={`whitespace-nowrap px-5 py-2.5 text-xs font-semibold rounded-lg border transition-all duration-200 cursor-pointer ${isActive
                     ? 'bg-[#0a192f] text-white border-[#0a192f] shadow-sm'
                     : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {category}
               </button>

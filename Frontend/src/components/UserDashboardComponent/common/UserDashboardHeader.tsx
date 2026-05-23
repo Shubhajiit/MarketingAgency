@@ -15,9 +15,9 @@ export default function UserDashboardHeader({ onMenuClick }: UserDashboardHeader
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchVal.trim()) {
-      router.push(`/my-courses?search=${encodeURIComponent(searchVal.trim())}`);
+      router.push(`/all-course?search=${encodeURIComponent(searchVal.trim())}`);
     } else {
-      router.push('/my-courses');
+      router.push('/all-course');
     }
   };
 

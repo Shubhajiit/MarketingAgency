@@ -52,17 +52,13 @@ export default function Sidebar() {
               <LayoutDashboard size={18} />
               <span>Dashboards</span>
             </Link>
-            <button disabled className="w-full text-left cursor-not-allowed opacity-60 flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium text-sm text-[#5f6368]">
-              <Users size={18} />
-              <span>Teachers</span>
-            </button>
             <Link href="/admin/users" className={isActive('/admin/users') ? activeClass : inactiveClass}>
               <Users size={18} />
               <span>Students</span>
             </Link>
             <Link href="/admin/workshops" className={isActive('/admin/workshops') ? activeClass : inactiveClass}>
               <BookOpen size={18} />
-              <span>Course</span>
+              <span>Workshops</span>
             </Link>
             <Link href="/admin/videos" className={isActive('/admin/videos') ? activeClass : inactiveClass}>
               <Video size={18} />
