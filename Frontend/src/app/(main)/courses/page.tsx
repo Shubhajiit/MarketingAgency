@@ -467,15 +467,15 @@ Email: contact@aiscale.com
     <div className="flex-1 flex flex-col bg-white">
 
       {/* Main Page Area */}
-      <main className="flex-1 bg-slate-50/50 py-16 px-4 md:px-36">
+      <main className="flex-1 bg-slate-50/50 py-8 md:py-16 px-4 md:px-36">
         <div className="max-w-6xl mx-auto flex flex-col items-center">
           {/* Header */}
-          <h1 className="text-3xl md:text-[38px] font-black text-[#1e2245] tracking-tight text-center mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-[38px] font-semibold text-[#1e2245] tracking-tight text-center mb-5 md:mb-8">
             Explore Our Certification Courses
           </h1>
 
           {/* Interactive Navigation Tabs */}
-          <div className="w-full border-b border-slate-100 flex justify-center mb-10 overflow-x-auto whitespace-nowrap scrollbar-none">
+          <div className="w-full border-b border-slate-100 flex justify-center mb-10 overflow-x-auto whitespace-nowrap scrollbar-none pb-[2px]">
             <nav className="flex gap-8 md:gap-12 px-4">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -483,9 +483,9 @@ Email: contact@aiscale.com
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-3 text-[13px] md:text-sm font-bold tracking-wide transition-all duration-200 border-b-3 -mb-[1.5px] cursor-pointer select-none ${isActive
-                      ? "text-[#1e2245] border-[#00c58d]"
-                      : "text-slate-400 hover:text-slate-600 border-transparent"
+                    className={`py-2 text-[13px] md:text-sm tracking-wide transition-all duration-200 border-b-2 -mb-[2px] cursor-pointer select-none ${isActive
+                      ? "text-[#1e2245] border-[#00c58d] font-semibold"
+                      : "text-slate-400 hover:text-slate-600 border-transparent font-normal"
                       }`}
                   >
                     {tab.label}
@@ -549,11 +549,10 @@ Email: contact@aiscale.com
                     placeholder="First Name"
                     value={brochureForm.firstName}
                     onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${
-                      brochureErrors.firstName
-                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-300 focus:border-gray-900"
-                    }`}
+                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.firstName
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-gray-300 focus:border-gray-900"
+                      }`}
                   />
                   {brochureErrors.firstName && (
                     <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
@@ -568,11 +567,10 @@ Email: contact@aiscale.com
                     placeholder="Last Name"
                     value={brochureForm.lastName}
                     onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${
-                      brochureErrors.lastName
-                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-300 focus:border-gray-900"
-                    }`}
+                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.lastName
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-gray-300 focus:border-gray-900"
+                      }`}
                   />
                   {brochureErrors.lastName && (
                     <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
@@ -590,11 +588,10 @@ Email: contact@aiscale.com
                   placeholder="Email"
                   value={brochureForm.email}
                   onChange={handleBrochureInputChange}
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${
-                    brochureErrors.email
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                  }`}
+                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.email
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-gray-300 focus:border-gray-900"
+                    }`}
                 />
                 {brochureErrors.email && (
                   <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
@@ -652,11 +649,10 @@ Email: contact@aiscale.com
                       placeholder="Phone"
                       value={brochureForm.phone}
                       onChange={handleBrochureInputChange}
-                      className={`w-full text-sm pl-12 pr-3 py-2 border rounded-r focus:outline-none transition-colors ${
-                        brochureErrors.phone
-                          ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
-                          : "border-gray-300 focus:border-gray-900 border-l"
-                      }`}
+                      className={`w-full text-sm pl-12 pr-3 py-2 border rounded-r focus:outline-none transition-colors ${brochureErrors.phone
+                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
+                        : "border-gray-300 focus:border-gray-900 border-l"
+                        }`}
                     />
                   </div>
                 </div>
@@ -676,11 +672,10 @@ Email: contact@aiscale.com
                     placeholder="Job Title"
                     value={brochureForm.jobTitle}
                     onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${
-                      brochureErrors.jobTitle
-                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-300 focus:border-gray-900"
-                    }`}
+                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.jobTitle
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-gray-300 focus:border-gray-900"
+                      }`}
                   />
                   {brochureErrors.jobTitle && (
                     <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
@@ -693,11 +688,10 @@ Email: contact@aiscale.com
                     name="workExperience"
                     value={brochureForm.workExperience}
                     onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors appearance-none bg-white pr-8 ${
-                      brochureErrors.workExperience
-                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-300 focus:border-gray-900"
-                    }`}
+                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors appearance-none bg-white pr-8 ${brochureErrors.workExperience
+                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-gray-300 focus:border-gray-900"
+                      }`}
                   >
                     <option value="" disabled hidden>
                       Work Experience
@@ -728,11 +722,10 @@ Email: contact@aiscale.com
                   placeholder="City"
                   value={brochureForm.city}
                   onChange={handleBrochureInputChange}
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${
-                    brochureErrors.city
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                  }`}
+                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.city
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    : "border-gray-300 focus:border-gray-900"
+                    }`}
                 />
                 {brochureErrors.city && (
                   <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
@@ -905,11 +898,10 @@ Email: contact@aiscale.com
                           placeholder="Your Name"
                           value={enrollForm.name}
                           onChange={handleEnrollInputChange}
-                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${
-                            enrollErrors.name
-                              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                              : "border-gray-200 focus:border-[#009ee3]"
-                          }`}
+                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${enrollErrors.name
+                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-gray-200 focus:border-[#009ee3]"
+                            }`}
                         />
                         {enrollErrors.name && (
                           <span className="text-[9px] text-red-600 font-semibold mt-1">⚠️ Name is required</span>
@@ -923,11 +915,10 @@ Email: contact@aiscale.com
                           placeholder="Your Email"
                           value={enrollForm.email}
                           onChange={handleEnrollInputChange}
-                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${
-                            enrollErrors.email
-                              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                              : "border-gray-200 focus:border-[#009ee3]"
-                          }`}
+                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${enrollErrors.email
+                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-gray-200 focus:border-[#009ee3]"
+                            }`}
                         />
                         {enrollErrors.email && (
                           <span className="text-[9px] text-red-600 font-semibold mt-1">⚠️ Valid email is required</span>
@@ -945,11 +936,10 @@ Email: contact@aiscale.com
                             placeholder="Phone Number"
                             value={enrollForm.phone}
                             onChange={handleEnrollInputChange}
-                            className={`w-full text-xs px-3 py-2 border rounded-r focus:outline-none transition-colors ${
-                              enrollErrors.phone
-                                ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
-                                : "border-gray-200 focus:border-[#009ee3] border-l"
-                            }`}
+                            className={`w-full text-xs px-3 py-2 border rounded-r focus:outline-none transition-colors ${enrollErrors.phone
+                              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
+                              : "border-gray-200 focus:border-[#009ee3] border-l"
+                              }`}
                           />
                         </div>
                         {enrollErrors.phone && (

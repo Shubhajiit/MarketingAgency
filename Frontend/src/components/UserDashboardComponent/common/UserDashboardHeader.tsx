@@ -12,7 +12,7 @@ export default function UserDashboardHeader({ className }: UserDashboardHeaderPr
 
 	const getTitle = (path: string) => {
 		if (path.includes('/activecourse')) return 'Active Courses';
-		if (path.includes('/workshops')) return 'Webinars';
+		if (path.includes('/workshops')) return 'Workshops';
 		if (path.includes('/videos')) return 'AI Avatar';
 		if (path.includes('/bookings')) return 'Bookmarks';
 		if (path.includes('/community')) return 'Community';

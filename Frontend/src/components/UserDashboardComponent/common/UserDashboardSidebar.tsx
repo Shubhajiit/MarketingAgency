@@ -17,7 +17,7 @@ import {
 
 const libraryItems = [
 	{ label: 'Courses', href: '/dashboard/activecourse' },
-	{ label: 'Webinars', href: '/dashboard/workshops' }
+	{ label: 'Workshops', href: '/dashboard/workshops' }
 ];
 
 const standaloneItems = [

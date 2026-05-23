@@ -220,8 +220,8 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
 
   // Fallback / original styling if needed
   return (
-    <div className="bg-white border border-slate-100 rounded-2xl flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group">
-      <div className={`relative h-[155px] w-full bg-gradient-to-tr ${course.bgGradient} shrink-0`}>
+    <div className="bg-white border border-slate-100 rounded-xl md:rounded-2xl flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group">
+      <div className={`relative h-[100px] md:h-[155px] w-full bg-gradient-to-tr ${course.bgGradient} shrink-0`}>
         {course.circlesColor && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
         )}
@@ -234,49 +234,51 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           />
         )}
 
-        <div className="absolute top-0 left-0 bg-[#0c102a] text-white text-[9px] font-extrabold px-3 py-1.5 uppercase rounded-br-lg tracking-wider z-20 select-none shadow-sm">
+        <div className="absolute top-0 left-0 bg-[#0c102a] text-white text-[7px] md:text-[9px] font-extrabold px-1.5 md:px-3 py-1 md:py-1.5 uppercase rounded-br-lg tracking-wider z-20 select-none shadow-sm">
           {course.tag}
         </div>
 
-        <div className="absolute bottom-[-18px] right-5 w-12 h-12 bg-[#a3ff12] text-[#0c102a] rounded-full flex flex-col items-center justify-center border-2 border-white shadow-md z-20">
-          <span className="text-[13px] font-black leading-none">{course.discount}</span>
-          <span className="text-[8px] font-extrabold leading-none mt-0.5">OFF</span>
+        <div className="absolute bottom-[-14px] md:bottom-[-18px] right-2 md:right-5 w-8 h-8 md:w-12 md:h-12 bg-[#a3ff12] text-[#0c102a] rounded-full flex flex-col items-center justify-center border border-white shadow-md z-20">
+          <span className="text-[9px] md:text-[13px] font-black leading-none">{course.discount}</span>
+          <span className="text-[6px] md:text-[8px] font-extrabold leading-none mt-0.5">OFF</span>
         </div>
       </div>
 
-      <div className="p-5 pt-7 flex flex-col items-center text-center flex-1 justify-between">
+      <div className="p-3 pt-5 md:p-5 md:pt-7 flex flex-col items-center text-center flex-1 justify-between">
         <div className="w-full flex flex-col items-center">
-          <h3 className="text-[15px] font-extrabold text-[#0c102a] tracking-tight leading-snug min-h-[44px] flex items-center justify-center px-1">
+          <h3 className="text-[11px] sm:text-xs md:text-[15px] font-extrabold text-[#0c102a] tracking-tight leading-snug min-h-[32px] md:min-h-[44px] flex items-center justify-center px-0.5">
             {course.title}
           </h3>
 
-          <p className="text-[11px] text-slate-500 font-semibold tracking-wide mt-2">
+          <p className="text-[9px] md:text-[11px] text-slate-500 font-semibold tracking-wide mt-1 md:mt-2">
             {course.hours}
           </p>
 
-          <div className="flex items-center justify-center gap-3.5 mt-4">
-            <span className="text-[20px] font-semibold text-[#0c102a]">
-              ₹{course.price}
-            </span>
-            <span className="text-slate-400 text-xs line-through font-semibold">
-              ₹{course.originalPrice}
-            </span>
-            <span className="bg-[#a3ff12] text-[#0c102a] text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 md:gap-3 mt-3 w-full">
+            <div className="flex items-center gap-1.5 justify-center">
+              <span className="text-xs sm:text-sm md:text-[20px] font-semibold text-[#0c102a]">
+                ₹{course.price}
+              </span>
+              <span className="text-slate-400 text-[10px] sm:text-xs line-through font-semibold">
+                ₹{course.originalPrice}
+              </span>
+            </div>
+            <span className="bg-[#a3ff12] text-[#0c102a] text-[8px] md:text-[9px] font-semibold px-1 py-0.5 rounded uppercase tracking-wider scale-90 sm:scale-100 whitespace-nowrap">
               {course.discount} OFF
             </span>
           </div>
         </div>
 
-        <div className="w-full flex flex-col gap-1.5 mt-4.5">
+        <div className="w-full flex flex-col gap-1 mt-3 md:mt-4.5">
           <button
             onClick={() => onPrimaryClick && onPrimaryClick(course)}
-            className="w-full py-2 bg-white border border-[#0c102a] text-[#0c102a] hover:bg-slate-50 font-extrabold text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs"
+            className="w-full py-1.5 md:py-2 bg-white border border-[#0c102a] text-[#0c102a] hover:bg-slate-50 font-extrabold text-[9px] sm:text-[10px] md:text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap overflow-hidden text-ellipsis"
           >
             {course.primaryCtaText}
           </button>
           <button
             onClick={() => onSecondaryClick && onSecondaryClick(course)}
-            className="w-full py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
+            className="w-full py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[9px] sm:text-[10px] md:text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
           >
             {course.secondaryCtaText}
           </button>

@@ -292,7 +292,7 @@ Email: contact@aiscale.com
   const checkmarkItems = workshop.highlights?.slice(0, 4) || [];
 
   return (
-    <div className={`flex-1 flex flex-col bg-white transition-all duration-300 ${showStickyBar ? 'pb-[76px] sm:pb-[80px]' : ''}`}>
+    <div className={`flex-1 flex flex-col bg-white transition-all duration-300 ${showStickyBar ? 'pb-[130px] sm:pb-[90px]' : ''}`}>
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
         <section
@@ -674,24 +674,24 @@ Email: contact@aiscale.com
         }}
       >
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 via-green-500 to-teal-400" />
-        <div className="max-w-7xl mx-auto px-4 md:px-16 py-3.5 flex flex-row items-center justify-between gap-3 md:gap-6">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-16 py-4 md:py-5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 md:gap-6">
+          <div className="flex items-center justify-center sm:justify-start gap-2 md:gap-3 w-full sm:w-auto">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 items-center justify-center text-emerald-600 shrink-0 shadow-sm hidden sm:flex">
               <svg className="w-4.5 h-4.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-              <span className="text-[11px] md:text-sm font-semibold text-emerald-800 tracking-tight">Free Access Ends in</span>
-              <span className="text-xs md:text-sm font-bold text-amber-500 tracking-wide bg-amber-50 px-2 py-0.5 rounded border border-amber-100/60 shadow-sm whitespace-nowrap">
+            <div className="flex flex-row items-center gap-2">
+              <span className="text-[13px] md:text-sm font-semibold text-emerald-800 tracking-tight">Free Access Ends in</span>
+              <span className="text-[13px] md:text-sm font-bold text-amber-500 tracking-wide bg-amber-50 px-2 py-0.5 rounded border border-amber-100/60 shadow-sm whitespace-nowrap">
                 {formattedTime.mins} mins {formattedTime.secs} secs
               </span>
             </div>
           </div>
           <button onClick={handleScrollToBook}
-            className="relative group overflow-hidden bg-[#007f00] hover:bg-[#006600] active:scale-[0.98] text-white text-[11px] md:text-sm font-bold py-2.5 px-4 md:px-7 rounded shadow-[0_4px_14px_rgba(0,127,0,0.25)] hover:shadow-[0_6px_20px_rgba(0,127,0,0.35)] transition-all duration-200 shrink-0">
+            className="relative group overflow-hidden bg-[#007f00] hover:bg-[#006600] active:scale-[0.98] text-white text-[13px] md:text-sm font-bold py-3 px-4 md:px-7 rounded shadow-[0_4px_14px_rgba(0,127,0,0.25)] hover:shadow-[0_6px_20px_rgba(0,127,0,0.35)] transition-all duration-200 shrink-0 w-full sm:w-auto flex justify-center">
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-            <span className="flex items-center gap-1.5 md:gap-2">
+            <span className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2">
               Book your Seat Now for
               <span className="line-through text-green-200 font-semibold">₹2,999</span>
               <span className="text-yellow-300 font-extrabold uppercase animate-bounce-slow">FREE</span>

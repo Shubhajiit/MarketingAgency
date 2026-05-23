@@ -73,7 +73,7 @@ export default function WorkshopsPage() {
 
       {/* Supporting Text */}
       <h2 className="text-lg font-bold text-slate-900 leading-snug mb-8 max-w-sm px-4">
-        It's a good time to explore all the webinars in store for you
+        It's a good time to explore all the workshops in store for you
       </h2>
 
       {/* Explore Button */}
@@ -81,7 +81,7 @@ export default function WorkshopsPage() {
         href="/"
         className="w-full max-w-xs py-3 px-6 bg-[#1b2a60] text-white text-sm font-semibold rounded-md shadow-sm hover:bg-[#15204a] transition-colors inline-block"
       >
-        Explore webinars
+        Explore workshops
       </Link>
     </div>
   );
