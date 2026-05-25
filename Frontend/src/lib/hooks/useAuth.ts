@@ -53,7 +53,10 @@ export function useAuth() {
       return;
     }
     
-    setLoading(true);
+    if (!isAuthenticated) {
+      setLoading(true);
+    }
+    
     try {
       const { data } = await authApi.getMe();
       if (data?.user) {
@@ -66,7 +69,7 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  }, [setAuth, clearAuth, setLoading, token]);
+  }, [setAuth, clearAuth, setLoading, token, isAuthenticated]);
 
   const googleLogin = useCallback(
     async (googleToken: string) => {

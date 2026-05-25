@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Mulish, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const mulish = Mulish({
+  variable: "--font-mulish",
   subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  display: "block",
 });
 
 const geistMono = Geist_Mono({
@@ -26,11 +29,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
+      className={`${mulish.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden">
+      <body className={`${mulish.className} min-h-full flex flex-col overflow-x-hidden`}>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+

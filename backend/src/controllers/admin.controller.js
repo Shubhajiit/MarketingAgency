@@ -1,21 +1,25 @@
 const User = require('../models/User');
+const Workshop = require('../models/Workshop');
 
 exports.getStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({ role: 'user' });
-    
+    const [totalUsers, totalWorkshops] = await Promise.all([
+      User.countDocuments({ role: 'user' }),
+      Workshop.countDocuments({ isActive: true }),
+    ]);
+
     res.status(200).json({
       success: true,
       data: {
         stats: {
-          totalUsers: totalUsers || 72056, // fallback if 0
-          totalWorkshops: 12056,
+          totalUsers: totalUsers || 0,
+          totalWorkshops: totalWorkshops || 0,
           totalBookings: 0,
-          totalVideos: 31056,
-          totalRevenue: 805056
+          totalVideos: 0,
+          totalRevenue: 0,
         },
-        recentBookings: []
-      }
+        recentBookings: [],
+      },
     });
   } catch (error) {
     console.error('Admin Stats Error:', error);

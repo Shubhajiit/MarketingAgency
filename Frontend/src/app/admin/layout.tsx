@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import Sidebar from '@/components/AdminDashboardComponent/common/Sidebar';
@@ -18,13 +18,18 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   const isLoginRoute = pathname === '/admin';
 
   useEffect(() => {
-    if (!isLoading) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoading) {
       if (isLoginRoute) {
         if (isAuthenticated && user?.role === 'admin') {
           router.replace('/admin/dashboard');
@@ -39,9 +44,25 @@ export default function AdminLayout({
         }
       }
     }
-  }, [isLoading, isAuthenticated, user, router, isLoginRoute]);
+  }, [mounted, isLoading, isAuthenticated, user, router, isLoginRoute]);
 
-  if (isLoading) {
+  // For the login route, we don't show the dashboard layout
+  if (isLoginRoute) {
+    if (mounted && !isLoading && isAuthenticated && user?.role === 'admin') {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[#f8f9fc]">
+          <svg className="animate-spin w-8 h-8 text-[#6366f1]" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      );
+    }
+    return <>{children}</>;
+  }
+
+  // Redirecting state when not authenticated/authorized
+  if (mounted && !isLoading && (!isAuthenticated || user?.role !== 'admin')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fc]">
         <svg className="animate-spin w-8 h-8 text-[#6366f1]" fill="none" viewBox="0 0 24 24">
@@ -52,13 +73,19 @@ export default function AdminLayout({
     );
   }
 
-  if (isLoginRoute) {
-    return <>{children}</>;
-  }
-
-  if (!isAuthenticated || user?.role !== 'admin') {
-    return null;
-  }
+  const renderContent = () => {
+    if (!mounted || isLoading) {
+      return (
+        <div className="flex-1 flex items-center justify-center min-h-[300px]">
+          <svg className="animate-spin w-8 h-8 text-[#6366f1]" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      );
+    }
+    return children;
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex text-[#1f2937]">
@@ -116,8 +143,8 @@ export default function AdminLayout({
         </header>
 
         {/* Content Viewport */}
-        <main className="flex-1 bg-gradient-to-b from-[#f8f9fe] via-[#f5f7fe] to-[#f8f9fe] px-8 py-8">
-          {children}
+        <main className="flex-1 bg-gradient-to-b from-[#f8f9fe] via-[#f5f7fe] to-[#f8f9fe] px-8 py-8 flex flex-col">
+          {renderContent()}
         </main>
       </div>
     </div>

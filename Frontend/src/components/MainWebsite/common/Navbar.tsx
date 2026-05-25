@@ -13,6 +13,7 @@ const RingIcon = ({ gradient }: { gradient: string }) => (
 );
 
 export default function Navbar() {
+    const [mounted, setMounted] = React.useState(false);
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [isProfileOpen, setIsProfileOpen] = React.useState(false);
     const [isMobileCoursesOpen, setIsMobileCoursesOpen] = React.useState(false);
@@ -21,9 +22,13 @@ export default function Navbar() {
     const [isWorkshopsOpen, setIsWorkshopsOpen] = React.useState(false);
     const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const workshopsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const pathname = usePathname();
     const dashboardHref = '/dashboard';
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     React.useEffect(() => {
         setIsMenuOpen(false);
@@ -43,10 +48,10 @@ export default function Navbar() {
         const now = Date.now();
         // Return if fetched within the last 5 minutes (300,000 ms)
         if (lastFetched && (now - lastFetched < 5 * 60 * 1000)) return;
-        
+
         setIsFetching(true);
         try {
-            const res = await workshopApi.list({ limit: 20 });
+            const res = await workshopApi.listPublic({ limit: 20 });
             setLiveWorkshops(res.data.workshops);
             setLastFetched(now);
         } catch {
@@ -133,13 +138,15 @@ export default function Navbar() {
                             </svg>
                         </a>
                     </div>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                    <a href="#" className="hover:text-[#009ee3]">REVIEWS</a>
-                    {isAuthenticated && user ? (
+                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</a>
+                    <a href="#" className="hover:text-[#009ee3]">CONTACT US</a>
+                    {!mounted || isLoading ? (
+                        <div className="h-9 w-20 bg-slate-100 animate-pulse rounded border border-slate-200/50" />
+                    ) : isAuthenticated && user ? (
                         <div className="relative">
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="w-9 h-9 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase hover:bg-blue-600 transition-colors"
+                                className="w-9 h-9 rounded-full bg-[#001A5A] text-white flex items-center justify-center font-semibold uppercase hover:bg-[#003063] transition-colors"
                             >
                                 {user.email.charAt(0)}
                             </button>
@@ -159,7 +166,7 @@ export default function Navbar() {
                             )}
                         </div>
                     ) : (
-                        <Link href="/login" className="px-5 py-2 bg-[#009ee3] text-white rounded hover:bg-blue-600 transition-colors">Login</Link>
+                        <Link href="/login" className="px-5 py-2 bg-[#001A5A] text-white rounded hover:bg-[#003063] transition-colors">Login</Link>
                     )}
                 </nav>
 
@@ -327,7 +334,7 @@ export default function Navbar() {
 
                 {/* Workshops Mega Menu Dropdown */}
                 {isWorkshopsOpen && (
-                    <div 
+                    <div
                         className="absolute top-full left-0 right-0 w-full bg-white border-t border-b border-gray-100 shadow-2xl z-50 py-10 transition-all duration-200"
                         onMouseEnter={handleWorkshopsMouseEnter}
                         onMouseLeave={handleWorkshopsMouseLeave}
@@ -486,7 +493,7 @@ export default function Navbar() {
                             </div>
                         )}
 
-                        <button 
+                        <button
                             onClick={() => {
                                 setIsMobileWorkshopsOpen(!isMobileWorkshopsOpen);
                                 fetchLiveWorkshops();
@@ -532,7 +539,15 @@ export default function Navbar() {
                         )}
                         <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
                         <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
-                        {isAuthenticated && user ? (
+                        {!mounted || isLoading ? (
+                            <div className="py-2.5 border-t border-gray-100 mt-2 flex flex-col gap-3 w-full animate-pulse">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/50" />
+                                    <div className="h-4 bg-slate-100 rounded w-2/3 border border-slate-200/30" />
+                                </div>
+                                <div className="h-9 bg-slate-100 rounded w-full border border-slate-200/50" />
+                            </div>
+                        ) : isAuthenticated && user ? (
                             <>
                                 <div className="py-2.5 border-t border-gray-100 mt-2 flex justify-between items-center relative">
                                     <div className="w-8 h-8 rounded-full bg-[#009ee3] text-white flex items-center justify-center font-semibold uppercase">

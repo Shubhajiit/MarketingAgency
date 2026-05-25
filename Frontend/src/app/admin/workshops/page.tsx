@@ -55,6 +55,7 @@ interface WorkshopFormData {
   thumbnail: string;
   batchNumber: string;
   startDate: string;
+  workshopTime: string;
   duration: string;
   durationDetail: string;
   fee: string;
@@ -62,8 +63,8 @@ interface WorkshopFormData {
   eligibility: string;
   eligibilityDetail: string;
   applicationDeadline: string;
-  heroImage: string;
   brochureUrl: string;
+  hasBrochure: boolean;
   tags: string;
   highlights: HighlightEntry[];
   modules: ModuleEntry[];
@@ -83,6 +84,7 @@ const defaultFormData: WorkshopFormData = {
   thumbnail: '',
   batchNumber: '',
   startDate: '',
+  workshopTime: '',
   duration: '',
   durationDetail: '',
   fee: '',
@@ -90,8 +92,8 @@ const defaultFormData: WorkshopFormData = {
   eligibility: '',
   eligibilityDetail: '',
   applicationDeadline: '',
-  heroImage: '',
   brochureUrl: '',
+  hasBrochure: true,
   tags: '',
   highlights: [],
   modules: [],
@@ -200,6 +202,99 @@ function FormTextArea({
   );
 }
 
+function ImageUploadInput({
+  label,
+  value,
+  onChange,
+  placeholder = '',
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File is too large (max 5MB)');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const data = await workshopApi.uploadImage(file);
+      if (data.success && data.url) {
+        onChange(data.url);
+      } else {
+        setError('Upload failed');
+      }
+    } catch (err) {
+      setError('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        {label}
+      </label>
+      <div className="flex items-center gap-3">
+        {value ? (
+          <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shrink-0 bg-white shadow-xs">
+            <img src={value} alt="" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="absolute inset-0 bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors cursor-pointer text-[10px] font-semibold"
+              title="Remove"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div className="w-14 h-14 rounded-lg border border-dashed border-gray-305 flex items-center justify-center shrink-0 bg-gray-50 text-gray-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+
+        <div className="flex-1 flex flex-col gap-1">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder || 'Paste URL or select file...'}
+              className="flex-1 px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white placeholder-gray-400"
+            />
+            <label className="px-4 py-2 bg-gray-950 hover:bg-black text-white text-xs font-bold rounded-lg cursor-pointer flex items-center justify-center transition-colors shadow-sm select-none border border-transparent whitespace-nowrap active:scale-[0.98]">
+              {uploading ? 'Uploading...' : 'Browse'}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+          </div>
+          {error && <span className="text-[10px] text-red-500 font-semibold">{error}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ──────────────────────────────────────────────
 export default function AdminWorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
@@ -250,6 +345,7 @@ export default function AdminWorkshopsPage() {
       thumbnail: workshop.thumbnail || '',
       batchNumber: workshop.batchNumber || '',
       startDate: workshop.startDate ? new Date(workshop.startDate).toISOString().split('T')[0] : '',
+      workshopTime: workshop.workshopTime || '',
       duration: workshop.duration || '',
       durationDetail: workshop.durationDetail || '',
       fee: workshop.fee || '',
@@ -257,8 +353,8 @@ export default function AdminWorkshopsPage() {
       eligibility: workshop.eligibility || '',
       eligibilityDetail: workshop.eligibilityDetail || '',
       applicationDeadline: workshop.applicationDeadline ? new Date(workshop.applicationDeadline).toISOString().split('T')[0] : '',
-      heroImage: workshop.heroImage || '',
       brochureUrl: workshop.brochureUrl || '',
+      hasBrochure: workshop.hasBrochure !== false,
       tags: (workshop.tags || []).join(', '),
       highlights: workshop.highlights?.length ? workshop.highlights : [],
       modules: workshop.modules?.length ? workshop.modules : [],
@@ -296,6 +392,7 @@ export default function AdminWorkshopsPage() {
         thumbnail: formData.thumbnail,
         batchNumber: formData.batchNumber,
         startDate: formData.startDate || null,
+        workshopTime: formData.workshopTime,
         duration: formData.duration,
         durationDetail: formData.durationDetail,
         fee: formData.fee,
@@ -303,8 +400,8 @@ export default function AdminWorkshopsPage() {
         eligibility: formData.eligibility,
         eligibilityDetail: formData.eligibilityDetail,
         applicationDeadline: formData.applicationDeadline || null,
-        heroImage: formData.heroImage,
         brochureUrl: formData.brochureUrl,
+        hasBrochure: formData.hasBrochure,
         tags: formData.tags
           .split(',')
           .map((t) => t.trim())
@@ -592,7 +689,7 @@ export default function AdminWorkshopsPage() {
                     rows={4}
                     required
                   />
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput
                       label="Price"
                       value={formData.price}
@@ -600,32 +697,23 @@ export default function AdminWorkshopsPage() {
                       type="number"
                       required
                     />
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Currency</label>
-                      <select
-                        value={formData.currency}
-                        onChange={(e) => updateField('currency', e.target.value)}
-                        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] bg-white"
-                      >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                      </select>
-                    </div>
-                    <FormInput
-                      label="Batch Number"
-                      value={formData.batchNumber}
-                      onChange={(v) => updateField('batchNumber', v)}
-                      placeholder="e.g. BATCH 3"
+                    {editingWorkshop && (
+                      <FormInput
+                        label="Batch Number"
+                        value={formData.batchNumber}
+                        onChange={(v) => updateField('batchNumber', v)}
+                        placeholder="e.g. BATCH 3"
+                      />
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <ImageUploadInput
+                      label="Workshop Image / Poster"
+                      value={formData.thumbnail}
+                      onChange={(v) => updateField('thumbnail', v)}
+                      placeholder="Paste URL or select image..."
                     />
                   </div>
-                  <FormInput
-                    label="Tags (comma-separated)"
-                    value={formData.tags}
-                    onChange={(v) => updateField('tags', v)}
-                    placeholder="e.g. martech, ai, digital-marketing"
-                  />
                 </div>
               </CollapsibleSection>
 
@@ -639,6 +727,14 @@ export default function AdminWorkshopsPage() {
                       onChange={(v) => updateField('startDate', v)}
                       type="date"
                     />
+                    <FormInput
+                      label="Workshop Time (shown in hero)"
+                      value={formData.workshopTime}
+                      onChange={(v) => updateField('workshopTime', v)}
+                      placeholder="e.g. 10 AM IST"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput
                       label="Application Deadline"
                       value={formData.applicationDeadline}
@@ -698,28 +794,32 @@ export default function AdminWorkshopsPage() {
               </CollapsibleSection>
 
               {/* Media */}
-              <CollapsibleSection title="🖼️ Media & Brochure">
+              <CollapsibleSection title="📄 Brochure Configuration">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Hero Image URL"
-                      value={formData.heroImage}
-                      onChange={(v) => updateField('heroImage', v)}
-                      placeholder="https://..."
-                    />
-                    <FormInput
-                      label="Thumbnail URL"
-                      value={formData.thumbnail}
-                      onChange={(v) => updateField('thumbnail', v)}
-                      placeholder="https://..."
-                    />
+                  <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-150 rounded-xl">
+                    <div>
+                      <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block">Brochure Download</span>
+                      <span className="text-xs text-gray-400">Offer a downloadable syllabus brochure (PDF or auto-generated) on the page</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={formData.hasBrochure}
+                        onChange={(e) => updateField('hasBrochure', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6366f1]"></div>
+                    </label>
                   </div>
-                  <FormInput
-                    label="Brochure URL (PDF link)"
-                    value={formData.brochureUrl}
-                    onChange={(v) => updateField('brochureUrl', v)}
-                    placeholder="https://... (leave empty for auto-generated brochure)"
-                  />
+
+                  {formData.hasBrochure && (
+                    <FormInput
+                      label="Brochure URL (PDF link)"
+                      value={formData.brochureUrl}
+                      onChange={(v) => updateField('brochureUrl', v)}
+                      placeholder="https://... (leave empty for auto-generated brochure)"
+                    />
+                  )}
                 </div>
               </CollapsibleSection>
 
@@ -949,8 +1049,8 @@ export default function AdminWorkshopsPage() {
                 </div>
               </CollapsibleSection>
 
-              {/* Experts */}
-              <CollapsibleSection title="🎓 Subject Matter Experts">
+              {/* Mentors */}
+              <CollapsibleSection title="🎓 Mentors">
                 <div className="space-y-3">
                   {formData.experts.map((exp, idx) => (
                     <div key={idx} className="flex gap-3 items-start group">
@@ -963,7 +1063,7 @@ export default function AdminWorkshopsPage() {
                             updated[idx] = { ...updated[idx], name: e.target.value };
                             updateField('experts', updated);
                           }}
-                          placeholder="Expert name"
+                          placeholder="Mentor name"
                           className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1] font-semibold"
                         />
                         <input
@@ -974,20 +1074,44 @@ export default function AdminWorkshopsPage() {
                             updated[idx] = { ...updated[idx], role: e.target.value };
                             updateField('experts', updated);
                           }}
-                          placeholder="Role / Title"
+                          placeholder="Role / Title (e.g. Founder, CEO)"
                           className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
                         />
-                        <input
-                          type="text"
-                          value={exp.image}
-                          onChange={(e) => {
-                            const updated = [...formData.experts];
-                            updated[idx] = { ...updated[idx], image: e.target.value };
-                            updateField('experts', updated);
-                          }}
-                          placeholder="Image URL"
-                          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
-                        />
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={exp.image}
+                            onChange={(e) => {
+                              const updated = [...formData.experts];
+                              updated[idx] = { ...updated[idx], image: e.target.value };
+                              updateField('experts', updated);
+                            }}
+                            placeholder="Image URL or upload"
+                            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
+                          />
+                          <label className="px-3 py-2 bg-gray-950 hover:bg-black text-white text-xs font-bold rounded-lg cursor-pointer transition-colors shadow-sm select-none border border-transparent whitespace-nowrap active:scale-[0.98]">
+                            Upload
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  const data = await workshopApi.uploadImage(file);
+                                  if (data.success && data.url) {
+                                    const updated = [...formData.experts];
+                                    updated[idx] = { ...updated[idx], image: data.url };
+                                    updateField('experts', updated);
+                                  }
+                                } catch (err) {
+                                  console.error(err);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -1007,7 +1131,7 @@ export default function AdminWorkshopsPage() {
                     onClick={() => updateField('experts', [...formData.experts, { name: '', role: '', image: '' }])}
                     className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
                   >
-                    <Plus size={14} /> Add Expert
+                    <Plus size={14} /> Add Mentor
                   </button>
                 </div>
               </CollapsibleSection>
