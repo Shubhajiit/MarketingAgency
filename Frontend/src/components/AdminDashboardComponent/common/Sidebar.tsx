@@ -2,23 +2,30 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import {
   X,
   LayoutDashboard,
   Users,
   BookOpen,
-  Video,
+  UserPlus,
   Settings,
   HelpCircle,
   ExternalLink,
-  LogOut
+  LogOut,
+  Award
 } from 'lucide-react';
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, clearAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
+
+  const logout = async () => {
+    const Cookies = (await import('js-cookie')).default;
+    Cookies.remove('refreshToken');
+    clearAuth();
+  };
 
   // Visual helper to determine active status
   const isActive = (route: string) => pathname === route;
@@ -60,9 +67,13 @@ export default function Sidebar() {
               <BookOpen size={18} />
               <span>Workshops</span>
             </Link>
-            <Link href="/admin/videos" className={isActive('/admin/videos') ? activeClass : inactiveClass}>
-              <Video size={18} />
-              <span>Resource</span>
+            <Link href="/admin/courses" className={isActive('/admin/courses') ? activeClass : inactiveClass}>
+              <Award size={18} />
+              <span>Courses</span>
+            </Link>
+            <Link href="/admin/assign-course" className={isActive('/admin/assign-course') ? activeClass : inactiveClass}>
+              <UserPlus size={18} />
+              <span>Assign Course</span>
             </Link>
           </nav>
         </div>
@@ -101,8 +112,8 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             title="Go to User Dashboard"
             className="p-1.5 rounded-lg text-gray-400 hover:text-[#6366f1] hover:bg-gray-50 transition-all duration-200"
           >

@@ -197,7 +197,7 @@ export default function Page() {
                         ].map((item) => (
                             <div
                                 key={item.step}
-                                className="rounded-xl border border-[#e6e1d7] bg-[#fffdf8] px-6 py-5 md:px-7 md:py-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                                className="rounded-xl border border-slate-100 bg-[#f8fafd] px-6 py-5 md:px-7 md:py-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]"
                             >
                                 <div className="text-[11px] tracking-widest text-[#7b7b7b] font-semibold">
                                     {item.step}
@@ -209,7 +209,7 @@ export default function Page() {
                         ))}
                     </div>
 
-                    <div className="mt-10 md:mt-12 rounded-2xl bg-[#fff8ec] border border-[#f3e4c8] px-6 md:px-12 py-9 md:py-12 relative overflow-hidden">
+                    <div className="mt-10 md:mt-12 rounded-2xl bg-[#f8fafd] border border-slate-100 px-6 md:px-12 py-9 md:py-12 relative overflow-hidden">
                         <div className="absolute -left-2 top-5 text-[#f6d9a4] text-[100px] md:text-[125px] leading-none select-none z-0">
                             "
                         </div>
@@ -252,7 +252,7 @@ export default function Page() {
             </section>
 
             {/* AI-native competitor section */}
-            <section className="w-full px-4 md:px-36 py-12 md:py-16 bg-[#fff9f4]">
+            <section className="w-full px-4 md:px-36 py-12 md:py-16 bg-[#f8fafd]">
                 <div className="max-w-[1180px] mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:pr-6">
@@ -362,7 +362,7 @@ export default function Page() {
                 </div>
             </section>
 
-            <section className="w-full px-4 md:px-24 lg:px-32 py-12 md:py-16 bg-[#fff9f4]">
+            <section className="w-full px-4 md:px-24 lg:px-32 py-12 md:py-16 bg-[#f8fafd]">
                 <div className="max-w-[1200px] mx-auto">
                     <div className="flex items-center justify-between mb-6">
                         <h4 className="text-[22px] md:text-[28px] font-semibold text-[#1f2a44]">
@@ -496,7 +496,7 @@ export default function Page() {
             </section>
 
             <GrowthStats />
-            <CertificationCoursesSection bgColor="bg-[#fff9f4]" />
+            <CertificationCoursesSection bgColor="bg-[#f8fafd]" />
         </div>
     );
 }

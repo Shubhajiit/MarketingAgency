@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import { 
 	Book, 
 	Video, 
@@ -18,7 +18,11 @@ import {
 
 export default function MobileBottomNav() {
 	const pathname = usePathname();
-	const { user, logout } = useAuth();
+	const { user, clearAuth } = useAuthStore();
+	const logout = () => {
+		import('js-cookie').then(({ default: Cookies }) => Cookies.remove('refreshToken'));
+		clearAuth();
+	};
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 
 	const isActive = (href: string) => pathname === href;

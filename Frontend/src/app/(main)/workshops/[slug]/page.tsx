@@ -70,7 +70,7 @@ function WorkshopSkeleton() {
           <div className="max-w-8xl mx-auto w-full bg-[#FCF8F5] rounded-3xl border border-[#F2ECE4]/70 p-6 md:p-10 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch min-h-[480px]">
             {/* Left: Workshop Image Box */}
             <div className="w-full lg:w-[50%] flex items-center justify-center">
-              <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[260px] md:min-h-[300px] shadow-xs flex items-center justify-center bg-slate-200/40" />
+              <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[160px] sm:min-h-[200px] md:min-h-[300px] shadow-xs flex items-center justify-center bg-slate-200/40" />
             </div>
 
             {/* Right: Content details */}
@@ -347,7 +347,7 @@ Email: contact@aiscale.com
 
               {/* Left: Workshop Image */}
               <div className="w-full lg:w-[50%] flex items-center justify-center">
-                <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[260px] md:min-h-[300px] shadow-xs flex items-center justify-center">
+                <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[160px] sm:min-h-[200px] md:min-h-[300px] shadow-xs flex items-center justify-center">
                   {workshop.thumbnail ? (
                     <img
                       src={workshop.thumbnail}
@@ -476,190 +476,190 @@ Email: contact@aiscale.com
 
         {!loading && workshop && (
           <>
-        {/* Stats / Details Bar */}
-        <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-gray-300">
-            <div className="flex flex-col items-start md:px-8 first:pl-0">
-              <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
-              <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block">
-                {formatDisplayDate(workshop.startDate) || 'TBD'}
-              </span>
-            </div>
-            <div className="flex flex-col items-start md:px-8">
-              <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">DURATION</span>
-              <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.duration || 'TBD'}</span>
-              {workshop.durationDetail && <span className="text-xs font-medium text-gray-500 leading-normal block">{workshop.durationDetail}</span>}
-            </div>
-            <div className="flex flex-col items-start md:px-8">
-              <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">PROGRAMME FEE</span>
-              <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.fee || `${workshop.currency === 'INR' ? '₹' : '$'}${workshop.price.toLocaleString()}`}</span>
-              {workshop.feeNote && <span className="text-xs font-medium text-gray-500 leading-normal block mb-1.5">{workshop.feeNote}</span>}
-              <a href="#" className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:underline leading-relaxed block transition-colors">
-                Flexible Payment Options Available
-              </a>
-            </div>
-            <div className="flex flex-col items-start md:pl-8 md:pr-0">
-              <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">ELIGIBILITY</span>
-              <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1.5">{workshop.eligibility || 'Open to all'}</span>
-              {workshop.eligibilityDetail && <span className="text-xs font-medium text-gray-500 leading-relaxed block">{workshop.eligibilityDetail}</span>}
-            </div>
-          </div>
-        </section>
-
-        {/* Application Deadline */}
-        {workshop.applicationDeadline && (
-          <section className="bg-white py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-            <div className="w-full max-w-4xl bg-[#f5f5f5] py-8 px-6 text-center border border-gray-100">
-              <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application Deadline</h2>
-              <p className="text-gray-600 text-sm md:text-base font-normal">
-                Apply by <span className="font-bold text-gray-800">{formatDisplayDate(workshop.applicationDeadline)}</span> at 11:59 PM
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* Who is this Programme For */}
-        {workshop.targetAudience && workshop.targetAudience.length > 0 && (
-          <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="who-is-this-programme-for">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
-              <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Who is this Programme For</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                {workshop.targetAudience.map((ta, i) => (
-                  <div key={i} className="bg-[#f8f9fa] p-6 md:p-8 rounded-lg flex flex-col gap-3 border border-gray-50/60 shadow-xs">
-                    <h3 className="text-lg md:text-xl font-bold text-gray-950 tracking-tight">{ta.title}</h3>
-                    <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed font-medium">{ta.description}</p>
-                  </div>
-                ))}
+            {/* Stats / Details Bar */}
+            <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
+              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-gray-300">
+                <div className="flex flex-col items-start md:px-8 first:pl-0">
+                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
+                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block">
+                    {formatDisplayDate(workshop.startDate) || 'TBD'}
+                  </span>
+                </div>
+                <div className="flex flex-col items-start md:px-8">
+                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">DURATION</span>
+                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.duration || 'TBD'}</span>
+                  {workshop.durationDetail && <span className="text-xs font-medium text-gray-500 leading-normal block">{workshop.durationDetail}</span>}
+                </div>
+                <div className="flex flex-col items-start md:px-8">
+                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">PROGRAMME FEE</span>
+                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.fee || `${workshop.currency === 'INR' ? '₹' : '$'}${workshop.price.toLocaleString()}`}</span>
+                  {workshop.feeNote && <span className="text-xs font-medium text-gray-500 leading-normal block mb-1.5">{workshop.feeNote}</span>}
+                  <a href="#" className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:underline leading-relaxed block transition-colors">
+                    Flexible Payment Options Available
+                  </a>
+                </div>
+                <div className="flex flex-col items-start md:pl-8 md:pr-0">
+                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">ELIGIBILITY</span>
+                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1.5">{workshop.eligibility || 'Open to all'}</span>
+                  {workshop.eligibilityDetail && <span className="text-xs font-medium text-gray-500 leading-relaxed block">{workshop.eligibilityDetail}</span>}
+                </div>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
 
-        {/* Programme Highlights */}
-        {workshop.highlights && workshop.highlights.length > 0 && (
-          <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="programme-highlights">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
-              <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Programme Highlights</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-6">
-                {workshop.highlights.map((hl, i) => (
-                  <div key={i} className="bg-white p-5 rounded-xl border border-gray-200/50 shadow-xs flex flex-col items-start gap-4 hover:shadow-md transition-all duration-300">
-                    <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
-                      <svg className="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <h4 className="text-sm font-bold text-gray-900 leading-tight">{hl.title}</h4>
-                      {hl.description && <p className="text-gray-500 text-xs leading-relaxed font-medium">{hl.description}</p>}
-                    </div>
+            {/* Application Deadline */}
+            {workshop.applicationDeadline && (
+              <section className="bg-white py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
+                <div className="w-full max-w-4xl bg-[#f5f5f5] py-8 px-6 text-center border border-gray-100">
+                  <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application Deadline</h2>
+                  <p className="text-gray-600 text-sm md:text-base font-normal">
+                    Apply by <span className="font-bold text-gray-800">{formatDisplayDate(workshop.applicationDeadline)}</span> at 11:59 PM
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {/* Who is this Programme For */}
+            {workshop.targetAudience && workshop.targetAudience.length > 0 && (
+              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="who-is-this-programme-for">
+                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Who is this Programme For</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    {workshop.targetAudience.map((ta, i) => (
+                      <div key={i} className="bg-[#f8f9fa] p-6 md:p-8 rounded-lg flex flex-col gap-3 border border-gray-50/60 shadow-xs">
+                        <h3 className="text-lg md:text-xl font-bold text-gray-950 tracking-tight">{ta.title}</h3>
+                        <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed font-medium">{ta.description}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+                </div>
+              </section>
+            )}
 
-        {/* Learning Outcomes */}
-        {workshop.learningOutcomes && workshop.learningOutcomes.length > 0 && (
-          <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="learning-outcomes">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
-              <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Learning Outcome</h2>
-              <div className="flex flex-col divide-y divide-gray-100">
-                {workshop.learningOutcomes.map((lo, i) => (
-                  <div key={i} className="py-4.5 first:pt-0 last:pb-0">
-                    <p className="text-gray-700 text-sm md:text-[15px] font-medium leading-relaxed">{lo}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Expert Masterclasses */}
-        {workshop.experts && workshop.experts.length > 0 && (
-          <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="expert-masterclasses">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
-              <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Masterclasses with Subject Matter Experts</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                {workshop.experts.map((exp, i) => (
-                  <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200/60 shadow-xs flex flex-row items-stretch hover:shadow-md transition-all duration-300 min-h-[140px] md:min-h-[160px]">
-                    <div className="w-[120px] md:w-[150px] shrink-0 relative bg-gray-100">
-                      {exp.image ? (
-                        <img src={exp.image} alt={exp.name} className="absolute inset-0 w-full h-full object-cover" />
-                      ) : (
-                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-3xl font-bold">
-                          {exp.name.charAt(0)}
+            {/* Programme Highlights */}
+            {workshop.highlights && workshop.highlights.length > 0 && (
+              <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="programme-highlights">
+                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Programme Highlights</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-6">
+                    {workshop.highlights.map((hl, i) => (
+                      <div key={i} className="bg-white p-5 rounded-xl border border-gray-200/50 shadow-xs flex flex-col items-start gap-4 hover:shadow-md transition-all duration-300">
+                        <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
+                          <svg className="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
                         </div>
-                      )}
-                    </div>
-                    <div className="p-5 flex flex-col justify-center gap-2 flex-1">
-                      <h3 className="text-base md:text-lg font-bold text-gray-950 leading-snug">{exp.name}</h3>
-                      {exp.role && <p className="text-gray-500 text-xs md:text-sm font-medium leading-relaxed">{exp.role}</p>}
-                      <a href="#" className="text-[#cc0000] hover:text-[#b30000] text-xs font-bold uppercase tracking-wider flex items-center gap-1 mt-1 transition-colors hover:underline">
-                        View Profile <span className="text-sm">→</span>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Programme Modules */}
-        {workshop.modules && workshop.modules.length > 0 && (
-          <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="programme-modules">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
-              <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight mb-2">Programme Modules</h2>
-              <div className="flex flex-col gap-3.5 w-full">
-                {workshop.modules.map((mod, idx) => {
-                  const isOpen = activeModule === idx;
-                  return (
-                    <div key={idx} className="border border-gray-200/80 rounded-lg overflow-hidden bg-white shadow-xs">
-                      <button
-                        onClick={() => handleToggleModule(idx)}
-                        className="w-full flex items-center justify-between p-5 bg-[#fcfcfc] hover:bg-[#f5f5f5] text-left transition-colors font-semibold text-gray-900 text-sm md:text-base cursor-pointer"
-                      >
-                        <span>{mod.title}</span>
-                        <svg className={`w-5 h-5 text-gray-500 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] border-t border-gray-100' : 'max-h-0'}`}>
-                        <div className="p-6 bg-white flex flex-col gap-3">
-                          {mod.content.map((point, pIdx) => (
-                            <div key={pIdx} className="flex items-start gap-3">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
-                              <p className="text-gray-700 text-xs md:text-sm leading-relaxed font-medium">{point}</p>
-                            </div>
-                          ))}
+                        <div className="flex flex-col gap-1.5">
+                          <h4 className="text-sm font-bold text-gray-900 leading-tight">{hl.title}</h4>
+                          {hl.description && <p className="text-gray-500 text-xs leading-relaxed font-medium">{hl.description}</p>}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Download Brochure CTA */}
-              {workshop?.hasBrochure !== false && (
-                <div className="mt-8 flex flex-col items-center gap-6">
-                  <p className="text-gray-500 text-xs md:text-sm text-center max-w-4xl leading-relaxed font-medium">
-                    <span className="font-bold text-gray-700">Note:</span> Modules/topics are indicative only, and the suggested time and sequence may be dropped, modified, or adapted to fit the total programme hours
-                  </p>
-                  <button
-                    onClick={handleScrollToBook}
-                    className="bg-[#222222] hover:bg-black text-white font-bold py-3.5 px-8 flex items-center gap-2.5 transition-all duration-200 uppercase tracking-wider text-xs md:text-sm cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] border border-transparent rounded-sm"
-                  >
-                    Download Programme Brochure
-                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          </section>
-        )}
+              </section>
+            )}
+
+            {/* Learning Outcomes */}
+            {workshop.learningOutcomes && workshop.learningOutcomes.length > 0 && (
+              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="learning-outcomes">
+                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Learning Outcome</h2>
+                  <div className="flex flex-col divide-y divide-gray-100">
+                    {workshop.learningOutcomes.map((lo, i) => (
+                      <div key={i} className="py-4.5 first:pt-0 last:pb-0">
+                        <p className="text-gray-700 text-sm md:text-[15px] font-medium leading-relaxed">{lo}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Expert Masterclasses */}
+            {workshop.experts && workshop.experts.length > 0 && (
+              <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="expert-masterclasses">
+                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Masterclasses with Subject Matter Experts</h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                    {workshop.experts.map((exp, i) => (
+                      <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200/60 shadow-xs flex flex-row items-stretch hover:shadow-md transition-all duration-300 min-h-[140px] md:min-h-[160px]">
+                        <div className="w-[120px] md:w-[150px] shrink-0 relative bg-gray-100">
+                          {exp.image ? (
+                            <img src={exp.image} alt={exp.name} className="absolute inset-0 w-full h-full object-cover" />
+                          ) : (
+                            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-3xl font-bold">
+                              {exp.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-5 flex flex-col justify-center gap-2 flex-1">
+                          <h3 className="text-base md:text-lg font-bold text-gray-950 leading-snug">{exp.name}</h3>
+                          {exp.role && <p className="text-gray-500 text-xs md:text-sm font-medium leading-relaxed">{exp.role}</p>}
+                          <a href="#" className="text-[#cc0000] hover:text-[#b30000] text-xs font-bold uppercase tracking-wider flex items-center gap-1 mt-1 transition-colors hover:underline">
+                            View Profile <span className="text-sm">→</span>
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Programme Modules */}
+            {workshop.modules && workshop.modules.length > 0 && (
+              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="programme-modules">
+                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight mb-2">Programme Modules</h2>
+                  <div className="flex flex-col gap-3.5 w-full">
+                    {workshop.modules.map((mod, idx) => {
+                      const isOpen = activeModule === idx;
+                      return (
+                        <div key={idx} className="border border-gray-200/80 rounded-lg overflow-hidden bg-white shadow-xs">
+                          <button
+                            onClick={() => handleToggleModule(idx)}
+                            className="w-full flex items-center justify-between p-5 bg-[#fcfcfc] hover:bg-[#f5f5f5] text-left transition-colors font-semibold text-gray-900 text-sm md:text-base cursor-pointer"
+                          >
+                            <span>{mod.title}</span>
+                            <svg className={`w-5 h-5 text-gray-500 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] border-t border-gray-100' : 'max-h-0'}`}>
+                            <div className="p-6 bg-white flex flex-col gap-3">
+                              {mod.content.map((point, pIdx) => (
+                                <div key={pIdx} className="flex items-start gap-3">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                                  <p className="text-gray-700 text-xs md:text-sm leading-relaxed font-medium">{point}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Download Brochure CTA */}
+                  {workshop?.hasBrochure !== false && (
+                    <div className="mt-8 flex flex-col items-center gap-6">
+                      <p className="text-gray-500 text-xs md:text-sm text-center max-w-4xl leading-relaxed font-medium">
+                        <span className="font-bold text-gray-700">Note:</span> Modules/topics are indicative only, and the suggested time and sequence may be dropped, modified, or adapted to fit the total programme hours
+                      </p>
+                      <button
+                        onClick={handleScrollToBook}
+                        className="bg-[#222222] hover:bg-black text-white font-bold py-3.5 px-8 flex items-center gap-2.5 transition-all duration-200 uppercase tracking-wider text-xs md:text-sm cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] border border-transparent rounded-sm"
+                      >
+                        Download Programme Brochure
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </>
         )}
       </main>

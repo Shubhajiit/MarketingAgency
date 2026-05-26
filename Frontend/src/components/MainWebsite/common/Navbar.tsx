@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
 
 const RingIcon = ({ gradient }: { gradient: string }) => (
@@ -22,7 +22,7 @@ export default function Navbar() {
     const [isWorkshopsOpen, setIsWorkshopsOpen] = React.useState(false);
     const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const workshopsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-    const { user, isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuthStore();
     const pathname = usePathname();
     const dashboardHref = '/dashboard';
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import apiClient from '@/lib/api/client';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import {
   GraduationCap,
   BookOpen,
@@ -110,7 +110,7 @@ const MOCK_BOOKINGS = [
 ];
 
 export default function AdminStatsPage() {
-  const { user: authUser } = useAuth();
+  const { user: authUser } = useAuthStore();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import {
 	BookOpen,
 	Video,
@@ -27,7 +27,11 @@ const standaloneItems = [
 
 export default function UserDashboardSidebar() {
 	const pathname = usePathname();
-	const { user, logout } = useAuth();
+	const { user, clearAuth } = useAuthStore();
+	const logout = () => {
+		import('js-cookie').then(({ default: Cookies }) => Cookies.remove('refreshToken'));
+		clearAuth();
+	};
 	const [isLibraryOpen, setIsLibraryOpen] = useState(true);
 
 	const isActive = (href: string) => pathname === href;

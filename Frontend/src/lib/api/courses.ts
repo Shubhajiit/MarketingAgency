@@ -1,0 +1,43 @@
+import apiClient from './client';
+import { Course } from '@/components/common/CoursesCardsUI';
+
+export interface CourseResponse {
+  success: boolean;
+  data: {
+    courses: Course[];
+  };
+}
+
+export interface SingleCourseResponse {
+  success: boolean;
+  data: {
+    course: Course;
+  };
+}
+
+export const coursesApi = {
+  list: async (params?: { all?: boolean }) => {
+    const res = await apiClient.get<CourseResponse>('/courses', { params });
+    return res.data;
+  },
+
+  get: async (id: string) => {
+    const res = await apiClient.get<SingleCourseResponse>(`/courses/${id}`);
+    return res.data;
+  },
+
+  create: async (data: Partial<Course>) => {
+    const res = await apiClient.post<SingleCourseResponse>('/courses', data);
+    return res.data;
+  },
+
+  update: async (id: string, data: Partial<Course>) => {
+    const res = await apiClient.patch<SingleCourseResponse>(`/courses/${id}`, data);
+    return res.data;
+  },
+
+  delete: async (id: string) => {
+    const res = await apiClient.delete<{ success: boolean; message: string }>(`/courses/${id}`);
+    return res.data;
+  },
+};

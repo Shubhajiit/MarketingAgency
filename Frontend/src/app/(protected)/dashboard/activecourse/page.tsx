@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Course, CourseCard } from '@/components/common/CoursesCardsUI';
+import { useAuthStore } from '@/store/auth.store';
 
 // Custom mock data to exactly match the screenshot
 const mockActiveCourses: Course[] = [
@@ -41,12 +42,39 @@ const mockActiveCourses: Course[] = [
 ];
 
 export default function ActiveCoursesPage() {
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
 
+  // Map real enrolled courses to Course card structure
+  const enrolledCourses: Course[] = (user?.enrolledCourses || []).map((c: any) => ({
+    id: c._id || c.id,
+    title: c.title,
+    category: c.category || "popular",
+    tag: c.tag || "DMI",
+    hours: c.hours || "Self-Paced",
+    price: c.price || 0,
+    originalPrice: c.originalPrice || 0,
+    discount: c.discount || "0%",
+    bgGradient: c.bgGradient || "from-[#6366f1] to-[#8b5cf6]",
+    primaryCtaText: c.primaryCtaText || "View Course",
+    secondaryCtaText: c.secondaryCtaText || "View Course",
+    isPackage: !c.isGraphicOnly,
+    isMockTest: c.isMockTest || false,
+    authorName: c.authorName || "",
+    validityText: "Lifetime",
+    thumbnailType: c.thumbnailType || undefined,
+    circlesColor: c.circlesColor,
+    instructorImage: c.instructorImage,
+    isGraphicOnly: c.isGraphicOnly,
+    graphicType: c.graphicType
+  }));
+
+  const allActiveCourses = [...enrolledCourses, ...mockActiveCourses];
+
   const filteredCourses = activeTab === 'active'
-    ? mockActiveCourses.filter(course =>
+    ? allActiveCourses.filter(course =>
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (course.authorName && course.authorName.toLowerCase().includes(searchQuery.toLowerCase()))
     )

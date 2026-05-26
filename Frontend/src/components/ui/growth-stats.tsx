@@ -42,8 +42,8 @@ export default function GrowthStats() {
                             key={idx}
                             className="text-left py-8 md:py-10 px-6 md:px-8 flex flex-col justify-start"
                         >
-                            {/* Value (emerald green color to match the requested style) */}
-                            <div className="text-4xl md:text-5xl font-extrabold text-[#0b7a2a] mb-5 tracking-tight">
+                            {/* Value (brand blue color to match the button style) */}
+                            <div className="text-4xl md:text-5xl font-extrabold text-[#0056d2] mb-5 tracking-tight">
                                 {stat.value}
                             </div>
                             {/* Title */}

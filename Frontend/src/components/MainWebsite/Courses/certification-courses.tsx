@@ -1,242 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Course, CourseCard, ConcentricRings } from "@/components/common/CoursesCardsUI";
+import { useRouter } from "next/navigation";
+import { coursesApi } from "@/lib/api/courses";
 
-export const coursesData: Course[] = [
-  // Popular Courses
-  {
-    id: "social-media-marketing-pop",
-    title: "Social Media Marketing Course",
-    category: "popular",
-    tag: "DMI SPECIALIST",
-    hours: "27 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#e52d6a] to-[#d81b60]",
-    circlesColor: "#00c58d",
-    instructorImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "advanced-ai-pop",
-    title: "Advanced AI For Digital Marketing",
-    category: "popular",
-    tag: "DMI TRACK",
-    hours: "8 Hours • Self-Paced",
-    price: 672,
-    originalPrice: 895,
-    discount: "25%",
-    bgGradient: "from-[#1e2245] to-[#0c102a]",
-    isGraphicOnly: true,
-    graphicType: "ai",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "Buy Now"
-  },
-  {
-    id: "digital-marketing-diploma-pop",
-    title: "Professional Diploma in Digital Marketing",
-    category: "popular",
-    tag: "DMI PRO",
-    hours: "30 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#22c55e] to-[#15803d]",
-    circlesColor: "#00c58d",
-    instructorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "search-marketing-pop",
-    title: "Search Marketing Course",
-    category: "popular",
-    tag: "DMI SPECIALIST",
-    hours: "27 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#f97316] to-[#ea580c]",
-    circlesColor: "#10b981",
-    instructorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-
-  // Pro & Specialist Courses
-  {
-    id: "dmi-pro-spec",
-    title: "Professional Diploma in Digital Marketing",
-    category: "pro-specialist",
-    tag: "DMI PRO",
-    hours: "30 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#22c55e] to-[#15803d]",
-    circlesColor: "#00c58d",
-    instructorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "search-marketing-spec",
-    title: "Search Marketing Course",
-    category: "pro-specialist",
-    tag: "DMI SPECIALIST",
-    hours: "27 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#f97316] to-[#ea580c]",
-    circlesColor: "#10b981",
-    instructorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "social-media-marketing-spec",
-    title: "Social Media Marketing Course",
-    category: "pro-specialist",
-    tag: "DMI SPECIALIST",
-    hours: "27 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#e52d6a] to-[#d81b60]",
-    circlesColor: "#00c58d",
-    instructorImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "strategy-leadership-spec",
-    title: "Strategy & Leadership Course",
-    category: "pro-specialist",
-    tag: "DMI SPECIALIST",
-    hours: "27 Hours • Self-Paced",
-    price: 1442,
-    originalPrice: 2060,
-    discount: "30%",
-    bgGradient: "from-[#a855f7] to-[#7e22ce]",
-    circlesColor: "#38bdf8",
-    instructorImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-
-  // Short Courses
-  {
-    id: "advanced-ai-short",
-    title: "Advanced AI For Digital Marketing",
-    category: "short",
-    tag: "DMI TRACK",
-    hours: "8 Hours • Self-Paced",
-    price: 672,
-    originalPrice: 895,
-    discount: "25%",
-    bgGradient: "from-[#1e2245] to-[#0c102a]",
-    isGraphicOnly: true,
-    graphicType: "ai",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "Buy Now"
-  },
-  {
-    id: "seo-short",
-    title: "Search Engine Optimization (SEO)",
-    category: "short",
-    tag: "DMI TRACK",
-    hours: "8 Hours • Self-Paced",
-    price: 672,
-    originalPrice: 895,
-    discount: "25%",
-    bgGradient: "from-[#0284c7] to-[#0369a1]",
-    isGraphicOnly: true,
-    graphicType: "seo",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "Buy Now"
-  },
-  {
-    id: "ppc-short",
-    title: "Paid Search (PPC)",
-    category: "short",
-    tag: "DMI TRACK",
-    hours: "8 Hours • Self-Paced",
-    price: 672,
-    originalPrice: 895,
-    discount: "25%",
-    bgGradient: "from-[#0d9488] to-[#0f766e]",
-    isGraphicOnly: true,
-    graphicType: "ppc",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "Buy Now"
-  },
-  {
-    id: "digital-strategy-short",
-    title: "Digital Strategy Course",
-    category: "short",
-    tag: "DMI TRACK",
-    hours: "8 Hours • Self-Paced",
-    price: 672,
-    originalPrice: 895,
-    discount: "25%",
-    bgGradient: "from-[#475569] to-[#334155]",
-    isGraphicOnly: true,
-    graphicType: "strategy",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "Buy Now"
-  },
-
-  // Advanced Courses
-  {
-    id: "dmi-expert-adv",
-    title: "DMI Expert Certification",
-    category: "advanced",
-    tag: "DMI EXPERT",
-    hours: "44 Hours • Self-Paced",
-    price: 2900,
-    originalPrice: 3625,
-    discount: "20%",
-    bgGradient: "from-[#6366f1] to-[#4f46e5]",
-    circlesColor: "#f43f5e",
-    instructorImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "postgrad-diploma-adv",
-    title: "Postgraduate Diploma In Digital Marketing",
-    category: "advanced",
-    tag: "DMI POSTGRAD",
-    hours: "60 Hours • Self-Paced",
-    price: 3500,
-    originalPrice: 4120,
-    discount: "15%",
-    bgGradient: "from-[#0f172a] to-[#020617]",
-    circlesColor: "#a855f7",
-    instructorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  },
-  {
-    id: "msc-digital-marketing-adv",
-    title: "Masters (MSc) In Digital Marketing",
-    category: "advanced",
-    tag: "DMI MASTERS",
-    hours: "120 Hours • Self-Paced",
-    price: 4500,
-    originalPrice: 5000,
-    discount: "10%",
-    bgGradient: "from-[#1d4ed8] to-[#1e3a8a]",
-    circlesColor: "#fbbf24",
-    instructorImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=350&q=80",
-    primaryCtaText: "Download Brochure",
-    secondaryCtaText: "View Course"
-  }
-];
+export const coursesData: Course[] = [];
 
 const tabs = [
   { id: "popular", label: "Popular Courses" },
@@ -254,7 +23,7 @@ const countryCodes = [
   { code: "+65", country: "Singapore", flag: "🇸🇬" },
 ];
 
-const getSyllabusModules = (courseTitle: string) => {
+export const getSyllabusModules = (courseTitle: string) => {
   if (courseTitle.includes("Social Media")) {
     return [
       { title: "Module 1: Social Media Strategy & Brand Positioning", description: "Learn how to define your audience, select the right platforms, and position your brand for growth." },
@@ -301,11 +70,30 @@ const getSyllabusModules = (courseTitle: string) => {
 };
 
 export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50" }: { bgColor?: string }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("popular");
   const [selectedBrochureCourse, setSelectedBrochureCourse] = useState<Course | null>(null);
   const [selectedViewCourse, setSelectedViewCourse] = useState<Course | null>(null);
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const res = await coursesApi.list();
+        setCourses(res.data.courses);
+      } catch (err) {
+        console.error("Failed to load dynamic courses:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   // Brochure Request Form State
   const [brochureForm, setBrochureForm] = useState({
@@ -445,7 +233,8 @@ Email: contact@aiscale.com
     }
   };
 
-  const filteredCourses = coursesData.filter(
+  const displayCourses = courses.length > 0 ? courses : coursesData;
+  const filteredCourses = displayCourses.filter(
     (course) => course.category === activeTab
   );
 
@@ -479,26 +268,41 @@ Email: contact@aiscale.com
         </div>
 
         {/* Grid of Course Cards */}
-        <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              onPrimaryClick={(course) => {
-                if (course.primaryCtaText === "Download Brochure") {
-                  setSelectedBrochureCourse(course);
-                } else {
-                  setSelectedViewCourse(course);
-                  setEnrollSuccess(false);
-                }
-              }}
-              onSecondaryClick={(course) => {
-                setSelectedViewCourse(course);
-                setEnrollSuccess(false);
-              }}
-            />
-          ))}
-        </div>
+        {filteredCourses.length > 0 ? (
+          <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {filteredCourses.map((course) => {
+              const cid = (course as any)._id || course.id;
+              return (
+                <CourseCard
+                  key={cid}
+                  course={course}
+                  onPrimaryClick={(course) => {
+                    if (course.primaryCtaText === "Download Brochure") {
+                      setSelectedBrochureCourse(course);
+                    } else {
+                      router.push(`/coursedetails/${cid}`);
+                    }
+                  }}
+                  onSecondaryClick={(course) => {
+                    router.push(`/coursedetails/${cid}`);
+                  }}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="w-full py-16 text-center space-y-3 px-6">
+            <div className="w-12 h-12 rounded-full bg-slate-200/50 flex items-center justify-center mx-auto text-slate-500">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-bold text-slate-800">No Certification Courses Available</h3>
+            <p className="text-xs text-slate-400 max-w-xs mx-auto leading-normal">
+              We couldn't find any active courses in this category at the moment. Please check back later!
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Course Brochure Modal */}

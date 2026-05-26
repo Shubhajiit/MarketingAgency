@@ -1,9 +1,16 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/lib/api/auth';
 import Cookies from 'js-cookie';
+
+// Token lifespan: 5 days
+const TOKEN_EXPIRY_DAYS = 5;
+
+// Module-level flag: prevents checkAuth from being called concurrently
+// if multiple components happen to trigger it at the same time.
+let authCheckInFlight = false;
 
 export function useAuth() {
   const { user, isAuthenticated, isLoading, setAuth, clearAuth, setLoading, token } = useAuthStore();
@@ -13,13 +20,17 @@ export function useAuth() {
       setLoading(true);
       try {
         const { data } = await authApi.login(email, password);
-        Cookies.set('refreshToken', data.session.access_token);
+        // Set cookie with explicit 5-day expiry so it persists across browser/server restarts
+        Cookies.set('refreshToken', data.session.access_token, {
+          expires: TOKEN_EXPIRY_DAYS,
+          sameSite: 'lax',
+        });
         setAuth(data.user, data.session.access_token);
-        setLoading(false);
         return data;
       } catch (error: any) {
-        setLoading(false);
         throw error;
+      } finally {
+        setLoading(false);
       }
     },
     [setAuth, setLoading]
@@ -30,13 +41,17 @@ export function useAuth() {
       setLoading(true);
       try {
         const { data } = await authApi.register(name, email, password);
-        Cookies.set('refreshToken', data.session.access_token);
+        // Set cookie with explicit 5-day expiry
+        Cookies.set('refreshToken', data.session.access_token, {
+          expires: TOKEN_EXPIRY_DAYS,
+          sameSite: 'lax',
+        });
         setAuth(data.user, data.session.access_token);
-        setLoading(false);
         return data;
       } catch (error: any) {
-        setLoading(false);
         throw error;
+      } finally {
+        setLoading(false);
       }
     },
     [setAuth, setLoading]
@@ -47,54 +62,65 @@ export function useAuth() {
     clearAuth();
   }, [clearAuth]);
 
+  /**
+   * Verifies the stored token with the backend.
+   * Protected by a module-level in-flight flag so it only runs once at a time,
+   * even if multiple components call it on mount simultaneously.
+   */
   const checkAuth = useCallback(async () => {
-    if (!token) {
+    // Get latest token directly from store (not the stale closure value)
+    const currentToken = useAuthStore.getState().token;
+
+    if (!currentToken) {
       setLoading(false);
       return;
     }
-    
-    if (!isAuthenticated) {
-      setLoading(true);
-    }
-    
+
+    // Deduplicate: if a check is already running, skip
+    if (authCheckInFlight) return;
+    authCheckInFlight = true;
+
+    setLoading(true);
+
     try {
       const { data } = await authApi.getMe();
       if (data?.user) {
-        setAuth(data.user, token);
+        useAuthStore.getState().setAuth(data.user, currentToken);
       } else {
-        clearAuth();
+        // Token invalid or expired — clear everything
+        Cookies.remove('refreshToken');
+        useAuthStore.getState().clearAuth();
       }
     } catch {
-      clearAuth();
+      // Network error or 401 — clear session
+      Cookies.remove('refreshToken');
+      useAuthStore.getState().clearAuth();
     } finally {
       setLoading(false);
+      authCheckInFlight = false;
     }
-  }, [setAuth, clearAuth, setLoading, token, isAuthenticated]);
+  }, [setLoading]);
 
   const googleLogin = useCallback(
     async (googleToken: string) => {
       setLoading(true);
       try {
         const { data } = await authApi.googleLogin(googleToken);
-        Cookies.set('refreshToken', data.session.access_token);
+        // Set cookie with explicit 5-day expiry
+        Cookies.set('refreshToken', data.session.access_token, {
+          expires: TOKEN_EXPIRY_DAYS,
+          sameSite: 'lax',
+        });
         setAuth(data.user, data.session.access_token);
-        setLoading(false);
         return data;
       } catch (error: any) {
-        setLoading(false);
         throw error;
+      } finally {
+        setLoading(false);
       }
     },
     [setAuth, setLoading]
   );
-
-  useEffect(() => {
-    if (token && !user) {
-      checkAuth();
-    } else if (!token) {
-      setLoading(false);
-    }
-  }, [token, user, checkAuth, setLoading]);
 
   return {
     user,

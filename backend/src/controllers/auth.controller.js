@@ -105,7 +105,7 @@ exports.login = async (req, res) => {
 // Get current user profile
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('enrolledWorkshops');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -115,7 +115,8 @@ exports.getMe = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          enrolledWorkshops: user.enrolledWorkshops || []
         }
       }
     });

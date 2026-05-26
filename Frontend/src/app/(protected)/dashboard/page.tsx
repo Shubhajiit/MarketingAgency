@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 
 export default function DashboardRedirect() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {

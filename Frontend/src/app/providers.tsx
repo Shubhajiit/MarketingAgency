@@ -1,17 +1,27 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
-
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+/**
+ * Calls checkAuth exactly once when the app first mounts.
+ * Using a ref guard ensures it doesn't re-fire in React StrictMode
+ * (which double-invokes effects in development) or if this component
+ * somehow re-renders.
+ */
 function AuthHydration({ children }: { children: React.ReactNode }) {
   const { checkAuth } = useAuth();
+  const didCheck = useRef(false);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (!didCheck.current) {
+      didCheck.current = true;
+      checkAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <>{children}</>;
 }

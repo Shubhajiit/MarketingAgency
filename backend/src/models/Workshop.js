@@ -121,7 +121,6 @@ workshopSchema.pre('save', async function (next) {
 });
 
 // ─── Indexes ──────────────────────────────────────────────────
-workshopSchema.index({ slug: 1 });
 workshopSchema.index({ isActive: 1, startDate: 1 });
 workshopSchema.index({ tags: 1 });
 

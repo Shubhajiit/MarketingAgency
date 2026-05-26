@@ -26,6 +26,7 @@ export interface Course {
   authorName?: string;
   validityText?: string;
   thumbnailType?: "dsa" | "cpp";
+  isActive?: boolean;
 }
 
 interface CourseCardProps {

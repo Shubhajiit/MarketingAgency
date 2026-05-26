@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthStore } from '@/store/auth.store';
 import UserDashboardHeader from '@/components/UserDashboardComponent/common/UserDashboardHeader';
 import UserDashboardSidebar from '@/components/UserDashboardComponent/common/UserDashboardSidebar';
 import MobileBottomNav from '@/components/UserDashboardComponent/common/MobileBottomNav';
@@ -12,7 +12,7 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 

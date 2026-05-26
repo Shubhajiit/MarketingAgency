@@ -6,6 +6,8 @@ export interface AuthUser {
   email: string;
   role: 'user' | 'admin';
   avatar?: string;
+  enrolledWorkshops?: any[];
+  enrolledCourses?: any[];
 }
 
 export const authApi = {
