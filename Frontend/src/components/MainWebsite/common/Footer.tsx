@@ -73,7 +73,7 @@ export default function Footer() {
                         </div>
 
                         {/* Tagline */}
-                        <h2 className="text-[10px] sm:text-xs md:text-3xl lg:text-4xl font-serif font-medium text-slate-800 leading-tight tracking-wide">
+                        <h2 className="text-[10px] sm:text-xs md:text-3xl lg:text-4xl font-sans font-normal text-slate-800 leading-tight tracking-wide">
                             Helping minds grow through adaptive AI learning
                         </h2>
 

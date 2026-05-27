@@ -12,7 +12,7 @@ export default function DashboardRedirect() {
     if (!isLoading) {
       if (user?.id) {
         if (user.role === 'admin') {
-          router.replace('/admin/workshops');
+          router.replace('/admin/dashboard');
         } else {
           router.replace('/dashboard/activecourse');
         }
