@@ -460,8 +460,8 @@ export default function AdminStatsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Overview Chart */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-6 flex flex-col h-[400px] shadow-xs relative">
-          <div className="flex items-center justify-between mb-6 shrink-0">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-4 sm:p-6 flex flex-col h-[420px] sm:h-[400px] shadow-xs relative">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-bold text-[#1f2937]">Overview</h2>
               <span className="flex items-center gap-0.5 text-[10px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-full">
@@ -469,7 +469,7 @@ export default function AdminStatsPage() {
                 23.5%
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               {/* Legends Toggles */}
               <div className="flex items-center gap-3 text-xs">
                 <button 
@@ -504,14 +504,14 @@ export default function AdminStatsPage() {
           </div>
 
           {/* Bar Chart Canvas */}
-          <div className="flex-1 w-full relative">
+          <div className="flex-1 w-full relative min-h-0">
             <Bar data={overviewData} options={overviewOptions} />
           </div>
         </div>
 
         {/* Right Column: Student Analysis Chart */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-6 flex flex-col h-[400px] shadow-xs relative">
-          <div className="flex items-center justify-between mb-6 shrink-0">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-4 sm:p-6 flex flex-col h-[420px] sm:h-[400px] shadow-xs relative">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-bold text-[#1f2937]">Student Analysis</h2>
               <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
@@ -519,7 +519,7 @@ export default function AdminStatsPage() {
                 3.5%
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               {/* Legends Toggles */}
               <div className="flex items-center gap-3 text-xs">
                 <button 
@@ -547,13 +547,13 @@ export default function AdminStatsPage() {
           </div>
 
           {/* Line Chart Canvas */}
-          <div className="flex-1 w-full relative">
+          <div className="flex-1 w-full relative min-h-0">
             <Line data={studentAnalysisData} options={studentAnalysisOptions} />
           </div>
         </div>
       </div>
 
-      {/* Transaction Table Section */}
+      {/* Transaction Section */}
       <div className="bg-white rounded-2xl border border-[#e9ebf0] shadow-xs overflow-hidden">
         {/* Table Header */}
         <div className="px-6 py-5 border-b border-[#f4f5f8] flex items-center justify-between bg-white shrink-0">
@@ -564,8 +564,119 @@ export default function AdminStatsPage() {
           </button>
         </div>
 
-        {/* Table View */}
-        <div className="overflow-x-auto">
+        {/* Mobile View (Cards) */}
+        <div className="md:hidden divide-y divide-[#f4f5f8] px-4 bg-white">
+          {displayBookings.map((booking) => {
+            const isPaid = booking.paymentStatus === 'paid';
+            const isCancelled = booking.paymentStatus === 'cancelled';
+            const isPending = booking.paymentStatus === 'pending';
+
+            return (
+              <div key={booking._id} className="py-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={booking.avatar} 
+                      alt={booking.user.name} 
+                      className="w-9 h-9 rounded-full object-cover border border-gray-105 shadow-xs shrink-0" 
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-bold text-[#1f2937] leading-tight text-xs">
+                        {booking.user.name}
+                      </span>
+                      <span className="text-[9.5px] text-gray-400 mt-0.5">
+                        ID: #{booking.user._id || '54124'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-extrabold text-xs text-[#1f2937] block">
+                      ${booking.amount.toFixed(2)}
+                    </span>
+                    <span className="text-[9.5px] text-gray-400 block mt-0.5">
+                      {new Date(booking.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-[#f8f9fe]/60 rounded-xl p-3 space-y-2 text-xs">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-gray-400 font-medium shrink-0">Course:</span>
+                    <span className="font-medium text-gray-700 text-right truncate max-w-[180px]">{booking.workshop.title}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 font-medium">Method:</span>
+                    <div className="flex items-center gap-1.5">
+                      {booking.cardType === 'mastercard' && (
+                        <div className="flex -space-x-1 overflow-hidden shrink-0">
+                          <span className="w-3 h-3 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
+                          <span className="w-3 h-3 rounded-full bg-[#f9a01b] inline-block -ml-1 mix-blend-multiply"></span>
+                        </div>
+                      )}
+                      {booking.cardType === 'visa' && (
+                        <span className="text-[9px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.2 rounded border border-blue-100 shrink-0">
+                          VISA
+                        </span>
+                      )}
+                      {booking.cardType === 'amex' && (
+                        <span className="text-[8px] font-bold text-sky-600 bg-sky-50 px-1 py-0.2 rounded border border-sky-100 shrink-0">
+                          AMEX
+                        </span>
+                      )}
+                      <span className="text-gray-500 font-medium text-[10px]">
+                        **** {booking.cardDigits}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 font-medium">Status:</span>
+                    {isPaid && (
+                      <span className="inline-block bg-[#eefbf6] text-[#2ac78b] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        Success
+                      </span>
+                    )}
+                    {isCancelled && (
+                      <span className="inline-block bg-[#fdf2f2] text-[#f05252] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        Cancel
+                      </span>
+                    )}
+                    {isPending && (
+                      <span className="inline-block bg-[#fffbeb] text-[#f59e0b] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button 
+                    title="View Details"
+                    className="flex-1 py-1.5 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                  >
+                    <Eye size={12} className="stroke-[2.5]" />
+                    <span>View</span>
+                  </button>
+                  <button 
+                    title="Approve / Edit"
+                    className="flex-1 py-1.5 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                  >
+                    <Check size={12} className="stroke-[3]" />
+                    <span>Approve</span>
+                  </button>
+                  <button 
+                    title="Delete Transaction"
+                    className="w-8 h-8 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors shrink-0"
+                  >
+                    <Trash2 size={12} className="stroke-[2.5]" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop View (Table) */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-white text-xs font-bold text-gray-500 border-b border-[#f4f5f8]">

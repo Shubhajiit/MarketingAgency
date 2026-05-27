@@ -19,13 +19,19 @@ export function middleware(request: NextRequest) {
 
   // Protected routes
   const protectedPaths = ['/dashboard', '/bookings', '/videos'];
-  const adminPaths = ['/admin'];
-
+  
+  // Admin routes are protected, excluding the login page itself
+  const isAdmin = pathname.startsWith('/admin') && pathname !== '/admin' && pathname !== '/admin/';
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
-  const isAdmin = adminPaths.some((path) => pathname.startsWith(path));
 
-  // Redirect unauthenticated users to login
-  if ((isProtected || isAdmin) && !hasRefreshToken) {
+  // Redirect unauthenticated users
+  if (isAdmin && !hasRefreshToken) {
+    const adminLoginUrl = new URL('/admin', request.url);
+    adminLoginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(adminLoginUrl);
+  }
+
+  if (isProtected && !hasRefreshToken) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);

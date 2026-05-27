@@ -12,7 +12,5 @@ router.get('/workshops', protect, workshopController.adminListWorkshops);
 
 // Admin: users management & assignment
 router.get('/users', protect, adminController.getUsers);
-router.post('/users/assign', protect, adminController.assignCourse);
-router.post('/users/unassign', protect, adminController.unassignCourse);
 
 module.exports = router;

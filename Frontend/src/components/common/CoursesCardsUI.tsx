@@ -14,6 +14,7 @@ export interface Course {
   discount: string;
   bgGradient: string;
   circlesColor?: string;
+  thumbnail?: string;
   instructorImage?: string;
   isGraphicOnly?: boolean;
   graphicType?: "ai" | "seo" | "ppc" | "strategy";
@@ -219,6 +220,8 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
     );
   }
 
+  const courseImg = course.thumbnail || course.instructorImage;
+
   // Fallback / original styling if needed
   return (
     <div className="bg-white border border-slate-100 rounded-xl md:rounded-2xl flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group">
@@ -227,9 +230,9 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
         )}
 
-        {course.instructorImage && (
+        {courseImg && (
           <img
-            src={course.instructorImage}
+            src={courseImg}
             alt={course.title}
             className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[88%] w-auto object-contain z-10 transition-transform duration-500 group-hover:scale-105 select-none pointer-events-none"
           />

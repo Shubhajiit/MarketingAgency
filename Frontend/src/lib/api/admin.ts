@@ -19,20 +19,4 @@ export const adminApi = {
     }>('/admin/users');
     return res.data;
   },
-
-  assignCourse: async (userId: string, courseId: string) => {
-    const res = await apiClient.post<{
-      success: boolean;
-      message: string;
-    }>('/admin/users/assign', { userId, courseId });
-    return res.data;
-  },
-
-  unassignCourse: async (userId: string, courseId: string) => {
-    const res = await apiClient.post<{
-      success: boolean;
-      message: string;
-    }>('/admin/users/unassign', { userId, courseId });
-    return res.data;
-  },
 };

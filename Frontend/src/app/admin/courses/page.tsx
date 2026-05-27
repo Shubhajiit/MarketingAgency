@@ -13,7 +13,8 @@ import {
   Search,
   BookOpen,
   Eye,
-  Settings
+  Settings,
+  Upload
 } from 'lucide-react';
 
 interface CourseFormData {
@@ -26,6 +27,7 @@ interface CourseFormData {
   discount: string;
   bgGradient: string;
   circlesColor: string;
+  thumbnail: string;
   instructorImage: string;
   isGraphicOnly: boolean;
   graphicType: 'ai' | 'seo' | 'ppc' | 'strategy' | '';
@@ -44,6 +46,7 @@ const defaultFormData: CourseFormData = {
   discount: '0%',
   bgGradient: 'from-[#6366f1] to-[#4f46e5]',
   circlesColor: '',
+  thumbnail: '',
   instructorImage: '',
   isGraphicOnly: false,
   graphicType: '',
@@ -87,6 +90,30 @@ export default function AdminCoursesPage() {
     setError('');
   };
 
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError('');
+    try {
+      const res = await coursesApi.uploadImage(file);
+      if (res.success && res.url) {
+        updateField('thumbnail', res.url);
+        updateField('instructorImage', res.url);
+      } else {
+        setError('Upload failed: Invalid response from server');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
     setFormData({
@@ -99,6 +126,7 @@ export default function AdminCoursesPage() {
       discount: course.discount || '0%',
       bgGradient: course.bgGradient || 'from-[#6366f1] to-[#4f46e5]',
       circlesColor: course.circlesColor || '',
+      thumbnail: course.thumbnail || '',
       instructorImage: course.instructorImage || '',
       isGraphicOnly: !!course.isGraphicOnly,
       graphicType: course.graphicType || '',
@@ -126,7 +154,8 @@ export default function AdminCoursesPage() {
         discount: formData.discount.trim(),
         bgGradient: formData.bgGradient.trim(),
         circlesColor: formData.circlesColor.trim(),
-        instructorImage: formData.instructorImage.trim(),
+        thumbnail: formData.thumbnail.trim(),
+        instructorImage: formData.instructorImage.trim() || formData.thumbnail.trim(),
         isGraphicOnly: formData.isGraphicOnly,
         graphicType: formData.graphicType || undefined,
         primaryCtaText: formData.primaryCtaText,
@@ -173,14 +202,14 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Certification Course Management</h1>
           <p className="text-sm text-gray-500 mt-1">Manage certification courses displayed in the main website in real-time.</p>
         </div>
         <button
           onClick={handleCreate}
-          className="flex items-center gap-2 bg-[#6366f1] hover:bg-[#5558e6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-[#6366f1]/20 hover:shadow-md hover:shadow-[#6366f1]/30 active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 bg-[#6366f1] hover:bg-[#5558e6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-[#6366f1]/20 hover:shadow-md hover:shadow-[#6366f1]/30 active:scale-[0.98] w-full sm:w-auto"
         >
           <Plus size={16} />
           Create Course
@@ -236,8 +265,8 @@ export default function AdminCoursesPage() {
                     <tr key={cid} className="hover:bg-[#f8f8ff] transition-colors group">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          {c.instructorImage ? (
-                            <img src={c.instructorImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
+                          {c.thumbnail || c.instructorImage ? (
+                            <img src={c.thumbnail || c.instructorImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
                           ) : (
                             <div className={`w-10 h-10 rounded-lg bg-gradient-to-tr ${c.bgGradient} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
                               {c.title.charAt(0)}
@@ -265,7 +294,7 @@ export default function AdminCoursesPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleEdit(c)}
                             className="p-2 rounded-lg text-gray-400 hover:text-[#6366f1] hover:bg-[#efeefc] transition-all"
@@ -457,15 +486,72 @@ export default function AdminCoursesPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Instructor Image URL</label>
-                <input
-                  type="text"
-                  value={formData.instructorImage}
-                  onChange={(e) => updateField('instructorImage', e.target.value)}
-                  placeholder="Paste Unsplash or external portrait URL..."
-                  className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                />
+              <div className="flex flex-col gap-2.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Thumbnail / Image</label>
+                
+                {/* File Uploader Box */}
+                <div className="flex flex-col sm:flex-row gap-4 items-center p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                  {formData.thumbnail || formData.instructorImage ? (
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shrink-0 group/preview bg-white">
+                      <img
+                        src={formData.thumbnail || formData.instructorImage}
+                        alt="Course preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateField('thumbnail', '');
+                          updateField('instructorImage', '');
+                        }}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-xl bg-gray-200/50 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 shrink-0 select-none">
+                      <Upload size={20} />
+                    </div>
+                  )}
+
+                  <div className="flex-1 w-full space-y-2">
+                    <div className="flex items-center gap-3">
+                      <label className="relative flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 cursor-pointer shadow-xs active:scale-[0.98] transition-all">
+                        {uploading ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin text-gray-500" />
+                            <span>Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={14} className="text-gray-500" />
+                            <span>Upload Image</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <span className="text-[10px] text-gray-400 font-medium">PNG, JPG, SVG up to 5MB</span>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={formData.thumbnail || formData.instructorImage}
+                      onChange={(e) => {
+                        updateField('thumbnail', e.target.value);
+                        updateField('instructorImage', e.target.value);
+                      }}
+                      placeholder="Or paste external image URL here..."
+                      className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 bg-white"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="border border-gray-100 rounded-xl p-4 space-y-3 bg-gray-50/50">

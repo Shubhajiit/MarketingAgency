@@ -16,7 +16,12 @@ import {
   Award
 } from 'lucide-react';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +40,7 @@ export default function Sidebar() {
   const inactiveClass = "flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium text-sm text-[#5f6368] hover:text-[#5e35b1] hover:bg-[#efeefc]/40 transition-all duration-200";
 
   return (
-    <aside className="w-68 bg-white border-r border-[#e9ebf0] flex flex-col fixed h-full z-30 transition-all duration-300">
+    <aside className={`w-68 bg-white border-r border-[#e9ebf0] flex flex-col fixed h-full z-40 transition-all duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
       {/* Logo */}
       <div className="px-6 py-6 flex items-center justify-between border-b border-[#f4f5f8]">
         <Link href="/admin/dashboard" className="flex items-center">
@@ -45,7 +50,7 @@ export default function Sidebar() {
             className="h-8 w-auto object-contain"
           />
         </Link>
-        <button className="text-gray-400 hover:text-gray-600 lg:hidden">
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 lg:hidden p-2 rounded-lg hover:bg-gray-50 transition-colors">
           <X size={18} />
         </button>
       </div>
@@ -70,10 +75,6 @@ export default function Sidebar() {
             <Link href="/admin/courses" className={isActive('/admin/courses') ? activeClass : inactiveClass}>
               <Award size={18} />
               <span>Courses</span>
-            </Link>
-            <Link href="/admin/assign-course" className={isActive('/admin/assign-course') ? activeClass : inactiveClass}>
-              <UserPlus size={18} />
-              <span>Assign Course</span>
             </Link>
           </nav>
         </div>
@@ -122,7 +123,7 @@ export default function Sidebar() {
           <button
             onClick={async () => {
               await logout();
-              router.push('/admin');
+              router.push('/');
             }}
             title="Sign Out"
             className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"

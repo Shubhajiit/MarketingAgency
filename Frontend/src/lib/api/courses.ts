@@ -40,4 +40,13 @@ export const coursesApi = {
     const res = await apiClient.delete<{ success: boolean; message: string }>(`/courses/${id}`);
     return res.data;
   },
+
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await apiClient.post<{ success: boolean; url: string; filename: string }>('/courses/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
 };
