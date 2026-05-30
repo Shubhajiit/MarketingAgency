@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getSyllabusModules } from "@/components/MainWebsite/Courses/certification-courses";
 import { Course } from "@/components/common/CoursesCardsUI";
 import { coursesApi } from "@/lib/api/courses";
+import { useCartStore } from "@/store/cart.store";
 
 const countryCodes = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -191,6 +192,7 @@ const getCourseDetailMeta = (course: Course) => {
 
 export default function CourseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { addToCart } = useCartStore();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -349,6 +351,23 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     });
   };
 
+  const handleBuyNow = () => {
+    if (!course) return;
+    addToCart({
+      id: (course as any)._id || course.id,
+      title: course.title,
+      category: course.category,
+      hours: course.hours,
+      price: course.price,
+      originalPrice: course.originalPrice,
+      discount: course.discount,
+      thumbnail: course.thumbnail || course.instructorImage,
+      instructorName: detailMeta.instructorName,
+      instructorBio: detailMeta.instructorBio,
+      level: detailMeta.level
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-white text-gray-900 relative">
 
@@ -380,18 +399,26 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </span>
             </div>
 
-            {/* CTA Button */}
-            <button
-              onClick={() => {
-                const formEl = document.getElementById("enrollment-form");
-                if (formEl) {
-                  formEl.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3.5 px-6 rounded-md shadow-sm transition-all normal-case tracking-wider cursor-pointer shrink-0"
-            >
-              Contact sales
-            </button>
+            {/* CTA Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleBuyNow}
+                className="bg-[#ebf3fc] hover:bg-[#ebf3fc]/80 text-[#0056d2] active:scale-[0.99] text-xs md:text-sm font-semibold py-2 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
+              >
+                Buy NOW
+              </button>
+              <button
+                onClick={() => {
+                  const formEl = document.getElementById("enrollment-form");
+                  if (formEl) {
+                    formEl.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-xs md:text-sm font-semibold py-2.5 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
+              >
+                Contact sales
+              </button>
+            </div>
           </div>
 
           {/* Row 2: Sub-navigation Tabs */}
@@ -502,19 +529,40 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             </span>
           </div>
 
-          {/* Action Button */}
+          {/* Price Block */}
+          <div className="flex items-baseline gap-2.5 mb-5 select-none">
+            <span className="text-3xl font-extrabold text-[#0056d2]">₹{course.price}</span>
+            {course.originalPrice > 0 && (
+              <span className="text-xs text-slate-400 line-through">₹{course.originalPrice}</span>
+            )}
+            {course.discount && (
+              <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs ml-1">
+                {course.discount} OFF
+              </span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
           <div className="flex flex-col gap-4">
-            <button
-              onClick={() => {
-                const formEl = document.getElementById("enrollment-form");
-                if (formEl) {
-                  formEl.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all w-fit uppercase tracking-wide cursor-pointer"
-            >
-              Contact sales
-            </button>
+            <div className="flex flex-row flex-wrap items-center gap-3">
+              <button
+                onClick={handleBuyNow}
+                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0"
+              >
+                Buy NOW
+              </button>
+              <button
+                onClick={() => {
+                  const formEl = document.getElementById("enrollment-form");
+                  if (formEl) {
+                    formEl.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 active:scale-[0.99] text-sm font-semibold py-3 px-8 rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide cursor-pointer shrink-0"
+              >
+                Contact Sales
+              </button>
+            </div>
 
             {/* Enrollment subtext */}
             <div className="flex flex-col gap-1.5 text-[13px] text-slate-500 font-medium">
@@ -532,7 +580,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
       {/* 2. Floating White Summary Card */}
       <section className="relative z-20 max-w-[1440px] w-full mx-auto px-4 md:px-10">
-        <div className="bg-transparent md:bg-white rounded-none md:rounded-xl border-none md:border md:border-slate-100/70 shadow-none md:shadow-[0_15px_35px_rgba(0,0,0,0.18)] mt-8 md:-mt-12 p-0 md:p-7">
+        <div className="bg-transparent md:bg-white rounded-none md:rounded-xl border-none md:border md:border-slate-100/70 shadow-none md:shadow-[0_15px_35px_rgba(0,0,0,0.18)] mt-3 md:-mt-20 p-0 md:p-7">
           <div className="flex flex-col md:grid md:grid-cols-5 gap-4 md:gap-4 divide-y-0 md:divide-x divide-slate-100 text-left">
 
             {/* 1. Guided Project Type */}

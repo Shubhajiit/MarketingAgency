@@ -1,18 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Course, CourseCard, ConcentricRings } from "@/components/common/CoursesCardsUI";
-import { useRouter } from "next/navigation";
+import { Course, CourseCard } from "@/components/common/CoursesCardsUI";
 import { coursesApi } from "@/lib/api/courses";
-
-export const coursesData: Course[] = [];
-
-const tabs = [
-  { id: "popular", label: "Popular Courses" },
-  { id: "pro-specialist", label: "Pro & Specialist Courses" },
-  { id: "short", label: "Short Courses" },
-  { id: "advanced", label: "Advanced Courses" }
-];
+import { useCartStore } from "@/store/cart.store";
+import { useRouter } from "next/navigation";
 
 const countryCodes = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -23,7 +15,7 @@ const countryCodes = [
   { code: "+65", country: "Singapore", flag: "🇸🇬" },
 ];
 
-export const getSyllabusModules = (courseTitle: string) => {
+const getSyllabusModules = (courseTitle: string) => {
   if (courseTitle.includes("Social Media")) {
     return [
       { title: "Module 1: Social Media Strategy & Brand Positioning", description: "Learn how to define your audience, select the right platforms, and position your brand for growth." },
@@ -69,33 +61,18 @@ export const getSyllabusModules = (courseTitle: string) => {
   ];
 };
 
-export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50" }: { bgColor?: string }) {
+export default function StorePage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string>("popular");
-  const [selectedBrochureCourse, setSelectedBrochureCourse] = useState<Course | null>(null);
-  const [selectedViewCourse, setSelectedViewCourse] = useState<Course | null>(null);
-  const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { addToCart } = useCartStore();
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        setLoading(true);
-        const res = await coursesApi.list();
-        setCourses(res?.data?.courses || []);
-      } catch (err) {
-        console.error("Failed to load dynamic courses:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCourses();
-  }, []);
+  const [error, setError] = useState<string | null>(null);
 
   // Brochure Request Form State
+  const [selectedBrochureCourse, setSelectedBrochureCourse] = useState<Course | null>(null);
+  const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [brochureForm, setBrochureForm] = useState({
     firstName: "",
     lastName: "",
@@ -109,16 +86,72 @@ export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50"
   const [brochureErrors, setBrochureErrors] = useState<Record<string, boolean>>({});
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Course Enrollment Form State
-  const [enrollForm, setEnrollForm] = useState({
-    name: "",
-    email: "",
-    phoneCode: "+91",
-    phone: "",
-  });
-  const [enrollErrors, setEnrollErrors] = useState<Record<string, boolean>>({});
-  const [isEnrolling, setIsEnrolling] = useState(false);
-  const [enrollSuccess, setEnrollSuccess] = useState(false);
+  // Dynamic SEO Configuration
+  useEffect(() => {
+    document.title = "Course Store | AI Scale";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute(
+        "content",
+        "Browse and purchase digital marketing and AI certification courses directly from the AI Scale store."
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const res = await coursesApi.list();
+        setCourses(res?.data?.courses || []);
+      } catch (err) {
+        console.error("Failed to load courses:", err);
+        setError("Failed to load courses. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const handleBuyNow = (course: Course) => {
+    // Populate default metadata block fields (instructor details) just like on the details page
+    let instructorName = "Elena R.";
+    let instructorBio = "Brand Manager & Social Strategist with 10+ years of experience scaling SaaS and retail brands.";
+    let level = "Intermediate level";
+
+    if (course.title.includes("Social Media")) {
+      instructorName = "Elena R.";
+      instructorBio = "Brand Manager & Social Strategist with 10+ years of experience scaling SaaS and retail brands.";
+      level = "Beginner level";
+    } else if (course.title.includes("AI")) {
+      instructorName = "Dr. Sarah Jenkins";
+      instructorBio = "AI Research Director & Growth Lead. Focuses on NLP models and marketing workflow automation.";
+      level = "Intermediate level";
+    } else if (course.title.includes("Search") || course.title.includes("SEO") || course.title.includes("PPC")) {
+      instructorName = "Arjun M.";
+      instructorBio = "Marketing Director & Search Lead. Specialist in SEO, SEM, and high-performance PPC campaigns.";
+      level = "Intermediate level";
+    } else if (course.title.includes("Strategy") || course.title.includes("Leadership")) {
+      instructorName = "James R.";
+      instructorBio = "Agency Founder & Leadership Coach. Advises Fortune 500 teams on digital transformation.";
+      level = "Advanced level";
+    }
+
+    addToCart({
+      id: (course as unknown as { _id?: string })._id || course.id,
+      title: course.title,
+      category: course.category,
+      hours: course.hours,
+      price: course.price,
+      originalPrice: course.originalPrice,
+      discount: course.discount,
+      thumbnail: course.thumbnail || course.instructorImage,
+      instructorName,
+      instructorBio,
+      level
+    });
+  };
 
   const handleBrochureInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -204,110 +237,99 @@ Email: contact@aiscale.com
     }
   };
 
-  const handleEnrollInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEnrollForm((prev) => ({ ...prev, [name]: value }));
-    if (enrollErrors[name]) {
-      setEnrollErrors((prev) => ({ ...prev, [name]: false }));
-    }
-  };
-
-  const validateEnrollForm = (): boolean => {
-    const newErrors: Record<string, boolean> = {};
-    let isValid = true;
-    if (!enrollForm.name.trim()) { newErrors.name = true; isValid = false; }
-    if (!enrollForm.email.trim() || !/\S+@\S+\.\S+/.test(enrollForm.email)) { newErrors.email = true; isValid = false; }
-    if (!enrollForm.phone.trim() || !/^\d{7,15}$/.test(enrollForm.phone.replace(/[\s-()]/g, ""))) { newErrors.phone = true; isValid = false; }
-    setEnrollErrors(newErrors);
-    return isValid;
-  };
-
-  const handleEnrollSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateEnrollForm()) {
-      setIsEnrolling(true);
-      setTimeout(() => {
-        setIsEnrolling(false);
-        setEnrollSuccess(true);
-      }, 1200);
-    }
-  };
-
-  const displayCourses = courses.length > 0 ? courses : coursesData;
-  const filteredCourses = displayCourses.filter(
-    (course) => course.category === activeTab
-  );
-
   return (
-    <section className={`w-full ${bgColor} py-8 md:py-16 px-4 md:px-36`}>
+    <div className="flex-1 bg-[#f8f9fa] py-8 md:py-16 px-4 md:px-36 font-sans">
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         {/* Header */}
-        <h2 className="text-xl sm:text-2xl md:text-[38px] font-semibold text-[#1e2245] tracking-tight text-center mb-5 md:mb-8">
-          Explore Our Certification Courses
-        </h2>
-
-        {/* Interactive Navigation Tabs */}
-        <div className="w-full border-b border-slate-100 flex justify-center mb-10 overflow-x-auto whitespace-nowrap scrollbar-none pb-[2px]">
-          <nav className="flex gap-8 md:gap-12 px-4">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 text-[13px] md:text-sm tracking-wide transition-all duration-200 border-b-2 -mb-[2px] cursor-pointer select-none ${isActive
-                    ? "text-[#1e2245] border-[#00c58d] font-semibold"
-                    : "text-slate-400 hover:text-slate-600 border-transparent font-normal"
-                    }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
+        <div className="text-center max-w-2xl mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-[38px] font-extrabold text-[#1e2245] tracking-tight mb-4">
+            AI Scale Course Store
+          </h1>
+          <p className="text-sm md:text-base text-slate-500 font-medium leading-relaxed">
+            Upgrade your skillset with our world-class, premium certification courses. Explore details and buy in a single click with instant slide-out checkout.
+          </p>
         </div>
 
-        {/* Grid of Course Cards */}
-        {filteredCourses.length > 0 ? (
-          <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-            {filteredCourses.map((course) => {
-              const cid = (course as any)._id || course.id;
-              return (
-                <CourseCard
-                  key={cid}
-                  course={course}
-                  onPrimaryClick={(course) => {
-                    if (course.primaryCtaText === "Download Brochure") {
-                      setSelectedBrochureCourse(course);
-                    } else {
-                      router.push(`/coursedetails/${cid}`);
-                    }
-                  }}
-                  onSecondaryClick={(course) => {
-                    router.push(`/coursedetails/${cid}`);
-                  }}
-                />
-              );
-            })}
+        {/* Skeleton Loader */}
+        {loading && (
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col gap-4 animate-pulse">
+                <div className="h-[120px] bg-slate-200 rounded-xl w-full" />
+                <div className="h-5 bg-slate-200 rounded w-3/4 mx-auto" />
+                <div className="h-4 bg-slate-200 rounded w-1/2 mx-auto" />
+                <div className="h-8 bg-slate-200 rounded w-full mt-2" />
+                <div className="h-6 bg-slate-200 rounded w-1/3 mx-auto" />
+              </div>
+            ))}
           </div>
-        ) : (
-          <div className="w-full py-16 text-center space-y-3 px-6">
-            <div className="w-12 h-12 rounded-full bg-slate-200/50 flex items-center justify-center mx-auto text-slate-500">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <h3 className="text-sm font-bold text-slate-800">No Certification Courses Available</h3>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto leading-normal">
-              We couldn't find any active courses in this category at the moment. Please check back later!
-            </p>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <div className="text-center py-12 px-6 bg-red-50 border border-red-100 rounded-2xl max-w-md w-full shadow-sm">
+            <p className="text-sm font-semibold text-red-800">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors uppercase tracking-wider cursor-pointer"
+            >
+              Retry
+            </button>
           </div>
+        )}
+
+        {/* Course Cards Grid */}
+        {!loading && !error && (
+          <>
+            {courses.length > 0 ? (
+              <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                {courses.map((course) => {
+                  const cid = (course as unknown as { _id?: string })._id || course.id;
+                  
+                  // Force card to have 'Buy Now' as secondary CTA and prepare it for store display
+                  const storeCourse: Course = {
+                    ...course,
+                    secondaryCtaText: "Buy Now"
+                  };
+
+                  return (
+                    <CourseCard
+                      key={cid}
+                      course={storeCourse}
+                      onPrimaryClick={(c) => {
+                        if (c.primaryCtaText === "Download Brochure") {
+                          setSelectedBrochureCourse(c);
+                        } else {
+                          router.push(`/coursedetails/${cid}`);
+                        }
+                      }}
+                      onSecondaryClick={(c) => {
+                        handleBuyNow(c);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="w-full py-16 text-center space-y-3 px-6 bg-white border border-slate-100 rounded-2xl max-w-xl">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-500">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold text-slate-800">No Certification Courses Available</h3>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto leading-normal">
+                  We couldn&apos;t find any active courses in our store database at the moment. Please check back later!
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* Course Brochure Modal */}
       {selectedBrochureCourse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-xs"
             onClick={() => setSelectedBrochureCourse(null)}
@@ -387,14 +409,14 @@ Email: contact@aiscale.com
               </div>
 
               {/* Phone */}
-              <div className="flex flex-col">
+              <div className="flex flex-col relative">
                 <div className="flex flex-row relative">
                   <button
                     type="button"
                     onClick={() => setIsCountrySelectOpen(!isCountrySelectOpen)}
                     className="flex items-center gap-1 px-2 border border-r-0 border-gray-300 bg-gray-50 rounded-l hover:bg-gray-100 transition-colors select-none text-sm shrink-0 min-w-[70px] justify-between cursor-pointer"
                   >
-                    <span className="text-base">
+                    <span className="text-base font-sans">
                       {countryCodes.find((c) => c.code === brochureForm.phoneCode)?.flag || "🇮🇳"}
                     </span>
                     <svg
@@ -416,7 +438,7 @@ Email: contact@aiscale.com
                             setBrochureForm((prev) => ({ ...prev, phoneCode: c.code }));
                             setIsCountrySelectOpen(false);
                           }}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-2.5 text-gray-700 cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-2.5 text-gray-700 cursor-pointer border-none bg-transparent"
                         >
                           <span className="text-base shrink-0">{c.flag}</span>
                           <span className="font-semibold text-gray-900 w-10">{c.code}</span>
@@ -512,7 +534,7 @@ Email: contact@aiscale.com
                     ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                     : "border-gray-300 focus:border-gray-900"
                     }`}
-                  />
+                />
                 {brochureErrors.city && (
                   <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
                     ⚠️ Required
@@ -524,7 +546,7 @@ Email: contact@aiscale.com
               <button
                 type="submit"
                 disabled={isDownloading}
-                className="mt-2 bg-[#cc0000] hover:bg-[#b30000] text-white text-center font-bold py-3 px-5 rounded uppercase tracking-wider text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 w-full flex items-center justify-center gap-2 cursor-pointer"
+                className="mt-2 bg-[#cc0000] hover:bg-[#b30000] text-white text-center font-bold py-3 px-5 rounded uppercase tracking-wider text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 w-full flex items-center justify-center gap-2 cursor-pointer border-none"
               >
                 {isDownloading ? (
                   <>
@@ -549,7 +571,7 @@ Email: contact@aiscale.com
 
       {/* Brochure Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuccessModal(false)}></div>
           <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full border border-gray-100 flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
             <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-5 text-[#22c55e]">
@@ -558,210 +580,19 @@ Email: contact@aiscale.com
               </svg>
             </div>
             <h3 className="text-xl font-black text-gray-900 mb-3 tracking-tight">Brochure Downloaded Successfully!</h3>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6 font-medium">
+            <p className="text-sm text-gray-500 leading-relaxed mb-6 font-medium font-sans">
               Thank you, <strong className="text-gray-900 font-semibold">{brochureForm.firstName}</strong>.
               The brochure has been generated and downloaded to your device. Our program advisors will contact you shortly to answer any questions about the curriculum.
             </p>
             <button
               onClick={() => setShowSuccessModal(false)}
-              className="bg-[#0c102a] hover:bg-slate-800 text-white font-bold py-2.5 px-8 rounded-lg text-sm transition-colors w-full focus:outline-none cursor-pointer"
+              className="bg-[#0c102a] hover:bg-slate-800 text-white font-bold py-2.5 px-8 rounded-lg text-sm transition-colors w-full focus:outline-none cursor-pointer border-none"
             >
               Close
             </button>
           </div>
         </div>
       )}
-
-      {/* Course View / Details Modal */}
-      {selectedViewCourse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
-            onClick={() => {
-              setSelectedViewCourse(null);
-              setEnrollSuccess(false);
-            }}
-          />
-          <div className="relative bg-white text-gray-900 rounded-2xl shadow-2xl w-full max-w-[850px] border border-gray-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200 z-10 flex flex-col">
-            {/* Top gradient banner */}
-            <div className={`bg-gradient-to-tr ${selectedViewCourse.bgGradient} p-6 md:p-8 text-white relative overflow-hidden shrink-0`}>
-              {selectedViewCourse.circlesColor && (
-                <div className="absolute right-[-10px] top-[-10px] w-36 h-36 opacity-30 pointer-events-none">
-                  <ConcentricRings color={selectedViewCourse.circlesColor} />
-                </div>
-              )}
-              <span className="inline-block bg-white/20 backdrop-blur-md text-white text-[9px] font-extrabold px-2.5 py-1 uppercase rounded tracking-wider mb-3 select-none">
-                {selectedViewCourse.tag}
-              </span>
-              <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight max-w-[90%]">
-                {selectedViewCourse.title}
-              </h2>
-              <p className="text-xs md:text-sm text-white/80 font-medium tracking-wide mt-2">
-                {selectedViewCourse.hours}
-              </p>
-              <button
-                onClick={() => {
-                  setSelectedViewCourse(null);
-                  setEnrollSuccess(false);
-                }}
-                className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors text-xl font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Split Content layout */}
-            <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-8 overflow-y-auto">
-              {/* Left Column: Syllabus Modules */}
-              <div className="md:col-span-7 flex flex-col gap-6">
-                <div>
-                  <h3 className="text-lg font-black text-[#0c102a] tracking-tight mb-2">
-                    Course Syllabus Overview
-                  </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                    This curriculum is crafted by industry experts to bring you up to speed with global standard certification requirements.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {getSyllabusModules(selectedViewCourse.title).map((module, idx) => (
-                    <div key={idx} className="border border-slate-100 rounded-lg p-4 bg-slate-50/50 hover:bg-slate-50 transition-all">
-                      <h4 className="text-[13.5px] font-extrabold text-[#0c102a] leading-snug">
-                        {module.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
-                        {module.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Column: Enrollment Card */}
-              <div className="md:col-span-5">
-                <div className="border border-slate-100 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-5 md:p-6 sticky top-0 flex flex-col gap-5">
-                  <div>
-                    <span className="text-[10px] font-extrabold text-[#009ee3] tracking-widest uppercase block mb-1">
-                      Programme Investment
-                    </span>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-[#0c102a]">
-                        ₹{selectedViewCourse.price}
-                      </span>
-                      <span className="text-slate-400 text-sm line-through font-semibold">
-                        ₹{selectedViewCourse.originalPrice}
-                      </span>
-                      <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider">
-                        {selectedViewCourse.discount} OFF
-                      </span>
-                    </div>
-                  </div>
-
-                  <hr className="border-slate-100" />
-
-                  {enrollSuccess ? (
-                    <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 text-center flex flex-col items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-sm font-bold">
-                        ✓
-                      </div>
-                      <h4 className="text-sm font-bold text-emerald-950">
-                        Enrollment Request Received!
-                      </h4>
-                      <p className="text-[11px] text-emerald-800 leading-relaxed font-medium">
-                        Congratulations! You have successfully submitted your application for <strong className="text-emerald-950 font-semibold">{selectedViewCourse.title}</strong>. Our admissions officer will contact you within 24 hours with onboarding and payment link details.
-                      </p>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleEnrollSubmit} className="flex flex-col gap-3.5">
-                      <h4 className="text-xs font-black text-slate-800 tracking-wider uppercase mb-1">
-                        Secure Your Seat Now
-                      </h4>
-
-                      <div className="flex flex-col">
-                        <input
-                          type="text"
-                          name="name"
-                          placeholder="Your Name"
-                          value={enrollForm.name}
-                          onChange={handleEnrollInputChange}
-                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${enrollErrors.name
-                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-gray-200 focus:border-[#009ee3]"
-                            }`}
-                        />
-                        {enrollErrors.name && (
-                          <span className="text-[9px] text-red-600 font-semibold mt-1">⚠️ Name is required</span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col">
-                        <input
-                          type="text"
-                          name="email"
-                          placeholder="Your Email"
-                          value={enrollForm.email}
-                          onChange={handleEnrollInputChange}
-                          className={`w-full text-xs px-3 py-2 border rounded focus:outline-none transition-colors ${enrollErrors.email
-                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-gray-200 focus:border-[#009ee3]"
-                            }`}
-                        />
-                        {enrollErrors.email && (
-                          <span className="text-[9px] text-red-600 font-semibold mt-1">⚠️ Valid email is required</span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col">
-                        <div className="flex flex-row">
-                          <span className="flex items-center justify-center px-2.5 border border-r-0 border-gray-200 bg-slate-50 text-slate-500 text-xs rounded-l select-none shrink-0 font-semibold min-w-[45px]">
-                            {enrollForm.phoneCode}
-                          </span>
-                          <input
-                            type="tel"
-                            name="phone"
-                            placeholder="Phone Number"
-                            value={enrollForm.phone}
-                            onChange={handleEnrollInputChange}
-                            className={`w-full text-xs px-3 py-2 border rounded-r focus:outline-none transition-colors ${enrollErrors.phone
-                              ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
-                              : "border-gray-200 focus:border-[#009ee3] border-l"
-                              }`}
-                          />
-                        </div>
-                        {enrollErrors.phone && (
-                          <span className="text-[9px] text-red-600 font-semibold mt-1">⚠️ Valid phone is required</span>
-                        )}
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isEnrolling}
-                        className="bg-[#009ee3] hover:bg-blue-600 active:scale-[0.99] transition-all disabled:bg-gray-400 text-white font-extrabold text-[12px] py-2.5 px-4 rounded w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                      >
-                        {isEnrolling ? (
-                          <>
-                            <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            Processing...
-                          </>
-                        ) : (
-                          "Apply & Enroll Now"
-                        )}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

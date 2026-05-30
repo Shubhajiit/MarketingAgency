@@ -37,6 +37,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
+  whatsappNumber: {
+    type: String,
+    default: ''
+  },
   purchasedVideos: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Video'

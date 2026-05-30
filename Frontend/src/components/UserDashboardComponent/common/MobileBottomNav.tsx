@@ -46,9 +46,8 @@ export default function MobileBottomNav() {
 	];
 
 	const menuItems = [
-		{ label: 'Account settings', icon: Settings },
+		{ label: 'Account settings', icon: Settings, href: '/dashboard/settings' },
 		{ label: 'Subscriptions', icon: RefreshCw },
-		{ label: 'My Wallet', icon: Wallet },
 		{ label: 'Purchase History', icon: History },
 		{ label: 'Notifications', icon: Bell }
 	];
@@ -105,24 +104,29 @@ export default function MobileBottomNav() {
 
 						{/* Menu Items */}
 						<div className="flex flex-col gap-7 pl-1">
-							{menuItems.map((item) => (
-								<div
-									key={item.label}
-									className="flex items-center gap-4 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors"
-								>
-									<item.icon size={20} strokeWidth={1.5} className="text-[#9aa0a6]" />
-									<span className="text-sm font-normal text-[#5f6368] tracking-wide">
-										{item.label}
-									</span>
-								</div>
-							))}
+							{menuItems.map((item) => {
+								const Component = item.href ? Link : 'div';
+								return (
+									<Component
+										key={item.label}
+										href={item.href || '#'}
+										onClick={() => setIsProfileOpen(false)}
+										className="flex items-center gap-4 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors"
+									>
+										<item.icon size={20} strokeWidth={1.5} className="text-[#9aa0a6]" />
+										<span className="text-sm font-normal text-[#5f6368] tracking-wide">
+											{item.label}
+										</span>
+									</Component>
+								);
+							})}
 						</div>
 					</div>
 
 					{/* Visit Store Button */}
 					<div className="mt-8">
 						<Link
-							href="/"
+							href="/store"
 							onClick={() => setIsProfileOpen(false)}
 							className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#fff7e8] text-[#c07a13] font-medium text-sm transition-colors hover:bg-[#ffeecb]"
 						>

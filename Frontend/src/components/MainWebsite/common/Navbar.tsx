@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
+import { ShoppingCart } from 'lucide-react';
+import { useCartStore } from '@/store/cart.store';
 
 const RingIcon = ({ gradient }: { gradient: string }) => (
     <div className={`w-5 h-5 rounded-full p-[2.5px] bg-gradient-to-r ${gradient} flex-shrink-0 flex items-center justify-center`}>
@@ -23,6 +25,7 @@ export default function Navbar() {
     const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const workshopsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const { user, isAuthenticated, isLoading } = useAuthStore();
+    const { cartCount, openDrawer } = useCartStore();
     const pathname = usePathname();
     const dashboardHref = '/dashboard';
 
@@ -140,6 +143,21 @@ export default function Navbar() {
                     </div>
                     <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</a>
                     <a href="#" className="hover:text-[#009ee3]">CONTACT US</a>
+
+                    {/* Cart Button */}
+                    <button
+                        onClick={openDrawer}
+                        className="relative p-2 text-gray-700 hover:text-[#009ee3] transition-colors flex items-center justify-center cursor-pointer"
+                        aria-label="View Cart"
+                    >
+                        <ShoppingCart className="w-5 h-5" />
+                        {cartCount > 0 && (
+                            <span className="absolute top-0 right-0 bg-[#e52d6a] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white animate-in scale-in duration-200">
+                                {cartCount}
+                            </span>
+                        )}
+                    </button>
+
                     {!mounted || isLoading ? (
                         <div className="h-9 w-20 bg-slate-100 animate-pulse rounded border border-slate-200/50" />
                     ) : isAuthenticated && user ? (
@@ -408,9 +426,23 @@ export default function Navbar() {
                         </div>
                     </div>
                 )}
+                {/* Mobile Cart Button */}
+                <button
+                    onClick={openDrawer}
+                    className="md:hidden relative p-2 text-gray-700 hover:text-[#009ee3] transition-colors flex items-center justify-center cursor-pointer ml-auto mr-2"
+                    aria-label="View Cart"
+                >
+                    <ShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                        <span className="absolute top-0 right-0 bg-[#e52d6a] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+                            {cartCount}
+                        </span>
+                    )}
+                </button>
+
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="md:hidden text-gray-800 focus:outline-none ml-auto p-1 hover:bg-gray-50 rounded"
+                    className="md:hidden text-gray-800 focus:outline-none p-1 hover:bg-gray-50 rounded"
                     aria-label="Toggle menu"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

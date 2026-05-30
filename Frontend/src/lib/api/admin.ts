@@ -6,6 +6,8 @@ export interface AdminUser {
   name: string;
   email: string;
   role: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
   enrolledWorkshops: any[];
   enrolledCourses: Course[];
   createdAt: string;

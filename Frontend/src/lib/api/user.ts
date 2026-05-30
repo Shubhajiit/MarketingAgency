@@ -6,7 +6,7 @@ export const userApi = {
     return res.data;
   },
 
-  updateProfile: async (data: { name?: string; avatar?: string }) => {
+  updateProfile: async (data: { name?: string; avatar?: string; phoneNumber?: string; whatsappNumber?: string }) => {
     const res = await apiClient.patch('/users/me', data);
     return res.data;
   },

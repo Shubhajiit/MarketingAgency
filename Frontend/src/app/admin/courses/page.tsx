@@ -71,7 +71,7 @@ export default function AdminCoursesPage() {
     try {
       setLoading(true);
       const res = await coursesApi.list({ all: true });
-      setCourses(res.data.courses);
+      setCourses(res?.data?.courses || []);
     } catch {
       setError('Failed to load courses');
     } finally {

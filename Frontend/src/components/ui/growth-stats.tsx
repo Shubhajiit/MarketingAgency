@@ -36,18 +36,18 @@ export default function GrowthStats() {
                 </p>
 
                 {/* Stats Grid with borders exactly like the image */}
-                <div className="grid grid-cols-1 md:grid-cols-4 border-t border-b border-gray-200 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-4 border-t border-b border-l border-r md:border-l-0 md:border-r-0 border-gray-200 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                     {stats.map((stat, idx) => (
                         <div
                             key={idx}
-                            className="text-left py-8 md:py-10 px-6 md:px-8 flex flex-col justify-start"
+                            className="text-left py-5 md:py-10 px-6 md:px-8 flex flex-col justify-start"
                         >
                             {/* Value (brand blue color to match the button style) */}
-                            <div className="text-4xl md:text-5xl font-extrabold text-[#0056d2] mb-5 tracking-tight">
+                            <div className="text-4xl md:text-5xl font-extrabold text-[#0056d2] mb-3 md:mb-5 tracking-tight">
                                 {stat.value}
                             </div>
                             {/* Title */}
-                            <h3 className="text-sm font-bold text-gray-950 tracking-wider mb-4 uppercase leading-snug min-h-[40px] flex items-center">
+                            <h3 className="text-sm font-bold text-gray-950 tracking-wider mb-2.5 md:mb-4 uppercase leading-snug min-h-0 md:min-h-[40px] flex items-center">
                                 {stat.title}
                             </h3>
                             {/* Description */}

@@ -477,7 +477,7 @@ Email: contact@aiscale.com
         {!loading && workshop && (
           <>
             {/* Stats / Details Bar */}
-            <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
+            <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-5 md:py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
               <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-gray-300">
                 <div className="flex flex-col items-start md:px-8 first:pl-0">
                   <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
@@ -508,8 +508,8 @@ Email: contact@aiscale.com
 
             {/* Application Deadline */}
             {workshop.applicationDeadline && (
-              <section className="bg-white py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-                <div className="w-full max-w-4xl bg-[#f5f5f5] py-8 px-6 text-center border border-gray-100">
+              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
+                <div className="w-full max-w-4xl bg-[#f5f5f5] py-6 md:py-8 px-6 text-center border border-gray-100">
                   <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application Deadline</h2>
                   <p className="text-gray-600 text-sm md:text-base font-normal">
                     Apply by <span className="font-bold text-gray-800">{formatDisplayDate(workshop.applicationDeadline)}</span> at 11:59 PM
@@ -520,7 +520,7 @@ Email: contact@aiscale.com
 
             {/* Who is this Programme For */}
             {workshop.targetAudience && workshop.targetAudience.length > 0 && (
-              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="who-is-this-programme-for">
+              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="who-is-this-programme-for">
                 <div className="max-w-7xl mx-auto flex flex-col gap-6">
                   <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Who is this Programme For</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -537,7 +537,7 @@ Email: contact@aiscale.com
 
             {/* Programme Highlights */}
             {workshop.highlights && workshop.highlights.length > 0 && (
-              <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="programme-highlights">
+              <section className="bg-slate-50 py-8 md:py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="programme-highlights">
                 <div className="max-w-7xl mx-auto flex flex-col gap-6">
                   <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Programme Highlights</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-6">
@@ -561,7 +561,7 @@ Email: contact@aiscale.com
 
             {/* Learning Outcomes */}
             {workshop.learningOutcomes && workshop.learningOutcomes.length > 0 && (
-              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="learning-outcomes">
+              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="learning-outcomes">
                 <div className="max-w-7xl mx-auto flex flex-col gap-6">
                   <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Learning Outcome</h2>
                   <div className="flex flex-col divide-y divide-gray-100">
@@ -577,7 +577,7 @@ Email: contact@aiscale.com
 
             {/* Expert Masterclasses */}
             {workshop.experts && workshop.experts.length > 0 && (
-              <section className="bg-slate-50 py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="expert-masterclasses">
+              <section className="bg-slate-50 py-8 md:py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="expert-masterclasses">
                 <div className="max-w-7xl mx-auto flex flex-col gap-6">
                   <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Masterclasses with Subject Matter Experts</h2>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
@@ -608,7 +608,7 @@ Email: contact@aiscale.com
 
             {/* Programme Modules */}
             {workshop.modules && workshop.modules.length > 0 && (
-              <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="programme-modules">
+              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="programme-modules">
                 <div className="max-w-7xl mx-auto flex flex-col gap-6">
                   <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight mb-2">Programme Modules</h2>
                   <div className="flex flex-col gap-3.5 w-full">

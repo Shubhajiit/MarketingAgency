@@ -76,6 +76,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Award size={18} />
               <span>Courses</span>
             </Link>
+            <Link href="/admin/courses-buyers" className={isActive('/admin/courses-buyers') ? activeClass : inactiveClass}>
+              <Users size={18} />
+              <span>Courses Buyers</span>
+            </Link>
           </nav>
         </div>
 

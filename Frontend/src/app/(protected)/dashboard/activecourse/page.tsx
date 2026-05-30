@@ -48,36 +48,40 @@ export default function ActiveCoursesPage() {
   const [launchMessage, setLaunchMessage] = useState<string | null>(null);
 
   // Map real enrolled courses to Course card structure
-  const enrolledCourses: Course[] = (user?.enrolledCourses || []).map((c: any) => ({
-    id: c._id || c.id,
-    title: c.title,
-    category: c.category || "popular",
-    tag: c.tag || "DMI",
-    hours: c.hours || "Self-Paced",
-    price: c.price || 0,
-    originalPrice: c.originalPrice || 0,
-    discount: c.discount || "0%",
-    bgGradient: c.bgGradient || "from-[#6366f1] to-[#8b5cf6]",
-    primaryCtaText: c.primaryCtaText || "View Course",
-    secondaryCtaText: c.secondaryCtaText || "View Course",
-    isPackage: !c.isGraphicOnly,
-    isMockTest: c.isMockTest || false,
-    authorName: c.authorName || "",
-    validityText: "Lifetime",
-    thumbnailType: c.thumbnailType || undefined,
-    circlesColor: c.circlesColor,
-    thumbnail: c.thumbnail || c.instructorImage,
-    instructorImage: c.instructorImage,
-    isGraphicOnly: c.isGraphicOnly,
-    graphicType: c.graphicType
-  }));
+  const enrolledCourses: Course[] = (user?.enrolledCourses || [])
+    .filter((c: any) => c && typeof c === 'object' && c.title)
+    .map((c: any) => ({
+      id: c._id || c.id,
+      title: c.title,
+      category: c.category || "popular",
+      tag: c.tag || "DMI",
+      hours: c.hours || "Self-Paced",
+      price: c.price || 0,
+      originalPrice: c.originalPrice || 0,
+      discount: c.discount || "0%",
+      bgGradient: c.bgGradient || "from-[#6366f1] to-[#8b5cf6]",
+      primaryCtaText: c.primaryCtaText || "View Course",
+      secondaryCtaText: c.secondaryCtaText || "View Course",
+      isPackage: !c.isGraphicOnly,
+      isMockTest: c.isMockTest || false,
+      authorName: c.authorName || "",
+      validityText: "Lifetime",
+      thumbnailType: c.thumbnailType || undefined,
+      circlesColor: c.circlesColor,
+      thumbnail: c.thumbnail || c.instructorImage,
+      instructorImage: c.instructorImage,
+      isGraphicOnly: c.isGraphicOnly,
+      graphicType: c.graphicType
+    }));
 
   const allActiveCourses = [...enrolledCourses, ...mockActiveCourses];
 
   const filteredCourses = activeTab === 'active'
     ? allActiveCourses.filter(course =>
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (course.authorName && course.authorName.toLowerCase().includes(searchQuery.toLowerCase()))
+      course && course.title && (
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (course.authorName && course.authorName.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
     )
     : [];
 
@@ -89,7 +93,7 @@ export default function ActiveCoursesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12 font-sans pt-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 font-sans pt-6">
       {/* Launch Toast Notification */}
       {launchMessage && (
         <div className="fixed top-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg z-50 text-sm font-semibold animate-in fade-in slide-in-from-top-4 duration-300 flex items-center gap-2 border border-slate-800">

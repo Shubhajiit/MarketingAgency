@@ -44,7 +44,11 @@ exports.signUp = async (req, res) => {
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: user.role,
+            phoneNumber: user.phoneNumber || '',
+            whatsappNumber: user.whatsappNumber || '',
+            enrolledCourses: user.enrolledCourses || [],
+            enrolledWorkshops: user.enrolledWorkshops || []
           }
         }
       });
@@ -91,7 +95,11 @@ exports.login = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          phoneNumber: user.phoneNumber || '',
+          whatsappNumber: user.whatsappNumber || '',
+          enrolledCourses: user.enrolledCourses || [],
+          enrolledWorkshops: user.enrolledWorkshops || []
         }
       }
     });
@@ -105,7 +113,7 @@ exports.login = async (req, res) => {
 // Get current user profile
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('enrolledWorkshops');
+    const user = await User.findById(req.user.id).populate('enrolledWorkshops').populate('enrolledCourses');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -116,6 +124,9 @@ exports.getMe = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          phoneNumber: user.phoneNumber || '',
+          whatsappNumber: user.whatsappNumber || '',
+          enrolledCourses: user.enrolledCourses || [],
           enrolledWorkshops: user.enrolledWorkshops || []
         }
       }
@@ -174,7 +185,11 @@ exports.googleLogin = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          avatar: user.avatar
+          avatar: user.avatar,
+          phoneNumber: user.phoneNumber || '',
+          whatsappNumber: user.whatsappNumber || '',
+          enrolledCourses: user.enrolledCourses || [],
+          enrolledWorkshops: user.enrolledWorkshops || []
         }
       }
     });

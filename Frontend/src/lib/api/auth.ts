@@ -8,6 +8,8 @@ export interface AuthUser {
   avatar?: string;
   enrolledWorkshops?: any[];
   enrolledCourses?: any[];
+  phoneNumber?: string;
+  whatsappNumber?: string;
 }
 
 export const authApi = {

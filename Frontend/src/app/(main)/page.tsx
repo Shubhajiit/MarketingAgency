@@ -3,26 +3,80 @@
 import React from "react";
 import { LogoCloud } from "@/components/ui/logo-cloud-2";
 import Image from "next/image";
+import Link from "next/link";
 import GrowthStats from "@/components/ui/growth-stats";
 import CertificationCoursesSection from "@/components/MainWebsite/Courses/certification-courses";
 
+const COURSE_LEVELS = [
+    {
+        title: "Digital Marketing Essentials",
+        subtitle: "6 Hours • Associate Level Certification",
+        bullets: [
+            "For beginners and non-marketers",
+            "Learn the fundamentals of digital marketing",
+            "Build digital awareness"
+        ],
+        image: "/LandingPage/essentials_course.png",
+        linkText: "View Course",
+        linkUrl: "/courses"
+    },
+    {
+        title: "Short Courses: Bite-size Learning",
+        subtitle: "5 to 10 Hours • Associate Level Certification",
+        bullets: [
+            "Rapid skills development",
+            "Focus on an in-demand or emerging skill",
+            "Stay relevant in your role",
+            "To the point and essential"
+        ],
+        image: "/LandingPage/short_course.png",
+        linkText: "View Courses",
+        linkUrl: "/courses"
+    },
+    {
+        title: "Pro & Specialist Courses",
+        subtitle: "25 to 40 Hours • Professional Certification",
+        bullets: [
+            "In depth and comprehensive",
+            "DMI Pro: For generalists who need to develop multiple skills at professional level",
+            "DMI Specialisms: For specialists focusing on one discipline to build expertise"
+        ],
+        image: "/LandingPage/pro_course.png",
+        linkText: "View Courses",
+        linkUrl: "/courses"
+    },
+    {
+        title: "Advanced Courses",
+        subtitle: "Advanced Qualifications",
+        bullets: [
+            "Expert led programmes and courses",
+            "Open the doors to C-level roles",
+            "Build expertise in digital marketing",
+            "Gain business strategy and leadership skills"
+        ],
+        image: "/LandingPage/advanced_course.png",
+        linkText: "View Courses",
+        linkUrl: "/courses"
+    }
+];
+
 const REVIEWS = [
-  {
-    text: "A lot of online workshops, but this one actually delivered. Practical, no fluff, and I left with tools I could use the very next day. Worth every minute.",
-    author: "James R."
-  },
-  {
-    text: "The session on AI-driven SEO alone saved my team weeks of manual research. This isn't just theory—it's highly actionable systems that produce real growth.",
-    author: "Sarah K. (Growth Lead)"
-  },
-  {
-    text: "Excellent value. The instructor walked through a live setup of a lead generation funnel without any complex coding. A game-changer for our agency.",
-    author: "Arjun M. (Marketing Director)"
-  },
-  {
-    text: "I was skeptical at first, but the framework for scaling content output 3x using AI is incredibly robust. Highly recommend for any marketing professional.",
-    author: "Elena R. (Brand Manager)"
-  }
+    {
+        text: "A lot of online workshops, but this one actually delivered. Practical, no fluff, and I left with tools I could use the very next day. Worth every minute.",
+        author: "James R."
+    },
+    {
+        text: "The session on AI-driven SEO alone saved my team weeks of manual research. This isn't just theory—it's highly actionable systems that produce real growth.",
+        author: "Sarah K. (Growth Lead)"
+    },
+    {
+        text: "Excellent value. The instructor walked through a live setup of a lead generation funnel without any complex coding. A game-changer for our agency.",
+        author: "Arjun M. (Marketing Director)"
+    },
+    {
+        text: "I was skeptical at first, but the framework for scaling content output 3x using AI is incredibly robust. Highly recommend for any marketing professional.",
+        author: "Elena R. (Brand Manager)"
+    }
 ];
 
 export default function Page() {
@@ -218,7 +272,7 @@ export default function Page() {
                         </div>
 
                         <div className="overflow-hidden w-full relative z-10">
-                            <div 
+                            <div
                                 className={`flex ${transitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''}`}
                                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                             >
@@ -240,9 +294,8 @@ export default function Page() {
                                 <button
                                     key={index}
                                     onClick={() => handleDotClick(index)}
-                                    className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${
-                                        (currentIndex % REVIEWS.length) === index ? 'bg-[#111827]' : 'bg-[#c7c7c7] hover:bg-[#a3a3a3]'
-                                    }`}
+                                    className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${(currentIndex % REVIEWS.length) === index ? 'bg-[#111827]' : 'bg-[#c7c7c7] hover:bg-[#a3a3a3]'
+                                        }`}
                                     aria-label={`Go to slide ${index + 1}`}
                                 />
                             ))}
@@ -497,6 +550,73 @@ export default function Page() {
 
             <GrowthStats />
             <CertificationCoursesSection bgColor="bg-[#f8fafd]" />
+
+            {/* Course Level Selector Section */}
+            <section className="w-full bg-white py-16 md:py-24 px-4 md:px-36 border-t border-slate-100">
+                <div className="max-w-6xl mx-auto flex flex-col items-center">
+                    <h2 className="text-2xl sm:text-3xl md:text-[38px] font-semibold text-[#1e2245] tracking-tight text-center leading-tight flex flex-wrap items-center justify-center gap-3">
+                        <span>Choose the Right Course for Your Skill Level & Career Goals</span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200/80 uppercase tracking-wider whitespace-nowrap align-middle">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Coming soon, building
+                        </span>
+                    </h2>
+                    <p className="text-[13px] md:text-sm text-[#5c6479] text-center max-w-3xl mx-auto mt-4 leading-relaxed font-normal">
+                        We develop courses for every stage of your marketing career. Find a course that will give you the <span className="font-bold text-[#1e2245]">skills and experience you need for any marketing role</span> such as Digital Strategy and Leadership, AI, Social Media, Search Marketing or SEO.
+                    </p>
+
+                    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-12 md:mt-16">
+                        {COURSE_LEVELS.map((course, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-white border border-[#e5e7eb] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:border-slate-300"
+                            >
+                                {/* Left: Portrait image container */}
+                                <div className="relative shrink-0 flex items-center justify-center">
+                                    <img
+                                        src={course.image}
+                                        alt={course.title}
+                                        className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full shadow-sm bg-slate-50"
+                                    />
+                                </div>
+
+                                {/* Right: Content details */}
+                                <div className="flex-1 flex flex-col justify-between min-h-0">
+                                    <div>
+                                        <h3 className="text-base sm:text-lg font-extrabold text-[#1e2245] leading-tight">
+                                            {course.title}
+                                        </h3>
+                                        <p className="text-[10px] sm:text-[11px] text-[#8e9aa8] font-bold tracking-wide mt-1 mb-2.5">
+                                            {course.subtitle}
+                                        </p>
+
+                                        <ul className="space-y-1.5 mb-4">
+                                            {course.bullets.map((bullet, bIdx) => (
+                                                <li key={bIdx} className="flex items-start gap-2 text-xs sm:text-[13px] text-[#4b5563] leading-relaxed">
+                                                    <svg className="w-3.5 h-3.5 text-[#00c58d] shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    <span>{bullet}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    <div className="mt-auto">
+                                        <Link
+                                            href={course.linkUrl}
+                                            className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-bold text-[#00a877] hover:text-[#008f64] transition-colors group/link"
+                                        >
+                                            {course.linkText}
+                                            <span className="transform transition-transform group-hover/link:translate-x-1">→</span>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }

@@ -16,9 +16,17 @@ export interface SingleCourseResponse {
 }
 
 export const coursesApi = {
-  list: async (params?: { all?: boolean }) => {
-    const res = await apiClient.get<CourseResponse>('/courses', { params });
-    return res.data;
+  list: async (params?: { all?: boolean }): Promise<CourseResponse> => {
+    try {
+      const res = await apiClient.get<CourseResponse>('/courses', { params });
+      return res.data;
+    } catch (error) {
+      console.error("apiClient.get('/courses') failed:", error);
+      return {
+        success: false,
+        data: { courses: [] }
+      };
+    }
   },
 
   get: async (id: string) => {
@@ -38,6 +46,11 @@ export const coursesApi = {
 
   delete: async (id: string) => {
     const res = await apiClient.delete<{ success: boolean; message: string }>(`/courses/${id}`);
+    return res.data;
+  },
+
+  enroll: async (id: string) => {
+    const res = await apiClient.post<{ success: boolean; message: string; data: { enrolledCourses: string[] } }>(`/courses/${id}/enroll`);
     return res.data;
   },
 

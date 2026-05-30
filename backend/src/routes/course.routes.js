@@ -15,6 +15,7 @@ router.get('/:id', courseController.getCourseById);
 router.post('/', protect, courseController.createCourse);
 router.patch('/:id', protect, courseController.updateCourse);
 router.delete('/:id', protect, courseController.deleteCourse);
+router.post('/:id/enroll', protect, courseController.enrollInCourse);
 
 // POST /api/v1/courses/upload — upload course thumbnail image to Cloudinary
 router.post('/upload', protect, upload.single('image'), async (req, res) => {
