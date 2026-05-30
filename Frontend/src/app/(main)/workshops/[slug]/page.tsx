@@ -347,7 +347,7 @@ Email: contact@aiscale.com
 
               {/* Left: Workshop Image */}
               <div className="w-full lg:w-[50%] flex items-center justify-center">
-                <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[160px] sm:min-h-[200px] md:min-h-[300px] shadow-xs flex items-center justify-center">
+                <div className="bg-transparent border-0 border-b border-gray-200/80 rounded-none overflow-hidden aspect-auto max-w-full lg:max-w-[520px] w-full h-[200px] sm:h-[240px] md:h-auto min-h-0 shadow-[0_6px_12px_rgba(255,255,255,0.95)] flex items-center justify-center md:bg-white md:border md:border-[#EADFD3] md:rounded-2xl md:aspect-[4/3] md:min-h-[300px] md:shadow-xs">
                   {workshop.thumbnail ? (
                     <img
                       src={workshop.thumbnail}
@@ -366,14 +366,10 @@ Email: contact@aiscale.com
               </div>
 
               {/* Right: Content */}
-              <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left font-sans">
-                <div className="flex flex-col items-start">
-                  {workshop.batchNumber && (
-                    <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-2 bg-[#F0EBE3] px-2.5 py-1 rounded-full border border-[#E5DCD3]">
-                      {workshop.batchNumber}
-                    </span>
-                  )}
-                  <h1 className="text-3xl md:text-4xl lg:text-[40px] font-extrabold text-[#111827] leading-[1.15] tracking-tight mb-2">
+              <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left font-sans gap-y-4">
+                {/* Section 1: Title, Subtitle, Metadata Grid */}
+                <div className="flex flex-col items-start w-full order-1">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold text-[#111827] leading-[1.15] tracking-tight mb-2 w-full">
                     {workshop.title}
                   </h1>
                   {workshop.subtitle && (
@@ -383,7 +379,7 @@ Email: contact@aiscale.com
                   )}
 
                   {/* Metadata Grid: Date / Time / Duration */}
-                  <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mb-6">
+                  <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mb-2">
                     <div>
                       <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Date</span>
                       <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
@@ -405,68 +401,68 @@ Email: contact@aiscale.com
                       </span>
                     </div>
                   </div>
-
-                  {/* Experts / Mentors */}
-                  {workshop.experts && workshop.experts.length > 0 && (
-                    <div className="w-full mb-2">
-                      <span className="text-[10px] md:text-xs font-bold text-[#64748B] uppercase tracking-widest mb-3.5 block">Mentors</span>
-                      <div className="flex flex-wrap items-center gap-5 md:gap-8">
-                        {workshop.experts.slice(0, 2).map((expert, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            {expert.image ? (
-                              <img
-                                src={expert.image}
-                                alt={expert.name}
-                                className="w-10 h-10 rounded-full object-cover border border-[#E5DCD3] shadow-xs shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 border border-[#E5DCD3]">
-                                {expert.name.charAt(0)}
-                              </div>
-                            )}
-                            <div className="flex flex-col text-left">
-                              <span className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{expert.name}</span>
-                              <span className="text-[10px] md:text-[11px] font-medium text-gray-500 leading-none mt-0.5">{expert.role}</span>
-                            </div>
-                          </div>
-                        ))}
-                        {workshop.experts.length > 2 && (
-                          <span className="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-950 transition-colors cursor-pointer hover:underline">
-                            +{workshop.experts.length - 2} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* Bottom Row: Register button + Price */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E5DCD3]/50 pt-5 mt-6 w-full font-sans">
-                  <button
-                    onClick={() => setIsRegisterModalOpen(true)}
-                    id="workshop-register-btn"
-                    className="bg-[#7CD19B] hover:bg-[#6ec289] active:scale-[0.98] text-[#134F2C] text-sm md:text-base font-extrabold py-4 px-8 rounded-lg shadow-xs transition-all flex items-center gap-2 cursor-pointer w-full sm:w-[280px] justify-center font-sans"
-                  >
-                    Register Now
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  </button>
+                {/* Section 2: Experts / Mentors */}
+                {workshop.experts && workshop.experts.length > 0 && (
+                  <div className="w-full mb-2 order-3 md:order-2 border-t md:border-t-0 border-[#E5DCD3]/30 pt-4 md:pt-0">
+                    <span className="text-[10px] md:text-xs font-bold text-[#64748B] uppercase tracking-widest mb-3.5 block">Mentors</span>
+                    <div className="flex flex-wrap items-center gap-5 md:gap-8">
+                      {workshop.experts.slice(0, 2).map((expert, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          {expert.image ? (
+                            <img
+                              src={expert.image}
+                              alt={expert.name}
+                              className="w-10 h-10 rounded-full object-cover border border-[#E5DCD3] shadow-xs shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 border border-[#E5DCD3]">
+                              {expert.name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="flex flex-col text-left">
+                            <span className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{expert.name}</span>
+                            <span className="text-[10px] md:text-[11px] font-medium text-gray-500 leading-none mt-0.5">{expert.role}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {workshop.experts.length > 2 && (
+                        <span className="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-950 transition-colors cursor-pointer hover:underline">
+                          +{workshop.experts.length - 2} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                  <div className="flex items-center gap-3 sm:text-right w-full sm:w-auto justify-center sm:justify-end font-sans">
+                {/* Section 3: Register button + Price */}
+                <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 border-t-0 md:border-t border-[#E5DCD3]/50 pt-2 md:pt-5 mt-1 md:mt-2 w-full font-sans order-2 md:order-3">
+                  <div className="flex items-center gap-1.5 sm:gap-3 font-sans shrink-0">
                     {workshop.fee ? (
                       <>
-                        <span className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight font-sans">{workshop.fee}</span>
-                        {workshop.feeNote && <span className="text-xs font-semibold text-gray-400">{workshop.feeNote}</span>}
+                        <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">{workshop.fee}</span>
+                        {workshop.feeNote && <span className="text-[10px] sm:text-xs font-semibold text-gray-400">{workshop.feeNote}</span>}
                       </>
                     ) : workshop.price > 0 ? (
-                      <span className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight font-sans">
+                      <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">
                         {workshop.currency === 'INR' ? '₹' : workshop.currency}{workshop.price.toLocaleString('en-IN')}
                       </span>
                     ) : (
-                      <span className="text-2xl md:text-3xl font-black text-[#22c55e] tracking-tight font-sans">FREE</span>
+                      <span className="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight font-sans">FREE</span>
                     )}
                   </div>
+
+                  <button
+                    onClick={() => setIsRegisterModalOpen(true)}
+                    id="workshop-register-btn"
+                    className="bg-[#7CD19B] hover:bg-[#6ec289] active:scale-[0.98] text-[#134F2C] text-xs sm:text-sm md:text-base font-extrabold py-2.5 md:py-4 px-4 sm:px-8 rounded-lg shadow-xs transition-all flex items-center gap-2 cursor-pointer w-auto sm:w-[280px] justify-center font-sans shrink-0"
+                  >
+                    Register Now
+                    <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                  </button>
                 </div>
 
               </div>
