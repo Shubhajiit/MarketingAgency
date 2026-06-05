@@ -7,7 +7,6 @@ A scalable workshop-booking and paid video-learning platform built with a separa
 
 
 AI Scale lets users:
-
 - browse public workshop listings
 - pick a workshop slot and pay for booking
 - receive instant booking confirmation by email
