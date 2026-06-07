@@ -9,7 +9,7 @@ export interface CartCourse {
   price?: number;
   originalPrice?: number;
   discount?: string;
-  thumbnail?: string;
+  mentorPicture?: string;
   instructorName?: string;
   instructorBio?: string;
   level?: string;

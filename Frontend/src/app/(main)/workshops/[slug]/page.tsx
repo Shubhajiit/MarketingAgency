@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 
 import { workshopApi, Workshop } from '@/lib/api/workshops';
@@ -142,6 +142,7 @@ export default function DynamicWorkshopPage() {
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
   const [activeModule, setActiveModule] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<FormState>({
     firstName: '',
@@ -157,6 +158,45 @@ export default function DynamicWorkshopPage() {
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const outcomesRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollOutcomes = (direction: "left" | "right") => {
+    const container = outcomesRef.current;
+    if (!container) return;
+    const firstCard = container.firstElementChild as HTMLElement;
+    const scrollAmount = firstCard ? firstCard.offsetWidth + 32 : Math.max(280, Math.floor(container.clientWidth * 0.48));
+    container.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth"
+    });
+  };
+
+  useEffect(() => {
+    if (slug !== 'executive-programme-in-generative-ai-business-innovation') return;
+    const container = outcomesRef.current;
+    if (!container) return;
+
+    let direction: 'right' | 'left' = 'right';
+    const interval = setInterval(() => {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      if (direction === 'right' && scrollLeft + clientWidth >= scrollWidth - 25) {
+        direction = 'left';
+      } else if (direction === 'left' && scrollLeft <= 25) {
+        direction = 'right';
+      }
+
+      const firstCard = container.firstElementChild as HTMLElement;
+      const cardWidth = firstCard ? firstCard.offsetWidth + 32 : Math.floor(clientWidth * 0.48);
+
+      container.scrollBy({
+        left: direction === 'right' ? cardWidth : -cardWidth,
+        behavior: "smooth"
+      });
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [slug]);
 
   // Fetch workshop data
   useEffect(() => {
@@ -256,11 +296,11 @@ export default function DynamicWorkshopPage() {
   };
 
   const triggerBrochureDownload = () => {
-    if (workshop?.brochureUrl) {
+    if ((workshop as any)?.brochureUrl) {
       const link = document.createElement('a');
-      link.href = workshop.brochureUrl;
+      link.href = (workshop as any).brochureUrl;
       link.target = '_blank';
-      link.download = `${workshop.title}_Brochure.pdf`;
+      link.download = `${workshop?.title || 'Workshop'}_Brochure.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -272,7 +312,7 @@ export default function DynamicWorkshopPage() {
 =========================================
 ${(workshop?.title || 'Workshop').toUpperCase()}
 =========================================
-${workshop?.batchNumber || ''} ${workshop?.startDate ? '- Starts ' + new Date(workshop.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+${(workshop as any)?.batchNumber || ''} ${(workshop as any)?.startDate ? '- Starts ' + new Date((workshop as any).startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
 
 Congratulations ${formData.firstName} ${formData.lastName}!
 Thank you for downloading the brochure.
@@ -285,9 +325,9 @@ ${workshop?.highlights?.map((h, i) => `${i + 1}. ${h.title}`).join('\n') || 'Det
 -----------------------------------------
 PROGRAMME DETAILS:
 -----------------------------------------
-* Duration: ${workshop?.duration || 'TBD'}
-* Fees: ${workshop?.fee || 'TBD'}
-* Eligibility: ${workshop?.eligibility || 'TBD'}
+* Duration: ${(workshop as any)?.duration || 'TBD'}
+* Fees: ${(workshop as any)?.fee || 'TBD'}
+* Eligibility: ${(workshop as any)?.eligibility || 'TBD'}
 
 Contact us: 1800 4122 6965
 Email: contact@aiscale.com
@@ -312,7 +352,7 @@ Email: contact@aiscale.com
         setIsSubmitting(false);
         setShowSuccessModal(true);
         setIsRegisterModalOpen(false);
-        if (workshop?.hasBrochure !== false) {
+        if ((workshop as any)?.hasBrochure !== false) {
           triggerBrochureDownload();
         }
       }, 1200);
@@ -337,325 +377,1027 @@ Email: contact@aiscale.com
 
   const checkmarkItems = workshop?.highlights?.slice(0, 4) || [];
 
+  const getCleanedTitle = () => {
+    if (!workshop) return "";
+    return workshop.title
+      .replace(/Executive Programme in/gi, "")
+      .replace(/Executive Program in/gi, "")
+      .replace(/Programme in/gi, "")
+      .replace(/Program in/gi, "")
+      .trim();
+  };
+
+  const cleanedName = getCleanedTitle();
+  const buttonPrefix = cleanedName.toLowerCase().startsWith("become") ? "" : "Become A ";
+  const buttonSuffix = cleanedName.toLowerCase().endsWith("expert") ? " Now At" : " Expert Now At";
+
   return (
     <div className={`flex-1 flex flex-col bg-white transition-all duration-300 ${showStickyBar ? 'pb-[130px] sm:pb-[90px]' : ''}`}>
       <main className="flex-1 flex flex-col">
         {/* Hero Section — White Card UI (dynamic from DB) */}
         {!loading && workshop && (
-          <section className="bg-white pt-3 md:pt-5 pb-1 md:pb-2 px-4 md:px-8 w-full flex items-center justify-center font-sans" id="workshop-hero-section">
-            <div className="max-w-8xl mx-auto w-full bg-[#FCF8F5] rounded-3xl border border-[#F2ECE4]/70 p-6 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(255,255,255,1)] flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch">
-
-              {/* Left: Workshop Image */}
-              <div className="w-full lg:w-[50%] flex items-center justify-center">
-                <div className="bg-transparent border-0 border-b border-gray-200/80 rounded-none overflow-hidden aspect-auto max-w-full lg:max-w-[520px] w-full h-[200px] sm:h-[240px] md:h-auto min-h-0 shadow-[0_6px_12px_rgba(255,255,255,0.95)] flex items-center justify-center md:bg-white md:border md:border-[#EADFD3] md:rounded-2xl md:aspect-[4/3] md:min-h-[300px] md:shadow-xs">
-                  {workshop.thumbnail ? (
-                    <img
-                      src={workshop.thumbnail}
-                      alt={workshop.title}
-                      className="w-full h-full object-cover object-center"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-3 text-[#C4B5A5]">
-                      <svg className="w-14 h-14 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-xs font-semibold tracking-wide opacity-60">Image coming soon</span>
-                    </div>
-                  )}
-                </div>
+          slug === 'executive-programme-in-generative-ai-business-innovation' ? (
+            <section
+              className="relative bg-white pt-4 md:pt-12 pb-24 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
+              id="workshop-hero-section"
+              style={{
+                backgroundImage: 'radial-gradient(#cbd5e1 1.5px, transparent 1.5px)',
+                backgroundSize: '24px 24px',
+              }}
+            >
+              {/* Centered Top Content */}
+              <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-2 md:gap-3 px-1 sm:px-4 w-full">
+                <h1 className="text-3xl md:text-[45px] font-semibold text-gray-900 tracking-tight leading-tight [&_u]:no-underline [&_u]:border-b-[5px] [&_u]:border-[#0052FF] [&_u]:pb-1 [&_u]:inline-block w-full max-w-none animate-fade-in">
+                  One Day <span className="text-[#0052FF] font-extrabold">AI</span> <span className="">MasterClass</span>
+                </h1>
+                <p className="text-base md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
+                  Learn. Implement. Grow. Master AI. Save time.
+                </p>
+                <p className="text-xs md:text-sm font-semibold text-black leading-relaxed max-w-4xl mt-1">
+                  Take your Python skills to the next level with our intensive 30-day cohort. Learn from industry experts, work on real-world projects, and become a proficient Python developer in just one month!
+                </p>
               </div>
 
-              {/* Right: Content */}
-              <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left font-sans gap-y-4">
-                {/* Section 1: Title, Subtitle, Metadata Grid */}
-                <div className="flex flex-col items-start w-full order-1">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold text-[#111827] leading-[1.15] tracking-tight mb-2 w-full">
-                    {workshop.title}
-                  </h1>
-                  {workshop.subtitle && (
-                    <p className="text-gray-600 text-sm md:text-[15px] font-medium leading-relaxed mb-6">
-                      {workshop.subtitle}
-                    </p>
-                  )}
+              {/* Main Blue Bordered Card */}
+              <div className="max-w-5xl mx-auto w-full bg-white rounded-2xl border-[3px] border-[#0052FF] p-5 md:p-6 lg:p-8 shadow-[6px_6px_0px_#0052FF] relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
+                {/* Left Column: Image & Logos */}
+                <div className="w-full lg:w-[50%] flex flex-col justify-between gap-6">
+                  <div>
 
-                  {/* Metadata Grid: Date / Time / Duration */}
-                  <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mb-2">
-                    <div>
-                      <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Date</span>
-                      <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                        {workshop.startDate
-                          ? new Date(workshop.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                          : 'Coming Soon'}
-                      </span>
+                    <div className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden aspect-[16/9] shadow-sm flex items-center justify-center">
+                      <img
+                        src={workshop.thumbnail || "https://res.cloudinary.com/dppgindsc/image/upload/v1780774475/workshops/lqcuatyi3elxhrqbtkdn.png"}
+                        alt="0 to Hero In Python Banner"
+                        className="w-full h-full object-cover object-center"
+                      />
                     </div>
-                    <div>
-                      <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Time</span>
-                      <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                        {(workshop as Workshop & { workshopTime?: string }).workshopTime || 'TBD'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Duration</span>
-                      <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                        {workshop.duration || 'TBD'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Section 2: Experts / Mentors */}
-                {workshop.experts && workshop.experts.length > 0 && (
-                  <div className="w-full mb-2 order-3 md:order-2 border-t md:border-t-0 border-[#E5DCD3]/30 pt-4 md:pt-0">
-                    <span className="text-[10px] md:text-xs font-bold text-[#64748B] uppercase tracking-widest mb-3.5 block">Mentors</span>
-                    <div className="flex flex-wrap items-center gap-5 md:gap-8">
-                      {workshop.experts.slice(0, 2).map((expert, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          {expert.image ? (
-                            <img
-                              src={expert.image}
-                              alt={expert.name}
-                              className="w-10 h-10 rounded-full object-cover border border-[#E5DCD3] shadow-xs shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 border border-[#E5DCD3]">
-                              {expert.name.charAt(0)}
+                    {/* Logos marquee: continuously scrolls right-to-left */}
+                    <div className="pt-6 mt-6 px-2">
+                      <div className="relative overflow-hidden">
+                        <div className="marquee flex items-center gap-6" aria-hidden>
+                          <div className="flex items-center gap-6">
+                            <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
+                            <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain" />
+                            <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain" />
+                            <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain" />
+                            <div className="flex items-center gap-1.5">
+                              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
+                              </svg>
+                              <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
                             </div>
-                          )}
-                          <div className="flex flex-col text-left">
-                            <span className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{expert.name}</span>
-                            <span className="text-[10px] md:text-[11px] font-medium text-gray-500 leading-none mt-0.5">{expert.role}</span>
+                          </div>
+
+                          {/* duplicate for seamless loop */}
+                          <div className="flex items-center gap-6">
+                            <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
+                            <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain" />
+                            <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain" />
+                            <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain" />
+                            <div className="flex items-center gap-1.5">
+                              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
+                              </svg>
+                              <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
+                            </div>
                           </div>
                         </div>
-                      ))}
-                      {workshop.experts.length > 2 && (
-                        <span className="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-950 transition-colors cursor-pointer hover:underline">
-                          +{workshop.experts.length - 2} more
-                        </span>
-                      )}
+
+                        <style jsx>{`
+                          @keyframes marquee {
+                            0% { transform: translateX(0); }
+                            100% { transform: translateX(-50%); }
+                          }
+                          .marquee {
+                            display: flex;
+                            gap: 8rem;
+                            align-items: center;
+                            min-width: 200%;
+                            animation: marquee 16s linear infinite;
+                          }
+                        `}</style>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {/* Section 3: Register button + Price */}
-                <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 border-t-0 md:border-t border-[#E5DCD3]/50 pt-2 md:pt-5 mt-1 md:mt-2 w-full font-sans order-2 md:order-3">
-                  <div className="flex items-center gap-1.5 sm:gap-3 font-sans shrink-0">
-                    {workshop.fee ? (
-                      <>
-                        <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">{workshop.fee}</span>
-                        {workshop.feeNote && <span className="text-[10px] sm:text-xs font-semibold text-gray-400">{workshop.feeNote}</span>}
-                      </>
-                    ) : workshop.price > 0 ? (
-                      <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">
-                        {workshop.currency === 'INR' ? '₹' : workshop.currency}{workshop.price.toLocaleString('en-IN')}
-                      </span>
-                    ) : (
-                      <span className="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight font-sans">FREE</span>
-                    )}
+                  {/* Ratings Row under Logos strip */}
+                  <div className="flex flex-row flex-wrap items-center gap-5 px-2 mt-2 w-full">
+                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center justify-start gap-4 shadow-sm w-44 md:w-52 min-h-[64px]">
+                      <img src="/Rating/TrustStar.png" alt={(workshop as any).rating1Platform || "Trustpilot"} className="w-8 h-8 shrink-0 object-contain" />
+                      <div className="flex flex-col items-start leading-tight">
+                        <span className="text-sm font-bold text-gray-900 mb-0.5">
+                          {((workshop as any).rating1Value || "4.5/5")} {((workshop as any).rating1Count || "(725)")}
+                        </span>
+                        <span className="text-[13px] font-semibold text-gray-900 tracking-tight">
+                          {((workshop as any).rating1Platform || "Trustpilot")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center justify-start gap-4 shadow-sm w-44 md:w-52 min-h-[64px]">
+                      <img src="/Rating/ReviewStar.png" alt={(workshop as any).rating2Platform || "Rating Facts"} className="w-8 h-8 shrink-0 object-contain" />
+                      <div className="flex flex-col items-start leading-tight">
+                        <span className="text-sm font-bold text-gray-900 mb-0.5">
+                          {((workshop as any).rating2Value || "4.07/5")} {((workshop as any).rating2Count || "(88)")}
+                        </span>
+                        <span className="text-[13px] font-semibold text-gray-900 tracking-tight">
+                          {((workshop as any).rating2Platform || "Rating Facts")}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-
-                  <button
-                    onClick={() => setIsRegisterModalOpen(true)}
-                    id="workshop-register-btn"
-                    className="bg-[#7CD19B] hover:bg-[#6ec289] active:scale-[0.98] text-[#134F2C] text-xs sm:text-sm md:text-base font-extrabold py-2.5 md:py-4 px-4 sm:px-8 rounded-lg shadow-xs transition-all flex items-center gap-2 cursor-pointer w-auto sm:w-[280px] justify-center font-sans shrink-0"
-                  >
-                    Register Now
-                    <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  </button>
                 </div>
 
+                {/* Right Column: Bullets, Button, Deadline */}
+                <div className="w-full lg:w-[50%] flex flex-col justify-start gap-4">
+                  {/* Highlights Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {((workshop as any).heroPoints && (workshop as any).heroPoints.length > 0
+                      ? (workshop as any).heroPoints
+                      : [
+                        "25 Lessons With Case Studies",
+                        "Mega Webinar on Jun 14, 2026",
+                        "Get Certificate Of Completion",
+                        "No prior knowledge of python or AI required"
+                      ]
+                    ).map((text: string, idx: number) => (
+                      <div key={idx} className="bg-blue-50/60 border border-blue-100/30 rounded-xl p-4 flex items-center gap-3 shadow-xs">
+                        <img src="/WorkshopHeroTick/check.png" alt="check" className="w-6 h-6 object-contain shrink-0" />
+                        <span className="text-xs md:text-sm font-bold text-gray-800 leading-snug">{text}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Yellow Button & Deadline Group */}
+                  <div className="flex flex-col items-center w-full">
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      className="w-full bg-[#FCD12A] hover:bg-[#E6BD22] active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all flex flex-col items-center justify-center gap-1 cursor-pointer text-center"
+                    >
+                      <span className="font-semibold text-sm md:text-[17px] tracking-tight">
+                        {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
+                      </span>
+                      <span className="flex items-center gap-2 whitespace-nowrap">
+                        <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
+                          ₹{(workshop as any).originalPrice || 1999}
+                        </span>
+                        <span className="text-gray-900 text-lg md:text-xl font-semibold">
+                          ₹{workshop.price || 199}/-
+                        </span>
+                      </span>
+                    </button>
+
+                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
+                      {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                    </p>
+
+                    <div className="mt-7 w-full flex flex-col items-center">
+                      <h4 className="text-sm md:text-base font-extrabold text-gray-900 tracking-wide uppercase mb-3 border-b-2 border-[#0052FF] pb-1">
+                        Held On
+                      </h4>
+                      {(() => {
+                        const datesList = (workshop as any).workshopDates && (workshop as any).workshopDates.length > 0
+                          ? (workshop as any).workshopDates
+                          : [
+                            new Date('2026-06-03T10:00:00Z'),
+                            new Date('2026-06-04T10:00:00Z'),
+                            new Date('2026-06-05T10:00:00Z')
+                          ];
+                        const gridColsClass = datesList.length === 1
+                          ? 'grid-cols-1 max-w-[150px]'
+                          : datesList.length === 2
+                            ? 'grid-cols-2 max-w-[320px]'
+                            : 'grid-cols-3 max-w-[490px]';
+
+                        return (
+                          <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
+                            {datesList.map((dateVal: string | Date, idx: number) => {
+                              const dateObj = new Date(dateVal);
+                              const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                              const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className="w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-3 md:px-4 py-3 flex flex-row items-center justify-center gap-2.5 cursor-pointer transition-all bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02] group"
+                                >
+                                  <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
+                                  <div className="flex flex-col items-start text-left leading-none">
+                                    <span className="text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 text-gray-500 group-hover:text-[#0052FF]">
+                                      {weekday}
+                                    </span>
+                                    <span className="text-xs md:text-sm font-semibold text-gray-900 leading-none">
+                                      {dayMonth}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </section>
+
+              {/* Spacer */}
+              <div className="h-12 w-full"></div>
+
+              {/* Instructor Card */}
+              <div className="max-w-2xl w-full mx-auto flex justify-center z-10 px-4">
+                <div className="w-full max-w-xl bg-white border-[2.5px] border-[#0052FF] rounded-2xl p-5 md:p-6 shadow-[6px_6px_0px_#0052FF] flex flex-row items-center gap-5">
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-full overflow-hidden border-2 border-black bg-slate-900 flex items-center justify-center">
+                    <img
+                      src={(workshop as any).instructorImage || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80"}
+                      alt={workshop.instructor || "Aman Saurav"}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[11px] md:text-xs font-black tracking-widest text-black">INSTRUCTOR</span>
+                    <h3 className="text-base md:text-[19px] font-black text-gray-950 mt-0.5 leading-tight">{workshop.instructor || "Aman Saurav"}</h3>
+                    {((workshop as any).instructorDescription || "(IIT Delhi) Senior Data Analyst\nDirector at AI for Techies")
+                      .split("\n")
+                      .map((line: string, idx: number) => (
+                        <p key={idx} className={`text-xs md:text-sm text-gray-800 font-bold leading-snug ${idx === 0 ? 'mt-1.5' : 'mt-0.5'}`}>
+                          {line}
+                        </p>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Checkmarks Grid */}
+              <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 mt-10 mb-8 z-10 px-4">
+                {(workshop.learningOutcomes && workshop.learningOutcomes.length > 0
+                  ? workshop.learningOutcomes
+                  : [
+                    "Learn Python from basic",
+                    "Debug python code in seconds using AI",
+                    "Create interactive visualisations in Python in minutes",
+                    "Create website in Python using AI while saving 95% of time",
+                    "Solve real-world case studies",
+                    "Write code in python by using AI in seconds"
+                  ]
+                ).map((text, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <svg className="w-6.5 h-6.5 text-[#22C55E] shrink-0" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm md:text-base font-bold text-gray-800 leading-snug text-left">{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Blue Registration CTA Button */}
+              <div className="max-w-2xl w-full mx-auto mt-4 mb-6 z-10 px-4">
+                <button
+                  onClick={() => setIsRegisterModalOpen(true)}
+                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2.5 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                >
+                  <span className="font-semibold">
+                    {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
+                  </span>
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
+                      ₹{(workshop as any).originalPrice || 1999}
+                    </span>
+                    <span className="text-white text-base md:text-xl font-black">
+                      ₹{workshop.price || 199}/-
+                    </span>
+                  </span>
+                </button>
+              </div>
+
+              {/* Natural Wavy SVG Separator */}
+              <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-0 pointer-events-none">
+                <svg
+                  viewBox="0 0 1440 120"
+                  preserveAspectRatio="none"
+                  className="relative block w-full h-[60px] md:h-[100px] lg:h-[120px]"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient id="curve-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#0052FF" stopOpacity={0.8} />
+                      <stop offset="35%" stopColor="#0EA5E9" stopOpacity={0.7} />
+                      <stop offset="70%" stopColor="#38BDF8" stopOpacity={0.8} />
+                      <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.9} />
+                    </linearGradient>
+                    <linearGradient id="curve-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.4} />
+                      <stop offset="50%" stopColor="#93C5FD" stopOpacity={0.6} />
+                      <stop offset="100%" stopColor="#0052FF" stopOpacity={0.5} />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Base white fill to cleanly mask/transition the dot background */}
+                  <path
+                    d="M0,80 C360,130 720,30 1080,105 C1260,130 1440,90 1440,90 L1440,120 L0,120 Z"
+                    fill="#FFFFFF"
+                  />
+
+                  {/* Thin strokes representing the curves in the image */}
+                  <path
+                    d="M0,75 C360,125 720,25 1080,100 C1260,125 1440,85 1440,85"
+                    fill="none"
+                    stroke="url(#curve-grad-1)"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M0,90 C400,130 800,40 1200,110 C1320,120 1440,95 1440,95"
+                    fill="none"
+                    stroke="#0052FF"
+                    strokeWidth="0.75"
+                    strokeOpacity={0.4}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+            </section>
+          ) : (
+            <section className="bg-white pt-3 md:pt-5 pb-1 md:pb-2 px-4 md:px-8 w-full flex items-center justify-center font-sans" id="workshop-hero-section">
+              <div className="max-w-8xl mx-auto w-full bg-[#FCF8F5] rounded-3xl border border-[#F2ECE4]/70 p-6 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(255,255,255,1)] flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch">
+
+                {/* Left: Workshop Image */}
+                <div className="w-full lg:w-[50%] flex items-center justify-center">
+                  <div className="bg-transparent border-0 border-b border-gray-200/80 rounded-none overflow-hidden aspect-auto max-w-full lg:max-w-[520px] w-full h-[200px] sm:h-[240px] md:h-auto min-h-0 shadow-[0_6px_12px_rgba(255,255,255,0.95)] flex items-center justify-center md:bg-white md:border md:border-[#EADFD3] md:rounded-2xl md:aspect-[4/3] md:min-h-[300px] md:shadow-xs">
+                    {workshop.thumbnail ? (
+                      <img
+                        src={workshop.thumbnail}
+                        alt={workshop.title}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-3 text-[#C4B5A5]">
+                        <svg className="w-14 h-14 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-xs font-semibold tracking-wide opacity-60">Image coming soon</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right: Content */}
+                <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left font-sans gap-y-4">
+                  {/* Section 1: Title, Subtitle, Metadata Grid */}
+                  <div className="flex flex-col items-start w-full order-1">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold text-[#111827] leading-[1.15] tracking-tight mb-2 w-full">
+                      {workshop.title}
+                    </h1>
+                    {workshop.subtitle && (
+                      <p className="text-gray-600 text-sm md:text-[15px] font-medium leading-relaxed mb-6">
+                        {workshop.subtitle}
+                      </p>
+                    )}
+
+                    {/* Metadata Grid: Date / Time / Duration */}
+                    <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mb-2">
+                      <div>
+                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Date</span>
+                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
+                          {(workshop as any).startDate
+                            ? new Date((workshop as any).startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : 'Coming Soon'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Time</span>
+                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
+                          {(workshop as any).workshopTime || 'TBD'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Duration</span>
+                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
+                          {(workshop as any).duration || 'TBD'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Experts / Mentors */}
+                  {workshop.experts && workshop.experts.length > 0 && (
+                    <div className="w-full mb-2 order-3 md:order-2 border-t md:border-t-0 border-[#E5DCD3]/30 pt-4 md:pt-0">
+                      <span className="text-[10px] md:text-xs font-bold text-[#64748B] uppercase tracking-widest mb-3.5 block">Mentors</span>
+                      <div className="flex flex-wrap items-center gap-5 md:gap-8">
+                        {workshop.experts.slice(0, 2).map((expert, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            {expert.image ? (
+                              <img
+                                src={expert.image}
+                                alt={expert.name}
+                                className="w-10 h-10 rounded-full object-cover border border-[#E5DCD3] shadow-xs shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 border border-[#E5DCD3]">
+                                {expert.name.charAt(0)}
+                              </div>
+                            )}
+                            <div className="flex flex-col text-left">
+                              <span className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{expert.name}</span>
+                              <span className="text-[10px] md:text-[11px] font-medium text-gray-500 leading-none mt-0.5">{expert.role}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {workshop.experts.length > 2 && (
+                          <span className="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-950 transition-colors cursor-pointer hover:underline">
+                            +{workshop.experts.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Section 3: Register button + Price */}
+                  <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 border-t-0 md:border-t border-[#E5DCD3]/50 pt-2 md:pt-5 mt-1 md:mt-2 w-full font-sans order-2 md:order-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3 font-sans shrink-0">
+                      {(workshop as any).fee ? (
+                        <>
+                          <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">{(workshop as any).fee}</span>
+                          {(workshop as any).feeNote && <span className="text-[10px] sm:text-xs font-semibold text-gray-400">{(workshop as any).feeNote}</span>}
+                        </>
+                      ) : workshop.price > 0 ? (
+                        <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">
+                          {workshop.currency === 'INR' ? '₹' : workshop.currency}{workshop.price.toLocaleString('en-IN')}
+                        </span>
+                      ) : (
+                        <span className="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight font-sans">FREE</span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      id="workshop-register-btn"
+                      className="bg-[#7CD19B] hover:bg-[#6ec289] active:scale-[0.98] text-[#134F2C] text-xs sm:text-sm md:text-base font-extrabold py-2.5 md:py-4 px-4 sm:px-8 rounded-lg shadow-xs transition-all flex items-center gap-2 cursor-pointer w-auto sm:w-[280px] justify-center font-sans shrink-0"
+                    >
+                      Register Now
+                      <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+          )
         )}
 
         {!loading && workshop && (
           <>
             {/* Stats / Details Bar */}
-            <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-5 md:py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
-              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-gray-300">
-                <div className="flex flex-col items-start md:px-8 first:pl-0">
-                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
-                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block">
-                    {formatDisplayDate(workshop.startDate) || 'TBD'}
-                  </span>
-                </div>
-                <div className="flex flex-col items-start md:px-8">
-                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">DURATION</span>
-                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.duration || 'TBD'}</span>
-                  {workshop.durationDetail && <span className="text-xs font-medium text-gray-500 leading-normal block">{workshop.durationDetail}</span>}
-                </div>
-                <div className="flex flex-col items-start md:px-8">
-                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">PROGRAMME FEE</span>
-                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">{workshop.fee || `${workshop.currency === 'INR' ? '₹' : '$'}${workshop.price.toLocaleString()}`}</span>
-                  {workshop.feeNote && <span className="text-xs font-medium text-gray-500 leading-normal block mb-1.5">{workshop.feeNote}</span>}
-                  <a href="#" className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:underline leading-relaxed block transition-colors">
-                    Flexible Payment Options Available
-                  </a>
-                </div>
-                <div className="flex flex-col items-start md:pl-8 md:pr-0">
-                  <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">ELIGIBILITY</span>
-                  <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1.5">{workshop.eligibility || 'Open to all'}</span>
-                  {workshop.eligibilityDetail && <span className="text-xs font-medium text-gray-500 leading-relaxed block">{workshop.eligibilityDetail}</span>}
-                </div>
-              </div>
-            </section>
-
-            {/* Application Deadline */}
-            {workshop.applicationDeadline && (
-              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-                <div className="w-full max-w-4xl bg-[#f5f5f5] py-6 md:py-8 px-6 text-center border border-gray-100">
-                  <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application Deadline</h2>
-                  <p className="text-gray-600 text-sm md:text-base font-normal">
-                    Apply by <span className="font-bold text-gray-800">{formatDisplayDate(workshop.applicationDeadline)}</span> at 11:59 PM
-                  </p>
-                </div>
-              </section>
-            )}
-
-            {/* Who is this Programme For */}
-            {workshop.targetAudience && workshop.targetAudience.length > 0 && (
-              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="who-is-this-programme-for">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Who is this Programme For</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                    {workshop.targetAudience.map((ta, i) => (
-                      <div key={i} className="bg-[#f8f9fa] p-6 md:p-8 rounded-lg flex flex-col gap-3 border border-gray-50/60 shadow-xs">
-                        <h3 className="text-lg md:text-xl font-bold text-gray-950 tracking-tight">{ta.title}</h3>
-                        <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed font-medium">{ta.description}</p>
-                      </div>
-                    ))}
+            {slug !== 'executive-programme-in-generative-ai-business-innovation' && (
+              <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-5 md:py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
+                <div className={`max-w-7xl mx-auto grid grid-cols-1 ${slug === 'executive-programme-in-generative-ai-business-innovation' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-8 md:gap-0 md:divide-x divide-gray-300`}>
+                  <div className="flex flex-col items-start md:px-8 first:pl-0">
+                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
+                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block">
+                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '26 May 2026' : (formatDisplayDate((workshop as any).startDate) || 'TBD')}
+                    </span>
                   </div>
-                </div>
-              </section>
-            )}
-
-            {/* Programme Highlights */}
-            {workshop.highlights && workshop.highlights.length > 0 && (
-              <section className="bg-slate-50 py-8 md:py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="programme-highlights">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Programme Highlights</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-6">
-                    {workshop.highlights.map((hl, i) => (
-                      <div key={i} className="bg-white p-5 rounded-xl border border-gray-200/50 shadow-xs flex flex-col items-start gap-4 hover:shadow-md transition-all duration-300">
-                        <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shrink-0">
-                          <svg className="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <h4 className="text-sm font-bold text-gray-900 leading-tight">{hl.title}</h4>
-                          {hl.description && <p className="text-gray-500 text-xs leading-relaxed font-medium">{hl.description}</p>}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="flex flex-col items-start md:px-8">
+                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">DURATION</span>
+                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">
+                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '2 Weeks' : ((workshop as any).duration || 'TBD')}
+                    </span>
+                    {(slug === 'executive-programme-in-generative-ai-business-innovation' || (workshop as any).durationDetail) && (
+                      <span className="text-xs font-medium text-gray-500 leading-normal block">
+                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? '3-4 hours/week' : (workshop as any).durationDetail}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </section>
-            )}
-
-            {/* Learning Outcomes */}
-            {workshop.learningOutcomes && workshop.learningOutcomes.length > 0 && (
-              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="learning-outcomes">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Learning Outcome</h2>
-                  <div className="flex flex-col divide-y divide-gray-100">
-                    {workshop.learningOutcomes.map((lo, i) => (
-                      <div key={i} className="py-4.5 first:pt-0 last:pb-0">
-                        <p className="text-gray-700 text-sm md:text-[15px] font-medium leading-relaxed">{lo}</p>
-                      </div>
-                    ))}
+                  <div className="flex flex-col items-start md:px-8">
+                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">PROGRAMME FEE</span>
+                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1 font-sans">
+                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '₹149,999' : ((workshop as any).fee || `${workshop.currency === 'INR' ? '₹' : '$'}${workshop.price.toLocaleString()}`)}
+                    </span>
+                    {(slug === 'executive-programme-in-generative-ai-business-innovation' || (workshop as any).feeNote) && (
+                      <span className="text-xs font-medium text-gray-500 leading-normal block mb-1.5">
+                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? 'NO GST' : (workshop as any).feeNote}
+                      </span>
+                    )}
+                    <a href="#" className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:underline leading-relaxed block transition-colors">
+                      Flexible Payment Options Available
+                    </a>
                   </div>
-                </div>
-              </section>
-            )}
-
-            {/* Expert Masterclasses */}
-            {workshop.experts && workshop.experts.length > 0 && (
-              <section className="bg-slate-50 py-8 md:py-16 px-4 md:px-16 w-full border-t border-b border-slate-100 font-sans" id="expert-masterclasses">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight">Masterclasses with Subject Matter Experts</h2>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                    {workshop.experts.map((exp, i) => (
-                      <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200/60 shadow-xs flex flex-row items-stretch hover:shadow-md transition-all duration-300 min-h-[140px] md:min-h-[160px]">
-                        <div className="w-[120px] md:w-[150px] shrink-0 relative bg-gray-100">
-                          {exp.image ? (
-                            <img src={exp.image} alt={exp.name} className="absolute inset-0 w-full h-full object-cover" />
-                          ) : (
-                            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-3xl font-bold">
-                              {exp.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-5 flex flex-col justify-center gap-2 flex-1">
-                          <h3 className="text-base md:text-lg font-bold text-gray-950 leading-snug">{exp.name}</h3>
-                          {exp.role && <p className="text-gray-500 text-xs md:text-sm font-medium leading-relaxed">{exp.role}</p>}
-                          <a href="#" className="text-[#cc0000] hover:text-[#b30000] text-xs font-bold uppercase tracking-wider flex items-center gap-1 mt-1 transition-colors hover:underline">
-                            View Profile <span className="text-sm">→</span>
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Programme Modules */}
-            {workshop.modules && workshop.modules.length > 0 && (
-              <section className="bg-white py-8 md:py-16 px-4 md:px-16 w-full border-t border-gray-100 font-sans" id="programme-modules">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                  <h2 className="text-[26px] md:text-[32px] font-bold text-gray-900 tracking-tight leading-tight mb-2">Programme Modules</h2>
-                  <div className="flex flex-col gap-3.5 w-full">
-                    {workshop.modules.map((mod, idx) => {
-                      const isOpen = activeModule === idx;
-                      return (
-                        <div key={idx} className="border border-gray-200/80 rounded-lg overflow-hidden bg-white shadow-xs">
-                          <button
-                            onClick={() => handleToggleModule(idx)}
-                            className="w-full flex items-center justify-between p-5 bg-[#fcfcfc] hover:bg-[#f5f5f5] text-left transition-colors font-semibold text-gray-900 text-sm md:text-base cursor-pointer"
-                          >
-                            <span>{mod.title}</span>
-                            <svg className={`w-5 h-5 text-gray-500 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] border-t border-gray-100' : 'max-h-0'}`}>
-                            <div className="p-6 bg-white flex flex-col gap-3">
-                              {mod.content.map((point, pIdx) => (
-                                <div key={pIdx} className="flex items-start gap-3">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
-                                  <p className="text-gray-700 text-xs md:text-sm leading-relaxed font-medium">{point}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Download Brochure CTA */}
-                  {workshop?.hasBrochure !== false && (
-                    <div className="mt-8 flex flex-col items-center gap-6">
-                      <p className="text-gray-500 text-xs md:text-sm text-center max-w-4xl leading-relaxed font-medium">
-                        <span className="font-bold text-gray-700">Note:</span> Modules/topics are indicative only, and the suggested time and sequence may be dropped, modified, or adapted to fit the total programme hours
-                      </p>
-                      <button
-                        onClick={handleScrollToBook}
-                        className="bg-[#222222] hover:bg-black text-white font-bold py-3.5 px-8 flex items-center gap-2.5 transition-all duration-200 uppercase tracking-wider text-xs md:text-sm cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] border border-transparent rounded-sm"
-                      >
-                        Download Programme Brochure
-                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </button>
+                  {slug !== 'executive-programme-in-generative-ai-business-innovation' && (
+                    <div className="flex flex-col items-start md:pl-8 md:pr-0">
+                      <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">ELIGIBILITY</span>
+                      <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1.5">
+                        {(workshop as any).eligibility || 'Open to all'}
+                      </span>
+                      {(workshop as any).eligibilityDetail && (
+                        <span className="text-xs font-medium text-gray-500 leading-relaxed block">
+                          {(workshop as any).eligibilityDetail}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
               </section>
             )}
+
+            {/* What You'll Learn Section */}
+            {((workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0) || slug === 'executive-programme-in-generative-ai-business-innovation') && (
+              <section className="bg-white py-12 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
+                <div className="max-w-7xl w-full mx-auto flex flex-col items-center text-center">
+                  <h2 className="text-2xl sm:text-[32px] font-black text-gray-900 tracking-tight leading-tight">
+                    What You&apos;ll Learn
+                  </h2>
+                  <p className="text-gray-600 text-sm md:text-[15px] font-semibold mt-2.5 mb-10">
+                    Starts from Jun 14, 2026
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5 w-full text-left">
+                    {(workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0
+                      ? workshop.whatYouWillLearn.map((step, idx) => ({
+                        step: `Step ${idx + 1}`,
+                        title: step.title,
+                        tags: [step.description]
+                      }))
+                      : [
+                        {
+                          step: "Step 1",
+                          title: "Social Media Handling with AI",
+                          tags: [
+                            "Create, schedule, analyze & grow your social media using powerful AI tools."
+                          ]
+                        },
+                        {
+                          step: "Step 2",
+                          title: "Video Editing with AI",
+                          tags: [
+                            "Edit stunning videos, add effects, captions, transitions & more using AI."
+                          ]
+                        },
+                        {
+                          step: "Step 3",
+                          title: "Thumbnail Making with AI",
+                          tags: [
+                            "Design eye-catching thumbnails that get more clicks using AI."
+                          ]
+                        },
+                        {
+                          step: "Step 4",
+                          title: "Platform Growth with AI",
+                          tags: [
+                            "Use AI strategies to grow followers, increase engagement & reach."
+                          ]
+                        },
+                        {
+                          step: "Step 5",
+                          title: "WhatsApp Campaigning with AI",
+                          tags: [
+                            "Automate messaging, build list, run campaigns & boost leads using AI."
+                          ]
+                        },
+                        {
+                          step: "Step 6",
+                          title: "20 AI Tools You Must Know",
+                          tags: [
+                            "Hands-on with 20 powerful AI tools to simplify your workflow & boost productivity."
+                          ]
+                        }
+                      ]
+                    ).map((stepObj, idx) => {
+                      const isEven = idx % 2 === 1;
+                      return (
+                        <div
+                          key={idx}
+                          className={`${isEven ? "bg-[#EAFBF0]" : "bg-[#FCF5F0]"
+                            } border border-[#0052FF] shadow-[6px_6px_0px_#0052FF] rounded-2xl px-4 py-5 md:px-5 md:py-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#0052FF] transition-all duration-300`}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-xl md:text-2xl font-semibold text-gray-900">{stepObj.step}</h3>
+                            <h4 className={`text-sm md:text-base font-semibold leading-snug ${isEven ? "text-[#1E7F46]" : "text-blue-600"}`}>{stepObj.title}</h4>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {stepObj.tags.filter(Boolean).map((item, i) => (
+                              <div key={i} className="bg-white border border-gray-200/50 rounded-lg px-3 py-1.5 text-xs md:text-sm font-semibold text-gray-800 shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:bg-gray-50 hover:scale-[1.02] transition-all duration-200 cursor-default select-none">
+                                {item}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Application Deadline */}
+            {((workshop as any).applicationDeadline || slug === 'executive-programme-in-generative-ai-business-innovation') && (
+              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
+                <div className="w-full max-w-4xl p-[3px] rounded-2xl bg-gradient-to-r from-[#FF007A] via-[#7F00FF] via-[#001AFF] to-[#00E080] shadow-[0_0_30px_rgba(255,0,122,0.18),0_0_30px_rgba(0,26,255,0.18),0_0_30px_rgba(0,224,128,0.18)]">
+                  <div className="w-full bg-[#f5f5f5] py-6 md:py-8 px-6 text-center rounded-[13px]">
+                    <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application <span className="text-[#0052FF]">Deadline</span></h2>
+                    <p className="text-gray-600 text-sm md:text-base font-normal">
+                      Apply by <span className="font-bold text-[#0052FF]">
+                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? '28 May 2026' : formatDisplayDate((workshop as any).applicationDeadline)}
+                      </span> at 11:59 PM
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* What you'll learn in this Cohort Section */}
+            {((workshop.courseOutcomes && workshop.courseOutcomes.length > 0) || slug === 'executive-programme-in-generative-ai-business-innovation') && (
+              <section className="w-full bg-[#EBF5FF] pb-16 md:pb-24 relative font-sans" id="workshop-what-you-learn">
+                {/* SVG Curve transition from white to light-blue */}
+                <div className="w-full bg-white leading-none">
+                  <svg
+                    viewBox="0 0 1440 100"
+                    preserveAspectRatio="none"
+                    className="w-full h-[40px] md:h-[60px] lg:h-[80px]"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M0,40 C320,90 960,-10 1440,40 L1440,100 L0,100 Z"
+                      fill="#EBF5FF"
+                    />
+                  </svg>
+                </div>
+
+                <div className="max-w-6xl w-full mx-auto flex flex-col px-4 md:px-8 mt-6 md:mt-10">
+                  <div className="flex flex-row justify-between items-center mb-10 w-full">
+                    <h2 className="text-[26px] md:text-[36px] font-bold text-gray-900 tracking-tight text-left">
+                      All the details of Course Outcomes
+                    </h2>
+
+                    {/* Navigation Buttons (similar to testimonials) */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => scrollOutcomes("left")}
+                        className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
+                        aria-label="Scroll outcomes left"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollOutcomes("right")}
+                        className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
+                        aria-label="Scroll outcomes right"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M7.22 15.78a.75.75 0 010-1.06L11.94 10 7.22 5.28a.75.75 0 111.06-1.06l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 01-1.06 0z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    ref={outcomesRef}
+                    className="flex gap-8 overflow-x-auto scrollbar-none snap-x snap-mandatory w-full scroll-smooth pb-4"
+                  >
+                    {(workshop.courseOutcomes && workshop.courseOutcomes.length > 0
+                      ? workshop.courseOutcomes
+                      : [
+                          {
+                            image: "/DemoPicture/workdetails1.png",
+                            title: "Generate Codes in any language with AI",
+                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                          },
+                          {
+                            image: "/DemoPicture/workdetails2.png",
+                            title: "Manage data efficiently with AI",
+                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                          },
+                          {
+                            image: "/DemoPicture/workdetails1.png",
+                            title: "Generate Codes in any language with AI",
+                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                          },
+                          {
+                            image: "/DemoPicture/workdetails2.png",
+                            title: "Manage data efficiently with AI",
+                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                          }
+                        ]
+                    ).map((outcome, idx) => (
+                      <div key={idx} className="flex flex-col items-center text-center w-[85%] md:w-[48%] shrink-0 snap-start">
+                        <div className="w-full bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 p-2">
+                          <img
+                            src={outcome.image || "/DemoPicture/workdetails1.png"}
+                            alt={outcome.title}
+                            className="w-full h-auto object-contain"
+                          />
+                        </div>
+                        <h3 className="text-lg md:text-xl lg:text-[22px] font-bold text-gray-950 mt-6 mb-3 px-2">
+                          {outcome.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm md:text-[15px] leading-relaxed max-w-sm px-2">
+                          {outcome.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* What is this program for Section */}
+            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
+              <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-program-for">
+                <div className="max-w-6xl w-full mx-auto flex flex-col items-center text-center">
+                  <h2 className="text-[26px] md:text-[36px] font-bold text-gray-900 tracking-tight mb-12">
+                    What is this program for?
+                  </h2>
+
+                  {/* 3 Columns */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full max-w-4xl justify-center items-start mb-12">
+                    {/* Student */}
+                    <div className="flex flex-col items-center text-center group">
+                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                        <img
+                          src="/LandingPage/student_3d.png"
+                          alt="Student"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span className="text-lg md:text-xl font-bold text-gray-800">Student</span>
+                    </div>
+
+                    {/* Working Professionals */}
+                    <div className="flex flex-col items-center text-center group">
+                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                        <img
+                          src="/LandingPage/professional_3d.png"
+                          alt="Working Professionals"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span className="text-lg md:text-xl font-bold text-gray-800">Working Professionals</span>
+                    </div>
+
+                    {/* Job Seekers */}
+                    <div className="flex flex-col items-center text-center group">
+                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                        <img
+                          src="/LandingPage/job_seeker_3d.png"
+                          alt="Job Seekers"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span className="text-lg md:text-xl font-bold text-gray-800">Job Seekers</span>
+                    </div>
+                  </div>
+
+                  {/* Blue CTA Button */}
+                  <div className="max-w-2xl w-full mx-auto z-10 px-4">
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                    >
+                      <span className="font-semibold">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
+                        <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                      </span>
+                    </button>
+
+                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                      {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Did You Know? Section */}
+            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
+              <section className="bg-[#EBF5FF]/50 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-100" id="workshop-did-you-know">
+                <div className="max-w-6xl w-full mx-auto flex flex-col items-center text-center">
+                  <h2 className="text-[26px] md:text-[36px] font-black text-gray-900 tracking-tight mb-2">
+                    Did You Know?
+                  </h2>
+                  <p className="text-gray-800 text-sm md:text-[17px] font-bold max-w-2xl leading-relaxed mb-10 px-2">
+                    You can upskill yourself in AI and switch from service-based company to product-based company with minimum of 180% salary hike
+                  </p>
+
+                  {/* 3 Salary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl justify-center items-stretch mb-10">
+                    {/* Card 1: 4 LPA */}
+                    <div className="bg-white rounded-xl border-[1.5px] border-slate-500 p-6 md:p-8 flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md transition-all duration-300">
+                      <span className="text-4xl md:text-5xl font-black text-gray-950 mb-3 tracking-tight">4 LPA</span>
+                      <p className="text-gray-700 text-sm md:text-[15px] font-bold leading-relaxed max-w-xs">
+                        Average salary of a Python Developer
+                      </p>
+                    </div>
+
+                    {/* Card 2: 8 LPA */}
+                    <div className="bg-white rounded-xl border-[1.5px] border-slate-500 p-6 md:p-8 flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md transition-all duration-300">
+                      <span className="text-4xl md:text-5xl font-black text-gray-950 mb-3 tracking-tight">8 LPA</span>
+                      <p className="text-gray-700 text-sm md:text-[15px] font-bold leading-relaxed max-w-xs">
+                        Average salary of a Python Developer with 3 years of experience
+                      </p>
+                    </div>
+
+                    {/* Card 3: 21 LPA */}
+                    <div className="bg-white rounded-xl border-[1.5px] border-slate-500 p-6 md:p-8 flex flex-col items-center justify-center text-center shadow-xs hover:shadow-md transition-all duration-300">
+                      <span className="text-4xl md:text-5xl font-black text-gray-950 mb-3 tracking-tight">21 LPA</span>
+                      <p className="text-gray-700 text-sm md:text-[15px] font-bold leading-relaxed max-w-xs">
+                        Average salary of a Python Developer with 3 years of experience who uses AI
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Blue CTA Button */}
+                  <div className="max-w-2xl w-full mx-auto z-10 px-4">
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                    >
+                      <span className="font-semibold">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
+                        <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                      </span>
+                    </button>
+
+                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                      {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Meet your Mentors Section */}
+            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
+              <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-meet-mentors">
+                <div className="max-w-6xl w-full mx-auto flex flex-col items-center">
+                  <h2 className="text-[26px] md:text-[36px] font-semibold text-gray-900 tracking-tight text-center mb-12">
+                    Meet your Mentors
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl">
+                    {/* Left Column: Image and Name */}
+                    <div className="md:col-span-5 flex flex-col items-center">
+                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                        <img
+                          src="/LandingPage/aman_saurav.png"
+                          alt="Aman Saurav"
+                          className="w-full h-full object-cover rounded-[10px]"
+                        />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                        Aman Saurav
+                      </h3>
+                    </div>
+
+                    {/* Right Column: Details */}
+                    <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
+                      {/* Checkmarks list */}
+                      <div className="flex flex-col gap-3 mb-6">
+                        {[
+                          "IIT Delhi Alumni",
+                          "Director of AI for Techies",
+                          "Senior Data Analyst"
+                        ].map((text, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Paragraphs */}
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                        Hello, I'm a graduate of{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          IIT Delhi
+                        </span>{" "}
+                        and currently work as a{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          Senior Data Analyst
+                        </span>{" "}
+                        and Program{" "}
+                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                          Director at AI for Techies
+                        </span>
+                        . With over a decade of experience in the field, I've been teaching and mentoring learners in AI/ML, data analysis, Python, Excel, SQL, and related technologies.
+                      </p>
+
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        I've had the privilege of guiding{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          over 20,000 students
+                        </span>{" "}
+                        and{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          professionals
+                        </span>{" "}
+                        through their data and AI journeys. Passionate about simplifying complex concepts and building real-world skills, I aim to empower individuals to confidently step into the world of data and technology.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Frequently Asked Questions (FAQs) Section */}
+            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
+              <section className="bg-[#EBF5FF]/30 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-50" id="workshop-faqs">
+                <div className="max-w-5xl w-full mx-auto flex flex-col items-center text-center">
+                  <h2 className="text-[26px] md:text-[36px] font-black text-gray-900 tracking-tight mb-2">
+                    Frequently Asked Questions (FAQs)
+                  </h2>
+                  <p className="text-gray-700 text-sm md:text-base font-semibold leading-relaxed px-2">
+                    We&apos;ve tried our best to answer all common queries that you might have.
+                  </p>
+                  <p className="text-gray-700 text-sm md:text-base font-semibold leading-relaxed mb-6 px-2">
+                    For further queries, please email us at{" "}
+                    <a href="mailto:hello@aifortechies.in" className="text-blue-600 underline font-bold hover:text-blue-800 transition-colors">
+                      hello@aifortechies.in
+                    </a>
+                  </p>
+
+                  <h3 className="text-lg md:text-xl font-extrabold text-gray-900 tracking-tight mb-6 flex items-center gap-1.5 uppercase">
+                    SEE YOU INSIDE THE COHORT <span>😛</span>
+                  </h3>
+
+                  {/* Blue CTA Button */}
+                  <div className="max-w-2xl w-full mx-auto z-10 px-4 mb-10">
+                    <button
+                      onClick={() => setIsRegisterModalOpen(true)}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                    >
+                      <span className="font-semibold">Become A Python Using AI Expert Now At</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹1999</span>
+                        <span className="text-white text-base md:text-xl font-semibold">₹199/-</span>
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Accordion Questions List */}
+                  <div className="w-full flex flex-col gap-3.5 max-w-5xl text-left mt-4">
+                    {[
+                      {
+                        q: "When will the cohort start?",
+                        a: "The cohort starts on June 14, 2026. All live session timings and links will be shared via email and WhatsApp groups after registration."
+                      },
+                      {
+                        q: "Is there any prerequisite required?",
+                        a: "No prior coding or programming experience is required. We start completely from scratch (0 to Hero level) and guide you step-by-step."
+                      },
+                      {
+                        q: "Is it a certified cohort?",
+                        a: "Yes, you will receive a verified Certificate of Completion upon successfully finishing all modules and projects."
+                      },
+                      {
+                        q: "Do you get notes & assignments to practice?",
+                        a: "Yes, all lessons are accompanied by detailed notes, AI prompts, practice code notebooks, and hands-on assignments."
+                      },
+                      {
+                        q: "Is there any age limit for the cohort?",
+                        a: "There is no age limit. Whether you are a school student, college student, working professional, or career switcher, this program is designed for everyone."
+                      }
+                    ].map((item, idx) => {
+                      const isOpen = openFaq === idx;
+                      return (
+                        <div key={idx} className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs transition-all duration-300">
+                          <button
+                            onClick={() => setOpenFaq(isOpen ? null : idx)}
+                            className="w-full flex items-center justify-between p-5 text-left transition-colors font-bold text-gray-900 text-sm md:text-base cursor-pointer bg-white hover:bg-slate-50/50"
+                          >
+                            <span>{item.q}</span>
+                            <svg className={`w-4 h-4 text-gray-800 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-90' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                            </svg>
+                          </button>
+                          {isOpen && (
+                            <div className="px-5 pb-5 pt-1 text-gray-600 text-sm md:text-[15px] font-medium border-t border-slate-100 bg-white leading-relaxed">
+                              {item.a}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                </div>
+              </section>
+            )}
+
+
+
+
+
+
+
+
           </>
         )}
       </main>
@@ -671,17 +1413,17 @@ Email: contact@aiscale.com
               </svg>
             </div>
             <h3 className="text-xl font-black text-gray-900 mb-3 tracking-tight">
-              {workshop?.hasBrochure !== false ? 'Brochure Downloaded Successfully!' : 'Registered Successfully!'}
+              {(workshop as any)?.hasBrochure !== false ? 'Brochure Downloaded Successfully!' : 'Registered Successfully!'}
             </h3>
             <p className="text-sm text-gray-500 leading-relaxed mb-6 font-medium">
               Thank you, <strong className="text-gray-900 font-semibold">{formData.firstName}</strong>.
-              {workshop?.hasBrochure !== false ? (
+              {(workshop as any)?.hasBrochure !== false ? (
                 <> The brochure has been generated and downloaded to your device.</>
               ) : (
                 <> You have successfully registered for the workshop.</>
               )}
-              {workshop?.startDate && (
-                <> We have also emailed you details about the upcoming batch starting on <strong className="text-gray-900 font-semibold">{formatDisplayDate(workshop.startDate)}</strong>.</>
+              {(workshop as any)?.startDate && (
+                <> We have also emailed you details about the upcoming batch starting on <strong className="text-gray-900 font-semibold">{formatDisplayDate((workshop as any).startDate)}</strong>.</>
               )}
             </p>
             <button onClick={() => setShowSuccessModal(false)} className="bg-gray-900 hover:bg-black text-white font-bold py-2.5 px-8 rounded text-sm transition-colors w-full focus:outline-none">
@@ -705,10 +1447,10 @@ Email: contact@aiscale.com
               </svg>
             </button>
             <h2 className="text-lg md:text-xl font-black tracking-tight text-gray-900 mb-1 font-sans">
-              {workshop?.hasBrochure !== false ? 'Register & Get Brochure' : 'Register for Workshop'}
+              {(workshop as any)?.hasBrochure !== false ? 'Register & Get Brochure' : 'Register for Workshop'}
             </h2>
             <p className="text-xs text-gray-500 font-medium mb-4">
-              {workshop?.hasBrochure !== false
+              {(workshop as any)?.hasBrochure !== false
                 ? 'Fill in your details to register and download the programme brochure.'
                 : 'Fill in your details to register and book your slot.'}
             </p>
@@ -812,10 +1554,10 @@ Email: contact@aiscale.com
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    {workshop?.hasBrochure !== false ? 'Downloading...' : 'Registering...'}
+                    {(workshop as any)?.hasBrochure !== false ? 'Downloading...' : 'Registering...'}
                   </>
                 ) : (
-                  workshop?.hasBrochure !== false ? 'REGISTER & DOWNLOAD BROCHURE' : 'REGISTER NOW'
+                  (workshop as any)?.hasBrochure !== false ? 'REGISTER & DOWNLOAD BROCHURE' : 'REGISTER NOW'
                 )}
               </button>
             </form>

@@ -169,7 +169,7 @@ const getCourseDetailMeta = (course: Course) => {
   };
 
   const defaultMeta = {
-    instructorName: course.authorName || "Paula Del Rey",
+    instructorName: course.instructorName || course.authorName || "Paula Del Rey",
     instructorBio: "Industry Certified Expert with years of hands-on strategy and execution experience.",
     enrolledCount: "210,000",
     rating: "4.8",
@@ -187,7 +187,15 @@ const getCourseDetailMeta = (course: Course) => {
   };
 
   const cid = (course as any)._id || course.id;
-  return metaMap[cid] || defaultMeta;
+  const mapped = metaMap[cid] || defaultMeta;
+  return {
+    ...mapped,
+    type: course.metaType || mapped.type,
+    typeSubtitle: course.metaTypeSubtitle || mapped.typeSubtitle,
+    rating: course.metaRating || mapped.rating,
+    reviewsCount: course.metaReviewsCount || mapped.reviewsCount,
+    level: course.metaLevel || mapped.level,
+  };
 };
 
 export default function CourseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -361,7 +369,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       price: course.price,
       originalPrice: course.originalPrice,
       discount: course.discount,
-      thumbnail: course.thumbnail || course.instructorImage,
+      mentorPicture: course.mentorPicture || course.instructorImage,
       instructorName: detailMeta.instructorName,
       instructorBio: detailMeta.instructorBio,
       level: detailMeta.level
@@ -425,7 +433,6 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <div className="hidden md:flex gap-2 sm:gap-6 overflow-x-auto whitespace-nowrap scrollbar-none py-1.5 select-none items-center">
             {[
               { id: "about", label: "About" },
-              { id: "outcomes", label: "Outcomes" },
               { id: "syllabus", label: "Project details" },
               { id: "testimonials", label: "Testimonials" },
               { id: "reviews", label: "Reviews" },
@@ -446,6 +453,22 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                       if (revEl) {
                         revEl.scrollIntoView({ behavior: "smooth", block: "start" });
                       }
+                    } else if (tab.id === "syllabus") {
+                      setActiveSubTab("about");
+                      setTimeout(() => {
+                        const projEl = document.getElementById("about-guided-project");
+                        if (projEl) {
+                          projEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                      }, 100);
+                    } else if (tab.id === "testimonials") {
+                      setActiveSubTab("about");
+                      setTimeout(() => {
+                        const testEl = document.getElementById("why-choose-us");
+                        if (testEl) {
+                          testEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                      }, 100);
                     } else {
                       setActiveSubTab(tab.id as any);
                       const mainEl = document.getElementById("main-content-tabs");
@@ -519,7 +542,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200 shrink-0">
               <img
-                src={course.thumbnail || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
+                src={course.mentorPicture || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
                 alt={detailMeta.instructorName}
                 className="w-full h-full object-cover"
               />
@@ -617,7 +640,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 {detailMeta.level}
               </span>
               <span className="text-[14px] text-slate-500 font-medium mt-1 flex items-center gap-1 cursor-pointer group">
-                Recommended experience
+                {course.metaLevelSubtitle || "Recommended experience"}
                 <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -627,20 +650,20 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             {/* 4. Duration */}
             <div className="flex flex-col md:pl-5">
               <span className="font-bold text-slate-800 text-[18px]">
-                {course.hours.split("•")[0].trim() || "30 Hours"}
+                {course.metaDuration || (course.hours && course.hours.split("•")[0].trim()) || "30 Hours"}
               </span>
               <span className="text-[14px] text-slate-500 font-medium mt-1">
-                Learn at your own pace
+                {course.metaDurationSubtitle || "Learn at your own pace"}
               </span>
             </div>
 
             {/* 5. Hands-on Learning */}
             <div className="flex flex-col md:pl-5">
               <span className="font-bold text-slate-800 text-[18px]">
-                Hands-on learning
+                {course.metaHandsOn || "Hands-on learning"}
               </span>
               <span className="text-[14px] text-[#0056d2] underline hover:text-[#00419e] mt-1 font-semibold cursor-pointer">
-                Learn more
+                {course.metaHandsOnSubtitle || "Learn more"}
               </span>
             </div>
 
@@ -658,7 +681,6 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <div id="main-content-tabs" className="border-b border-slate-200 flex gap-6 pb-2 mb-2 overflow-x-auto whitespace-nowrap scrollbar-none select-none scroll-mt-28">
             {[
               { id: "about", label: "About" },
-              { id: "outcomes", label: "Outcomes" },
               { id: "syllabus", label: "Project details" },
               { id: "testimonials", label: "Testimonials" },
               { id: "reviews", label: "Reviews" },
@@ -677,6 +699,22 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     if (revEl) {
                       revEl.scrollIntoView({ behavior: "smooth", block: "start" });
                     }
+                  } else if (tab.id === "syllabus") {
+                    setActiveSubTab("about");
+                    setTimeout(() => {
+                      const projEl = document.getElementById("about-guided-project");
+                      if (projEl) {
+                        projEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }, 100);
+                  } else if (tab.id === "testimonials") {
+                    setActiveSubTab("about");
+                    setTimeout(() => {
+                      const testEl = document.getElementById("why-choose-us");
+                      if (testEl) {
+                        testEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }, 100);
                   } else {
                     setActiveSubTab(tab.id as any);
                   }
@@ -787,7 +825,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </section>
 
               {/* About this Guided Project Section */}
-              <section className="flex flex-col gap-6 w-full mt-12 border-t border-slate-100 pt-10 text-left">
+              <section id="about-guided-project" className="flex flex-col gap-6 w-full mt-12 border-t border-slate-100 pt-10 text-left">
                 <div className="flex flex-col gap-3">
                   <h3 className="text-[21px] font-bold text-slate-900 tracking-tight">
                     About this Guided Project
@@ -848,118 +886,11 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             </div>
           )}
 
-          {activeSubTab === "outcomes" && (
-            <div className="flex flex-col gap-8 animate-in fade-in duration-200">
-              <section className="flex flex-col gap-3">
-                <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">Career Outcomes</h3>
-                <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                  According to surveys of graduates who completed these certifications, they achieved key career accelerations shortly after graduation:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
-                  <div className="border border-slate-100 rounded-lg p-5 bg-[#f8fafd] flex flex-col items-center text-center shadow-xs">
-                    <span className="text-3xl font-black text-[#0056d2]">94%</span>
-                    <span className="text-xs text-slate-700 font-bold mt-2">Career Benefits</span>
-                    <span className="text-[11px] text-slate-500 font-medium mt-1 leading-normal">Reported salary increase, promotions, or job offers</span>
-                  </div>
-                  <div className="border border-slate-100 rounded-lg p-5 bg-[#f8fafd] flex flex-col items-center text-center shadow-xs">
-                    <span className="text-3xl font-black text-[#0056d2]">35%</span>
-                    <span className="text-xs text-slate-700 font-bold mt-2">Salary Increase</span>
-                    <span className="text-[11px] text-slate-500 font-medium mt-1 leading-normal">Average salary raise reported by participants</span>
-                  </div>
-                  <div className="border border-slate-100 rounded-lg p-5 bg-[#f8fafd] flex flex-col items-center text-center shadow-xs">
-                    <span className="text-3xl font-black text-[#0056d2]">1 in 5</span>
-                    <span className="text-xs text-slate-700 font-bold mt-2">Started Agency</span>
-                    <span className="text-[11px] text-slate-500 font-medium mt-1 leading-normal">Launched their own marketing agency operations</span>
-                  </div>
-                </div>
-              </section>
 
-              <section className="flex flex-col gap-3 border-t border-slate-100 pt-8 mt-2">
-                <h3 className="text-sm font-black text-slate-500 uppercase tracking-wider">Top Companies Hiring Our Alumni</h3>
-                <div className="flex flex-wrap gap-6 items-center mt-2 opacity-65 grayscale hover:grayscale-0 transition-all">
-                  {/* Styled mock text logos */}
-                  <span className="font-sans font-black text-slate-700 text-lg">Google</span>
-                  <span className="font-sans font-black text-slate-700 text-lg">Meta</span>
-                  <span className="font-sans font-black text-slate-700 text-lg">Microsoft</span>
-                  <span className="font-sans font-black text-slate-700 text-lg">Amazon</span>
-                  <span className="font-sans font-black text-slate-700 text-lg">Adobe</span>
-                </div>
-              </section>
-            </div>
-          )}
 
-          {activeSubTab === "syllabus" && (
-            <div className="flex flex-col gap-10 animate-in fade-in duration-200">
-              {/* Curriculum / Syllabus section */}
-              <section className="flex flex-col gap-4">
-                <div className="flex flex-col">
-                  <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
-                    Course Syllabus
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
-                    Review the core training phases covered under this program:
-                  </p>
-                </div>
 
-                <div className="flex flex-col gap-3.5 mt-2">
-                  {modules.map((module, idx) => (
-                    <div key={idx} className="border border-slate-100 rounded-lg p-5 bg-[#fcfdfe] hover:bg-slate-50/50 transition-all shadow-xs">
-                      <h4 className="text-sm font-extrabold text-[#0c102a] leading-snug">
-                        {module.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-2 leading-relaxed font-medium">
-                        {module.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
 
-              {/* Instructor Bio detailed */}
-              <section className="border-t border-slate-100 pt-8">
-                <h3 className="text-[19px] font-bold text-[#0c102a] tracking-tight">
-                  Your Instructor
-                </h3>
-                <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                    <img
-                      src={course.thumbnail || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
-                      alt={detailMeta.instructorName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5 text-left">
-                    <h4 className="font-bold text-[#0056d2] text-base underline hover:text-[#00419e] cursor-pointer">
-                      {detailMeta.instructorName}
-                    </h4>
-                    <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                      Lead Academy Advisor
-                    </p>
-                    <p className="text-xs text-slate-600 leading-relaxed font-medium mt-1">
-                      {detailMeta.instructorBio}
-                    </p>
-                  </div>
-                </div>
-              </section>
-            </div>
-          )}
 
-          {activeSubTab === "testimonials" && (
-            <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-              <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">Student Testimonials</h3>
-              {[
-                { author: "James R.", role: "Digital Agency Lead", text: "A lot of online workshops, but this one actually delivered. Practical, no fluff, and I left with tools I could use the very next day. Worth every minute." },
-                { author: "Sarah K.", role: "Growth Lead", text: "The session on AI-driven SEO alone saved my team weeks of manual research. This isn't just theory—it's highly actionable systems that produce real growth." },
-                { author: "Arjun M.", role: "Marketing Director", text: "Excellent value. The instructor walked through a live setup of a lead generation funnel without any complex coding. A game-changer for our agency." }
-              ].map((t, idx) => (
-                <div key={idx} className="border border-slate-100 rounded-lg p-5 bg-[#fffdf8] shadow-xs">
-                  <div className="flex text-[#fca130] text-sm mb-2.5">★★★★★</div>
-                  <p className="text-slate-600 text-[13.5px] leading-relaxed italic">"{t.text}"</p>
-                  <div className="text-[12.5px] font-bold text-slate-800 mt-3">{t.author} — <span className="text-slate-400 font-normal">{t.role}</span></div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {activeSubTab === "reviews" && (
             <div className="flex flex-col gap-6 animate-in fade-in duration-200">
@@ -1279,7 +1210,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       )}
 
       {/* Why people choose AIScale for their career (Full Width, White Background) */}
-      <section className="w-full bg-white py-10 md:py-16 border-t border-b border-slate-100">
+      <section id="why-choose-us" className="w-full bg-white py-10 md:py-16 border-t border-b border-slate-100">
         <div className="max-w-[1440px] mx-auto px-4 md:px-10 text-left">
           <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight mb-8">
             Why people choose AIScale for their career
@@ -1313,85 +1244,85 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               ref={testimonialsRef}
               className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible scrollbar-none snap-x snap-mandatory"
             >
-            {/* Card 1 */}
+              {/* Card 1 */}
               <div className="border border-slate-200 rounded-none p-6 bg-white flex flex-col gap-4 w-[86%] sm:w-auto shrink-0 snap-start">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"
-                    alt="Priya S."
-                    className="w-full h-full object-cover"
-                  />
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"
+                      alt="Priya S."
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-slate-900 text-[15px]">Priya S.</span>
+                    <span className="text-[12px] text-slate-400 font-semibold">Learner since 2021</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-slate-900 text-[15px]">Priya S.</span>
-                  <span className="text-[12px] text-slate-400 font-semibold">Learner since 2021</span>
-                </div>
+                <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
+                  "The material was highly practical and structured. I was able to automate my marketing workflows within a week!"
+                </p>
               </div>
-              <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                "The material was highly practical and structured. I was able to automate my marketing workflows within a week!"
-              </p>
-            </div>
 
-            {/* Card 2 */}
+              {/* Card 2 */}
               <div className="border border-slate-200 rounded-none p-6 bg-white flex flex-col gap-4 w-[86%] sm:w-auto shrink-0 snap-start">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
-                    alt="James K."
-                    className="w-full h-full object-cover"
-                  />
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
+                      alt="James K."
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-slate-900 text-[15px]">James K.</span>
+                    <span className="text-[12px] text-slate-400 font-semibold">Learner since 2022</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-slate-900 text-[15px]">James K.</span>
-                  <span className="text-[12px] text-slate-400 font-semibold">Learner since 2022</span>
-                </div>
+                <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
+                  "The hands-on projects helped me build a portfolio that landed me a growth lead job."
+                </p>
               </div>
-              <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                "The hands-on projects helped me build a portfolio that landed me a growth lead job."
-              </p>
-            </div>
 
-            {/* Card 3 */}
+              {/* Card 3 */}
               <div className="border border-slate-200 rounded-none p-6 bg-white flex flex-col gap-4 w-[86%] sm:w-auto shrink-0 snap-start">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
-                    alt="David L."
-                    className="w-full h-full object-cover"
-                  />
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
+                      alt="David L."
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-slate-900 text-[15px]">David L.</span>
+                    <span className="text-[12px] text-slate-400 font-semibold">Learner since 2023</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-slate-900 text-[15px]">David L.</span>
-                  <span className="text-[12px] text-slate-400 font-semibold">Learner since 2023</span>
-                </div>
+                <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
+                  "Outstanding templates. Using Make.com and Claude APIs transformed our agency operations completely."
+                </p>
               </div>
-              <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                "Outstanding templates. Using Make.com and Claude APIs transformed our agency operations completely."
-              </p>
-            </div>
 
-            {/* Card 4 */}
+              {/* Card 4 */}
               <div className="border border-slate-200 rounded-none p-6 bg-white flex flex-col gap-4 w-[86%] sm:w-auto shrink-0 snap-start">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
-                    alt="Michael A."
-                    className="w-full h-full object-cover"
-                  />
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
+                      alt="Michael A."
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-extrabold text-slate-900 text-[15px]">Michael A.</span>
+                    <span className="text-[12px] text-slate-400 font-semibold">Learner since 2024</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-slate-900 text-[15px]">Michael A.</span>
-                  <span className="text-[12px] text-slate-400 font-semibold">Learner since 2024</span>
-                </div>
+                <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
+                  "Highly recommended. The certification is recognized and respected across the digital marketing space."
+                </p>
               </div>
-              <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                "Highly recommended. The certification is recognized and respected across the digital marketing space."
-              </p>
-            </div>
             </div>
           </div>
         </div>
@@ -1604,7 +1535,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     {/* Thumbnail / Image */}
                     <div className="relative aspect-[16/9] w-full bg-slate-100 overflow-hidden">
                       <img
-                        src={c.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
+                        src={c.mentorPicture || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
                         alt={c.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

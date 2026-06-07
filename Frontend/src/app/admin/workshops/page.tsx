@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { workshopApi, Workshop } from '@/lib/api/workshops';
+import { workshopApi, Workshop, WorkshopWhatYouWillLearnStep, WorkshopCourseOutcome } from '@/lib/api/workshops';
 import {
   Plus,
   Pencil,
@@ -16,91 +16,56 @@ import {
   Loader2,
   AlertTriangle,
   Search,
-  GripVertical,
 } from 'lucide-react';
-
-// ─── Types ──────────────────────────────────────────────────
-interface ModuleEntry {
-  title: string;
-  content: string[];
-}
-interface HighlightEntry {
-  title: string;
-  description: string;
-}
-interface TargetAudienceEntry {
-  title: string;
-  description: string;
-}
-interface ExpertEntry {
-  name: string;
-  role: string;
-  image: string;
-}
-interface SlotEntry {
-  date: string;
-  startTime: string;
-  endTime: string;
-  totalSeats: number;
-  meetingLink: string;
-}
 
 interface WorkshopFormData {
   title: string;
   subtitle: string;
   description: string;
-  instructor: string;
-  price: number;
-  currency: string;
   thumbnail: string;
-  batchNumber: string;
-  startDate: string;
-  workshopTime: string;
-  duration: string;
-  durationDetail: string;
-  fee: string;
-  feeNote: string;
-  eligibility: string;
-  eligibilityDetail: string;
-  applicationDeadline: string;
-  brochureUrl: string;
-  hasBrochure: boolean;
-  tags: string;
-  highlights: HighlightEntry[];
-  modules: ModuleEntry[];
-  targetAudience: TargetAudienceEntry[];
+  price: string;
+  originalPrice: string;
+  priceCaption: string;
+  bonusDeadlineText: string;
+  heroPoints: string[];
+  workshopDates: string[];
+  rating1Value: string;
+  rating1Count: string;
+  rating1Platform: string;
+  rating2Value: string;
+  rating2Count: string;
+  rating2Platform: string;
+  instructor: string;
+  instructorImage: string;
+  instructorDescription: string;
   learningOutcomes: string[];
-  experts: ExpertEntry[];
-  slots: SlotEntry[];
+  whatYouWillLearn: WorkshopWhatYouWillLearnStep[];
+  courseOutcomes: WorkshopCourseOutcome[];
 }
 
 const defaultFormData: WorkshopFormData = {
   title: '',
   subtitle: '',
   description: '',
-  instructor: '',
-  price: 0,
-  currency: 'INR',
   thumbnail: '',
-  batchNumber: '',
-  startDate: '',
-  workshopTime: '',
-  duration: '',
-  durationDetail: '',
-  fee: '',
-  feeNote: '',
-  eligibility: '',
-  eligibilityDetail: '',
-  applicationDeadline: '',
-  brochureUrl: '',
-  hasBrochure: true,
-  tags: '',
-  highlights: [],
-  modules: [],
-  targetAudience: [],
+  price: '0',
+  originalPrice: '0',
+  priceCaption: 'Become A Python Using AI Expert Now At',
+  bonusDeadlineText: '',
+  heroPoints: ['', '', '', ''],
+  workshopDates: [],
+  rating1Value: '4.5/5',
+  rating1Count: '(725)',
+  rating1Platform: 'Trustpilot',
+  rating2Value: '4.07/5',
+  rating2Count: '(88)',
+  rating2Platform: 'Rating Facts',
+  instructor: '',
+  instructorImage: '',
+  instructorDescription: '',
   learningOutcomes: [],
-  experts: [],
-  slots: [],
+  whatYouWillLearn: [],
+  courseOutcomes: [],
 };
 
 // ─── Collapsible Section Component ──────────────────────────
@@ -163,7 +128,7 @@ function FormInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white placeholder-gray-400"
+        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white placeholder-gray-400"
       />
     </div>
   );
@@ -196,7 +161,7 @@ function FormTextArea({
         placeholder={placeholder}
         rows={rows}
         required={required}
-        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white placeholder-gray-400 resize-none"
+        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white placeholder-gray-400 resize-none"
       />
     </div>
   );
@@ -307,6 +272,38 @@ export default function AdminWorkshopsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
 
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // Manage mount and transition classes for slide-over drawer
+  useEffect(() => {
+    if (showModal) {
+      setMounted(true);
+      const timer = setTimeout(() => {
+        setVisible(true);
+      }, 10);
+      return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
+      const timer = setTimeout(() => {
+        setMounted(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showModal]);
+
+  // Prevent background scrolling when drawer is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showModal]);
+
   // Fetch workshops
   const fetchWorkshops = useCallback(async () => {
     try {
@@ -339,37 +336,29 @@ export default function AdminWorkshopsPage() {
       title: workshop.title || '',
       subtitle: workshop.subtitle || '',
       description: workshop.description || '',
-      instructor: workshop.instructor || '',
-      price: workshop.price || 0,
-      currency: workshop.currency || 'INR',
       thumbnail: workshop.thumbnail || '',
-      batchNumber: workshop.batchNumber || '',
-      startDate: workshop.startDate ? new Date(workshop.startDate).toISOString().split('T')[0] : '',
-      workshopTime: workshop.workshopTime || '',
-      duration: workshop.duration || '',
-      durationDetail: workshop.durationDetail || '',
-      fee: workshop.fee || '',
-      feeNote: workshop.feeNote || '',
-      eligibility: workshop.eligibility || '',
-      eligibilityDetail: workshop.eligibilityDetail || '',
-      applicationDeadline: workshop.applicationDeadline ? new Date(workshop.applicationDeadline).toISOString().split('T')[0] : '',
-      brochureUrl: workshop.brochureUrl || '',
-      hasBrochure: workshop.hasBrochure !== false,
-      tags: (workshop.tags || []).join(', '),
-      highlights: workshop.highlights?.length ? workshop.highlights : [],
-      modules: workshop.modules?.length ? workshop.modules : [],
-      targetAudience: workshop.targetAudience?.length ? workshop.targetAudience : [],
-      learningOutcomes: workshop.learningOutcomes?.length ? workshop.learningOutcomes : [],
-      experts: workshop.experts?.length ? workshop.experts : [],
-      slots: workshop.slots?.length
-        ? workshop.slots.map((s) => ({
-            date: new Date(s.date).toISOString().split('T')[0],
-            startTime: s.startTime,
-            endTime: s.endTime,
-            totalSeats: s.totalSeats,
-            meetingLink: s.meetingLink || '',
-          }))
+      price: String(workshop.price || 0),
+      originalPrice: String(workshop.originalPrice || 0),
+      priceCaption: workshop.priceCaption || 'Become A Python Using AI Expert Now At',
+      bonusDeadlineText: workshop.bonusDeadlineText || '',
+      heroPoints: workshop.heroPoints && workshop.heroPoints.length > 0
+        ? [...workshop.heroPoints, '', '', '', ''].slice(0, 4)
+        : ['', '', '', ''],
+      workshopDates: (workshop as any).workshopDates
+        ? (workshop as any).workshopDates.map((d: string) => new Date(d).toISOString().split('T')[0])
         : [],
+      rating1Value: (workshop as any).rating1Value || '4.5/5',
+      rating1Count: (workshop as any).rating1Count || '(725)',
+      rating1Platform: (workshop as any).rating1Platform || 'Trustpilot',
+      rating2Value: (workshop as any).rating2Value || '4.07/5',
+      rating2Count: (workshop as any).rating2Count || '(88)',
+      rating2Platform: (workshop as any).rating2Platform || 'Rating Facts',
+      instructor: workshop.instructor || '',
+      instructorImage: (workshop as any).instructorImage || '',
+      instructorDescription: (workshop as any).instructorDescription || '',
+      learningOutcomes: workshop.learningOutcomes || [],
+      whatYouWillLearn: workshop.whatYouWillLearn || [],
+      courseOutcomes: workshop.courseOutcomes || [],
     });
     setShowModal(true);
     setError('');
@@ -386,32 +375,25 @@ export default function AdminWorkshopsPage() {
         title: formData.title,
         subtitle: formData.subtitle,
         description: formData.description,
-        instructor: formData.instructor,
-        price: Number(formData.price),
-        currency: formData.currency,
         thumbnail: formData.thumbnail,
-        batchNumber: formData.batchNumber,
-        startDate: formData.startDate || null,
-        workshopTime: formData.workshopTime,
-        duration: formData.duration,
-        durationDetail: formData.durationDetail,
-        fee: formData.fee,
-        feeNote: formData.feeNote,
-        eligibility: formData.eligibility,
-        eligibilityDetail: formData.eligibilityDetail,
-        applicationDeadline: formData.applicationDeadline || null,
-        brochureUrl: formData.brochureUrl,
-        hasBrochure: formData.hasBrochure,
-        tags: formData.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
-        highlights: formData.highlights,
-        modules: formData.modules,
-        targetAudience: formData.targetAudience,
-        learningOutcomes: formData.learningOutcomes.filter(Boolean),
-        experts: formData.experts,
-        slots: formData.slots,
+        price: Number(formData.price) || 0,
+        originalPrice: Number(formData.originalPrice) || 0,
+        priceCaption: formData.priceCaption,
+        bonusDeadlineText: formData.bonusDeadlineText,
+        heroPoints: formData.heroPoints.filter(p => p.trim() !== ''),
+        workshopDates: formData.workshopDates.filter(Boolean),
+        rating1Value: formData.rating1Value,
+        rating1Count: formData.rating1Count,
+        rating1Platform: formData.rating1Platform,
+        rating2Value: formData.rating2Value,
+        rating2Count: formData.rating2Count,
+        rating2Platform: formData.rating2Platform,
+        instructor: formData.instructor,
+        instructorImage: formData.instructorImage,
+        instructorDescription: formData.instructorDescription,
+        learningOutcomes: formData.learningOutcomes.filter(p => p.trim() !== ''),
+        whatYouWillLearn: formData.whatYouWillLearn.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
+        courseOutcomes: formData.courseOutcomes.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
       };
 
       if (editingWorkshop) {
@@ -495,35 +477,65 @@ export default function AdminWorkshopsPage() {
 
       {/* Workshops Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {loading ? (
-          <div className="p-16 flex flex-col items-center justify-center gap-3">
-            <Loader2 size={28} className="animate-spin text-[#6366f1]" />
-            <span className="text-sm text-gray-500 font-medium">Loading workshops...</span>
-          </div>
-        ) : filteredWorkshops.length === 0 ? (
-          <div className="p-16 flex flex-col items-center justify-center gap-3">
-            <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center">
-              <Calendar size={24} className="text-gray-400" />
-            </div>
-            <p className="text-sm text-gray-500 font-medium">
-              {searchQuery ? 'No workshops found matching your search' : 'No workshops yet. Create your first one!'}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/60">
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workshop</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Start Date</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/60">
+                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workshop</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {loading ? (
+                Array.from({ length: 3 }).map((_, idx) => (
+                  <tr key={`skeleton-${idx}`} className="">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0" />
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-48" />
+                          <div className="h-3 bg-gray-200 rounded w-16" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-36" />
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-24" />
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-20" />
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-16" />
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <div className="w-8 h-8 rounded-lg bg-gray-200" />
+                        <div className="w-8 h-8 rounded-lg bg-gray-200" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : filteredWorkshops.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-16 text-center">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center">
+                        <Calendar size={24} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-500 font-medium">
+                        {searchQuery ? 'No workshops found matching your search' : 'No workshops yet. Create your first one!'}
+                      </p>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filteredWorkshops.map((w) => (
+              ) : (
+                filteredWorkshops.map((w) => (
                   <tr
                     key={w._id}
                     className="hover:bg-[#f8f8ff] transition-colors group"
@@ -539,11 +551,6 @@ export default function AdminWorkshopsPage() {
                         )}
                         <div>
                           <p className="text-sm font-semibold text-gray-900 leading-tight">{w.title}</p>
-                          {w.batchNumber && (
-                            <span className="text-[10px] font-bold text-[#6366f1] bg-[#efeefc] px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">
-                              {w.batchNumber}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -563,7 +570,6 @@ export default function AdminWorkshopsPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600">{w.instructor}</td>
-                    <td className="px-5 py-4 text-sm text-gray-600">{formatDate(w.startDate)}</td>
                     <td className="px-5 py-4">
                       <span className="text-sm font-semibold text-gray-900">
                         {w.currency === 'INR' ? '₹' : w.currency === 'USD' ? '$' : w.currency === 'EUR' ? '€' : '£'}
@@ -589,11 +595,11 @@ export default function AdminWorkshopsPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -624,640 +630,475 @@ export default function AdminWorkshopsPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-[#f8f9fc] rounded-2xl shadow-2xl w-full max-w-4xl border border-gray-200 my-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200 bg-white rounded-t-2xl">
+      {/* Create/Edit Drawer */}
+      {mounted && (
+        <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
+          {/* Backdrop Overlay with smooth transition */}
+          <div
+            className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${visible ? 'opacity-100' : 'opacity-0'
+              }`}
+            onClick={() => setShowModal(false)}
+          />
+
+          {/* Slide-out Panel (Full Screen) */}
+          <div
+            className={`relative bg-white w-screen h-screen shadow-2xl flex flex-col z-10 transition-transform duration-300 ease-in-out ${visible ? 'translate-x-0' : 'translate-x-full'
+              }`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200 bg-white shrink-0">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                <h2 className="text-xl font-bold text-gray-900 tracking-tight">
                   {editingWorkshop ? 'Edit Workshop' : 'Create New Workshop'}
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-1">
                   {editingWorkshop ? 'Update workshop details and content' : 'Fill in the details to create a new workshop with a dynamic page'}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-7 space-y-5 max-h-[70vh] overflow-y-auto">
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
-                  <AlertTriangle size={14} />
-                  {error}
-                </div>
-              )}
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden bg-white">
+              {/* Form Scrollable Area */}
+              <div className="flex-1 overflow-y-auto p-7 md:p-10 space-y-6 w-full">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
+                    <AlertTriangle size={14} />
+                    {error}
+                  </div>
+                )}
 
-              {/* Basic Information */}
-              <CollapsibleSection title="📋 Basic Information" defaultOpen={true}>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Basic Information */}
+                <CollapsibleSection title="📋 Basic Information">
+                  <div className="space-y-4">
                     <FormInput
                       label="Workshop Title"
                       value={formData.title}
                       onChange={(v) => updateField('title', v)}
-                      placeholder="e.g. Executive Programme in MarTech & AI"
+                      placeholder="e.g. Executive Programme in Generative AI & Business Innovation"
                       required
                     />
                     <FormInput
-                      label="Instructor"
-                      value={formData.instructor}
-                      onChange={(v) => updateField('instructor', v)}
-                      placeholder="e.g. Prof. John Smith"
+                      label="Subtitle"
+                      value={formData.subtitle}
+                      onChange={(v) => updateField('subtitle', v)}
+                      placeholder="e.g. Transform ideas into AI-powered business solutions – from fundamentals to deployment"
+                    />
+                    <FormTextArea
+                      label="Description"
+                      value={formData.description}
+                      onChange={(v) => updateField('description', v)}
+                      placeholder="Enter a clear and compelling description of the workshop..."
+                      rows={4}
                       required
                     />
                   </div>
-                  <FormInput
-                    label="Subtitle"
-                    value={formData.subtitle}
-                    onChange={(v) => updateField('subtitle', v)}
-                    placeholder="e.g. From strategy to stack – your roadmap to marketing in the era of AI"
-                  />
-                  <FormTextArea
-                    label="Description"
-                    value={formData.description}
-                    onChange={(v) => updateField('description', v)}
-                    placeholder="Full workshop description..."
-                    rows={4}
-                    required
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Price"
-                      value={formData.price}
-                      onChange={(v) => updateField('price', v)}
-                      type="number"
-                      required
-                    />
-                    {editingWorkshop && (
-                      <FormInput
-                        label="Batch Number"
-                        value={formData.batchNumber}
-                        onChange={(v) => updateField('batchNumber', v)}
-                        placeholder="e.g. BATCH 3"
+                </CollapsibleSection>
+
+                {/* Main Section */}
+                <CollapsibleSection title="⭐ Main Section">
+                  <div className="space-y-6">
+                    {/* Media */}
+                    <div className="grid grid-cols-1 gap-4">
+                      <ImageUploadInput
+                        label="Workshop Thumbnail"
+                        value={formData.thumbnail}
+                        onChange={(v) => updateField('thumbnail', v)}
                       />
-                    )}
-                  </div>
-                  <div className="w-full">
-                    <ImageUploadInput
-                      label="Workshop Image / Poster"
-                      value={formData.thumbnail}
-                      onChange={(v) => updateField('thumbnail', v)}
-                      placeholder="Paste URL or select image..."
-                    />
-                  </div>
-                </div>
-              </CollapsibleSection>
-
-              {/* Dates & Schedule */}
-              <CollapsibleSection title="📅 Dates & Schedule">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Start Date"
-                      value={formData.startDate}
-                      onChange={(v) => updateField('startDate', v)}
-                      type="date"
-                    />
-                    <FormInput
-                      label="Workshop Time (shown in hero)"
-                      value={formData.workshopTime}
-                      onChange={(v) => updateField('workshopTime', v)}
-                      placeholder="e.g. 10 AM IST"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Application Deadline"
-                      value={formData.applicationDeadline}
-                      onChange={(v) => updateField('applicationDeadline', v)}
-                      type="date"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Duration"
-                      value={formData.duration}
-                      onChange={(v) => updateField('duration', v)}
-                      placeholder="e.g. 26 weeks, Online"
-                    />
-                    <FormInput
-                      label="Duration Detail"
-                      value={formData.durationDetail}
-                      onChange={(v) => updateField('durationDetail', v)}
-                      placeholder="e.g. 4-6 hours of weekly"
-                    />
-                  </div>
-                </div>
-              </CollapsibleSection>
-
-              {/* Fee & Eligibility */}
-              <CollapsibleSection title="💰 Fee & Eligibility">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Display Fee"
-                      value={formData.fee}
-                      onChange={(v) => updateField('fee', v)}
-                      placeholder="e.g. ₹1,26,500"
-                    />
-                    <FormInput
-                      label="Fee Note"
-                      value={formData.feeNote}
-                      onChange={(v) => updateField('feeNote', v)}
-                      placeholder="e.g. GST will be charged at checkout"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput
-                      label="Eligibility"
-                      value={formData.eligibility}
-                      onChange={(v) => updateField('eligibility', v)}
-                      placeholder="e.g. Bachelor's Degree or 10+2+3"
-                    />
-                    <FormInput
-                      label="Eligibility Detail"
-                      value={formData.eligibilityDetail}
-                      onChange={(v) => updateField('eligibilityDetail', v)}
-                      placeholder="More details on eligibility..."
-                    />
-                  </div>
-                </div>
-              </CollapsibleSection>
-
-              {/* Media */}
-              <CollapsibleSection title="📄 Brochure Configuration">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-150 rounded-xl">
-                    <div>
-                      <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block">Brochure Download</span>
-                      <span className="text-xs text-gray-400">Offer a downloadable syllabus brochure (PDF or auto-generated) on the page</span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={formData.hasBrochure}
-                        onChange={(e) => updateField('hasBrochure', e.target.checked)}
-                        className="sr-only peer"
+
+                    {/* Pricing */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormInput
+                        label="Offer Price (INR)"
+                        type="number"
+                        value={formData.price}
+                        onChange={(v) => updateField('price', v)}
+                        placeholder="e.g. 199"
+                        required
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6366f1]"></div>
-                    </label>
-                  </div>
+                      <FormInput
+                        label="Original Price (INR)"
+                        type="number"
+                        value={formData.originalPrice}
+                        onChange={(v) => updateField('originalPrice', v)}
+                        placeholder="e.g. 1999"
+                      />
+                    </div>
 
-                  {formData.hasBrochure && (
-                    <FormInput
-                      label="Brochure URL (PDF link)"
-                      value={formData.brochureUrl}
-                      onChange={(v) => updateField('brochureUrl', v)}
-                      placeholder="https://... (leave empty for auto-generated brochure)"
-                    />
-                  )}
-                </div>
-              </CollapsibleSection>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormInput
+                        label="Price Caption"
+                        value={formData.priceCaption}
+                        onChange={(v) => updateField('priceCaption', v)}
+                        placeholder="e.g. Become A Python Using AI Expert Now At"
+                      />
+                      <FormInput
+                        label="Bonus Deadline Text"
+                        value={formData.bonusDeadlineText}
+                        onChange={(v) => updateField('bonusDeadlineText', v)}
+                        placeholder="e.g. Register Before June 07, 2026..."
+                      />
+                    </div>
 
-              {/* Programme Modules */}
-              <CollapsibleSection title="📚 Programme Modules">
-                <div className="space-y-4">
-                  {formData.modules.map((mod, idx) => (
-                    <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50 relative group">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.modules];
-                          updated.splice(idx, 1);
-                          updateField('modules', updated);
-                        }}
-                        className="absolute top-3 right-3 w-6 h-6 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-400 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                      <div className="flex items-center gap-2 mb-3">
-                        <GripVertical size={14} className="text-gray-300" />
-                        <input
-                          type="text"
-                          value={mod.title}
-                          onChange={(e) => {
-                            const updated = [...formData.modules];
-                            updated[idx] = { ...updated[idx], title: e.target.value };
-                            updateField('modules', updated);
-                          }}
-                          placeholder="Module title"
-                          className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] font-semibold"
+                    {/* Ratings section */}
+                    <div className="border-t border-gray-100 pt-4">
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-3">
+                        ⭐ Trustpilot & Rating Facts Configuration
+                      </span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <FormInput
+                          label="Rating 1 Value (e.g. 4.5/5)"
+                          value={formData.rating1Value}
+                          onChange={(v) => updateField('rating1Value', v)}
+                          placeholder="4.5/5"
+                        />
+                        <FormInput
+                          label="Rating 1 Count (e.g. (725))"
+                          value={formData.rating1Count}
+                          onChange={(v) => updateField('rating1Count', v)}
+                          placeholder="(725)"
+                        />
+                        <FormInput
+                          label="Rating 1 Platform Name"
+                          value={formData.rating1Platform}
+                          onChange={(v) => updateField('rating1Platform', v)}
+                          placeholder="Trustpilot"
                         />
                       </div>
-                      {mod.content.map((item, cIdx) => (
-                        <div key={cIdx} className="flex items-start gap-2 mb-2 ml-6">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] mt-2.5 shrink-0" />
-                          <input
-                            type="text"
-                            value={item}
-                            onChange={(e) => {
-                              const updated = [...formData.modules];
-                              const newContent = [...updated[idx].content];
-                              newContent[cIdx] = e.target.value;
-                              updated[idx] = { ...updated[idx], content: newContent };
-                              updateField('modules', updated);
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormInput
+                          label="Rating 2 Value (e.g. 4.07/5)"
+                          value={formData.rating2Value}
+                          onChange={(v) => updateField('rating2Value', v)}
+                          placeholder="4.07/5"
+                        />
+                        <FormInput
+                          label="Rating 2 Count (e.g. (88))"
+                          value={formData.rating2Count}
+                          onChange={(v) => updateField('rating2Count', v)}
+                          placeholder="(88)"
+                        />
+                        <FormInput
+                          label="Rating 2 Platform Name"
+                          value={formData.rating2Platform}
+                          onChange={(v) => updateField('rating2Platform', v)}
+                          placeholder="Rating Facts"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 4 Checkpoints */}
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block">
+                        Hero Checkpoints (Up to 4 points)
+                      </label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[0, 1, 2, 3].map((idx) => (
+                          <FormInput
+                            key={idx}
+                            label={`Point ${idx + 1}`}
+                            value={formData.heroPoints[idx] || ''}
+                            onChange={(val) => {
+                              const updated = [...formData.heroPoints];
+                              updated[idx] = val;
+                              updateField('heroPoints', updated);
                             }}
-                            placeholder="Content point..."
-                            className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
+                            placeholder={`Checkpoint point ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CollapsibleSection>
+
+                {/* Workshop Dates */}
+                <CollapsibleSection title="📅 Workshop Dates">
+                  <div className="space-y-4">
+                    <span className="text-xs text-gray-500 font-medium block">
+                      Add the dates when this workshop is held. These will display in the calendar selector on the details page.
+                    </span>
+                    <div className="space-y-3">
+                      {formData.workshopDates.map((dateStr, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <input
+                            type="date"
+                            value={dateStr}
+                            onChange={(e) => {
+                              const updated = [...formData.workshopDates];
+                              updated[idx] = e.target.value;
+                              updateField('workshopDates', updated);
+                            }}
+                            className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
                           />
                           <button
                             type="button"
                             onClick={() => {
-                              const updated = [...formData.modules];
-                              const newContent = [...updated[idx].content];
-                              newContent.splice(cIdx, 1);
-                              updated[idx] = { ...updated[idx], content: newContent };
-                              updateField('modules', updated);
+                              const updated = [...formData.workshopDates];
+                              updated.splice(idx, 1);
+                              updateField('workshopDates', updated);
                             }}
-                            className="p-1 text-gray-300 hover:text-red-500 transition-colors"
+                            className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
                           >
-                            <X size={12} />
+                            Remove
                           </button>
                         </div>
                       ))}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.modules];
-                          updated[idx] = { ...updated[idx], content: [...updated[idx].content, ''] };
-                          updateField('modules', updated);
-                        }}
-                        className="ml-6 text-xs font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors mt-1"
-                      >
-                        + Add content point
-                      </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updateField('modules', [...formData.modules, { title: '', content: [''] }])}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Module
-                  </button>
-                </div>
-              </CollapsibleSection>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField('workshopDates', [...formData.workshopDates, '']);
+                      }}
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                    >
+                      + Add Date
+                    </button>
+                  </div>
+                </CollapsibleSection>
 
-              {/* Highlights */}
-              <CollapsibleSection title="✨ Programme Highlights">
-                <div className="space-y-3">
-                  {formData.highlights.map((hl, idx) => (
-                    <div key={idx} className="flex gap-3 items-start group">
-                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          value={hl.title}
-                          onChange={(e) => {
-                            const updated = [...formData.highlights];
-                            updated[idx] = { ...updated[idx], title: e.target.value };
-                            updateField('highlights', updated);
-                          }}
-                          placeholder="Highlight title"
-                          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1] font-semibold"
+                {/* Mentor & Workshop Outcomes */}
+                <CollapsibleSection title="🎓 Mentor & Workshop Outcomes">
+                  <div className="space-y-6">
+                    {/* Mentor Details */}
+                    <div>
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-3 border-b border-gray-100 pb-2">
+                        Mentor Details
+                      </span>
+                      <div className="space-y-4">
+                        <FormInput
+                          label="Instructor Name"
+                          value={formData.instructor}
+                          onChange={(v) => updateField('instructor', v)}
+                          placeholder="e.g. Aman Saurav"
                         />
-                        <input
-                          type="text"
-                          value={hl.description}
-                          onChange={(e) => {
-                            const updated = [...formData.highlights];
-                            updated[idx] = { ...updated[idx], description: e.target.value };
-                            updateField('highlights', updated);
-                          }}
-                          placeholder="Short description"
-                          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
+                        <ImageUploadInput
+                          label="Instructor Image"
+                          value={formData.instructorImage}
+                          onChange={(v) => updateField('instructorImage', v)}
+                        />
+                        <FormTextArea
+                          label="Instructor Description / Role / Headline"
+                          value={formData.instructorDescription}
+                          onChange={(v) => updateField('instructorDescription', v)}
+                          placeholder="e.g. (IIT Delhi) Senior Data Analyst&#10;Director at AI for Techies"
+                          rows={3}
                         />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.highlights];
-                          updated.splice(idx, 1);
-                          updateField('highlights', updated);
-                        }}
-                        className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <X size={14} />
-                      </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updateField('highlights', [...formData.highlights, { title: '', description: '' }])}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Highlight
-                  </button>
-                </div>
-              </CollapsibleSection>
 
-              {/* Target Audience */}
-              <CollapsibleSection title="👥 Target Audience">
-                <div className="space-y-3">
-                  {formData.targetAudience.map((ta, idx) => (
-                    <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50 relative group">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.targetAudience];
-                          updated.splice(idx, 1);
-                          updateField('targetAudience', updated);
-                        }}
-                        className="absolute top-3 right-3 w-6 h-6 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-400 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                      <FormInput
-                        label="Audience Title"
-                        value={ta.title}
-                        onChange={(v) => {
-                          const updated = [...formData.targetAudience];
-                          updated[idx] = { ...updated[idx], title: v };
-                          updateField('targetAudience', updated);
-                        }}
-                        placeholder="e.g. Senior Managers and Leaders"
-                        className="mb-3"
-                      />
-                      <FormTextArea
-                        label="Description"
-                        value={ta.description}
-                        onChange={(v) => {
-                          const updated = [...formData.targetAudience];
-                          updated[idx] = { ...updated[idx], description: v };
-                          updateField('targetAudience', updated);
-                        }}
-                        placeholder="Describe the target audience..."
-                        rows={2}
-                      />
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updateField('targetAudience', [...formData.targetAudience, { title: '', description: '' }])}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Target Audience
-                  </button>
-                </div>
-              </CollapsibleSection>
-
-              {/* Learning Outcomes */}
-              <CollapsibleSection title="🎯 Learning Outcomes">
-                <div className="space-y-2">
-                  {formData.learningOutcomes.map((lo, idx) => (
-                    <div key={idx} className="flex items-center gap-2 group">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] shrink-0" />
-                      <input
-                        type="text"
-                        value={lo}
-                        onChange={(e) => {
-                          const updated = [...formData.learningOutcomes];
-                          updated[idx] = e.target.value;
-                          updateField('learningOutcomes', updated);
-                        }}
-                        placeholder="Learning outcome..."
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.learningOutcomes];
-                          updated.splice(idx, 1);
-                          updateField('learningOutcomes', updated);
-                        }}
-                        className="p-1 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updateField('learningOutcomes', [...formData.learningOutcomes, ''])}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Outcome
-                  </button>
-                </div>
-              </CollapsibleSection>
-
-              {/* Mentors */}
-              <CollapsibleSection title="🎓 Mentors">
-                <div className="space-y-3">
-                  {formData.experts.map((exp, idx) => (
-                    <div key={idx} className="flex gap-3 items-start group">
-                      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <input
-                          type="text"
-                          value={exp.name}
-                          onChange={(e) => {
-                            const updated = [...formData.experts];
-                            updated[idx] = { ...updated[idx], name: e.target.value };
-                            updateField('experts', updated);
-                          }}
-                          placeholder="Mentor name"
-                          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1] font-semibold"
-                        />
-                        <input
-                          type="text"
-                          value={exp.role}
-                          onChange={(e) => {
-                            const updated = [...formData.experts];
-                            updated[idx] = { ...updated[idx], role: e.target.value };
-                            updateField('experts', updated);
-                          }}
-                          placeholder="Role / Title (e.g. Founder, CEO)"
-                          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
-                        />
-                        <div className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            value={exp.image}
-                            onChange={(e) => {
-                              const updated = [...formData.experts];
-                              updated[idx] = { ...updated[idx], image: e.target.value };
-                              updateField('experts', updated);
-                            }}
-                            placeholder="Image URL or upload"
-                            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
-                          />
-                          <label className="px-3 py-2 bg-gray-950 hover:bg-black text-white text-xs font-bold rounded-lg cursor-pointer transition-colors shadow-sm select-none border border-transparent whitespace-nowrap active:scale-[0.98]">
-                            Upload
+                    {/* Outcome Points */}
+                    <div className="space-y-4 border-t border-gray-100 pt-6">
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1">
+                        Workshop Outcome Points
+                      </span>
+                      <span className="text-xs text-gray-500 font-medium block">
+                        Add the points outlining what students will achieve or learn in this workshop.
+                      </span>
+                      <div className="space-y-3">
+                        {formData.learningOutcomes.map((point, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
                             <input
-                              type="file"
-                              accept="image/*"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                try {
-                                  const data = await workshopApi.uploadImage(file);
-                                  if (data.success && data.url) {
-                                    const updated = [...formData.experts];
-                                    updated[idx] = { ...updated[idx], image: data.url };
-                                    updateField('experts', updated);
-                                  }
-                                } catch (err) {
-                                  console.error(err);
-                                }
+                              type="text"
+                              value={point}
+                              onChange={(e) => {
+                                const updated = [...formData.learningOutcomes];
+                                updated[idx] = e.target.value;
+                                updateField('learningOutcomes', updated);
                               }}
-                              className="hidden"
+                              placeholder={`Outcome point ${idx + 1}`}
+                              className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
                             />
-                          </label>
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.learningOutcomes];
+                                updated.splice(idx, 1);
+                                updateField('learningOutcomes', updated);
+                              }}
+                              className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
                       </div>
                       <button
                         type="button"
                         onClick={() => {
-                          const updated = [...formData.experts];
-                          updated.splice(idx, 1);
-                          updateField('experts', updated);
+                          updateField('learningOutcomes', [...formData.learningOutcomes, '']);
                         }}
-                        className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
                       >
-                        <X size={14} />
+                        + Add Outcome Point
                       </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updateField('experts', [...formData.experts, { name: '', role: '', image: '' }])}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Mentor
-                  </button>
-                </div>
-              </CollapsibleSection>
+                  </div>
+                </CollapsibleSection>
 
-              {/* Workshop Slots */}
-              <CollapsibleSection title="🗓️ Workshop Slots">
-                <div className="space-y-3">
-                  {formData.slots.map((slot, idx) => (
-                    <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50 relative group">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = [...formData.slots];
-                          updated.splice(idx, 1);
-                          updateField('slots', updated);
-                        }}
-                        className="absolute top-3 right-3 w-6 h-6 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-400 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-gray-500 uppercase">Date</label>
-                          <input
-                            type="date"
-                            value={slot.date}
-                            onChange={(e) => {
-                              const updated = [...formData.slots];
-                              updated[idx] = { ...updated[idx], date: e.target.value };
-                              updateField('slots', updated);
-                            }}
-                            className="px-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20"
-                          />
+                {/* What You'll Learn */}
+                <CollapsibleSection title="📖 What You'll Learn">
+                  <div className="space-y-4">
+                    <span className="text-xs text-gray-500 font-medium block">
+                      Add steps/topics to show under the "What You'll Learn" section on the details page.
+                    </span>
+                    <div className="space-y-4">
+                      {formData.whatYouWillLearn.map((step, idx) => (
+                        <div key={idx} className="border border-gray-150 rounded-xl p-4 bg-gray-50/30 space-y-3 relative group/step">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                              Step {idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.whatYouWillLearn];
+                                updated.splice(idx, 1);
+                                updateField('whatYouWillLearn', updated);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                            >
+                              Remove Step
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            <FormInput
+                              label="Step Heading"
+                              value={step.title}
+                              onChange={(v) => {
+                                const updated = [...formData.whatYouWillLearn];
+                                updated[idx] = { ...updated[idx], title: v };
+                                updateField('whatYouWillLearn', updated);
+                              }}
+                              placeholder="e.g. Social Media Handling with AI"
+                            />
+                            <FormTextArea
+                              label="Step Description"
+                              value={step.description}
+                              onChange={(v) => {
+                                const updated = [...formData.whatYouWillLearn];
+                                updated[idx] = { ...updated[idx], description: v };
+                                updateField('whatYouWillLearn', updated);
+                              }}
+                              placeholder="e.g. Create, schedule, analyze & grow your social media using powerful AI tools."
+                              rows={2}
+                            />
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-gray-500 uppercase">Start</label>
-                          <input
-                            type="time"
-                            value={slot.startTime}
-                            onChange={(e) => {
-                              const updated = [...formData.slots];
-                              updated[idx] = { ...updated[idx], startTime: e.target.value };
-                              updateField('slots', updated);
-                            }}
-                            className="px-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-gray-500 uppercase">End</label>
-                          <input
-                            type="time"
-                            value={slot.endTime}
-                            onChange={(e) => {
-                              const updated = [...formData.slots];
-                              updated[idx] = { ...updated[idx], endTime: e.target.value };
-                              updateField('slots', updated);
-                            }}
-                            className="px-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-gray-500 uppercase">Seats</label>
-                          <input
-                            type="number"
-                            value={slot.totalSeats}
-                            onChange={(e) => {
-                              const updated = [...formData.slots];
-                              updated[idx] = { ...updated[idx], totalSeats: parseInt(e.target.value) || 1 };
-                              updateField('slots', updated);
-                            }}
-                            min={1}
-                            className="px-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold text-gray-500 uppercase">Meeting Link</label>
-                          <input
-                            type="text"
-                            value={slot.meetingLink}
-                            onChange={(e) => {
-                              const updated = [...formData.slots];
-                              updated[idx] = { ...updated[idx], meetingLink: e.target.value };
-                              updateField('slots', updated);
-                            }}
-                            placeholder="https://..."
-                            className="px-2.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#6366f1]/20"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateField('slots', [
-                        ...formData.slots,
-                        { date: '', startTime: '10:00', endTime: '12:00', totalSeats: 50, meetingLink: '' },
-                      ])
-                    }
-                    className="flex items-center gap-1.5 text-sm font-semibold text-[#6366f1] hover:text-[#5558e6] transition-colors bg-[#efeefc] hover:bg-[#e8e6fb] px-4 py-2.5 rounded-xl"
-                  >
-                    <Plus size={14} /> Add Slot
-                  </button>
-                </div>
-              </CollapsibleSection>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField('whatYouWillLearn', [...formData.whatYouWillLearn, { title: '', description: '' }]);
+                      }}
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                    >
+                      + Add Step
+                    </button>
+                  </div>
+                </CollapsibleSection>
+
+                {/* Course Outcomes */}
+                <CollapsibleSection title="🎓 Course Outcomes (Image, Heading, Description)">
+                  <div className="space-y-4">
+                    <span className="text-xs text-gray-500 font-medium block">
+                      Add outcomes with an image, heading, and description to show in the outcomes carousel section.
+                    </span>
+                    <div className="space-y-4">
+                      {formData.courseOutcomes && formData.courseOutcomes.map((outcome, idx) => (
+                        <div key={idx} className="border border-gray-150 rounded-xl p-4 bg-gray-50/30 space-y-3 relative group/outcome">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                              Outcome {idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.courseOutcomes];
+                                updated.splice(idx, 1);
+                                updateField('courseOutcomes', updated);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                            >
+                              Remove Outcome
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            <ImageUploadInput
+                              label="Outcome Image"
+                              value={outcome.image}
+                              onChange={(v) => {
+                                const updated = [...formData.courseOutcomes];
+                                updated[idx] = { ...updated[idx], image: v };
+                                updateField('courseOutcomes', updated);
+                              }}
+                            />
+                            <FormInput
+                              label="Outcome Heading"
+                              value={outcome.title}
+                              onChange={(v) => {
+                                const updated = [...formData.courseOutcomes];
+                                updated[idx] = { ...updated[idx], title: v };
+                                updateField('courseOutcomes', updated);
+                              }}
+                              placeholder="e.g. Generate Codes in any language with AI"
+                            />
+                            <FormTextArea
+                              label="Outcome Description"
+                              value={outcome.description}
+                              onChange={(v) => {
+                                const updated = [...formData.courseOutcomes];
+                                updated[idx] = { ...updated[idx], description: v };
+                                updateField('courseOutcomes', updated);
+                              }}
+                              placeholder="e.g. Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField('courseOutcomes', [...(formData.courseOutcomes || []), { title: '', description: '', image: '' }]);
+                      }}
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                    >
+                      + Add Outcome Card
+                    </button>
+                  </div>
+                </CollapsibleSection>
+              </div>
+
+              {/* Sticky Footer */}
+              <div className="px-7 py-5 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  id="workshop-submit-btn"
+                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {submitting && <Loader2 size={14} className="animate-spin" />}
+                  {editingWorkshop ? 'Update Workshop' : 'Create Workshop'}
+                </button>
+              </div>
             </form>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-gray-200 bg-white rounded-b-2xl">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                id="workshop-submit-btn"
-                className="flex items-center gap-2 bg-[#6366f1] hover:bg-[#5558e6] disabled:bg-[#6366f1]/60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-[#6366f1]/20"
-              >
-                {submitting && <Loader2 size={14} className="animate-spin" />}
-                {editingWorkshop ? 'Update Workshop' : 'Create Workshop'}
-              </button>
-            </div>
           </div>
         </div>
       )}

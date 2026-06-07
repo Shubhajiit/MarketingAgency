@@ -1,16 +1,5 @@
 import apiClient from './client';
 
-export interface WorkshopSlot {
-  _id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  totalSeats: number;
-  bookedSeats: number;
-  isAvailable: boolean;
-  meetingLink: string;
-}
-
 export interface WorkshopModule {
   title: string;
   content: string[];
@@ -32,6 +21,17 @@ export interface WorkshopExpert {
   image: string;
 }
 
+export interface WorkshopWhatYouWillLearnStep {
+  title: string;
+  description: string;
+}
+
+export interface WorkshopCourseOutcome {
+  title: string;
+  description: string;
+  image: string;
+}
+
 export interface Workshop {
   _id: string;
   title: string;
@@ -39,35 +39,38 @@ export interface Workshop {
   subtitle: string;
   description: string;
   instructor: string;
+  instructorImage?: string;
+  instructorDescription?: string;
   price: number;
   currency: string;
   thumbnail: string;
   tags: string[];
   isActive: boolean;
-  slots: WorkshopSlot[];
   createdAt: string;
 
   // Detail page fields
-  batchNumber: string;
-  startDate: string | null;
-  workshopTime: string;
-  duration: string;
-  durationDetail: string;
-  fee: string;
-  feeNote: string;
-  eligibility: string;
-  eligibilityDetail: string;
-  applicationDeadline: string | null;
-  heroImage: string;
-  brochureUrl: string;
-  hasBrochure: boolean;
+  originalPrice: number;
+  priceCaption: string;
+  bonusDeadlineText: string;
+  heroPoints: string[];
+  workshopDates: string[];
 
   // Rich content
   highlights: WorkshopHighlight[];
   modules: WorkshopModule[];
   targetAudience: WorkshopTargetAudience[];
   learningOutcomes: string[];
+  whatYouWillLearn?: WorkshopWhatYouWillLearnStep[];
+  courseOutcomes?: WorkshopCourseOutcome[];
   experts: WorkshopExpert[];
+
+  // Ratings
+  rating1Value?: string;
+  rating1Count?: string;
+  rating1Platform?: string;
+  rating2Value?: string;
+  rating2Count?: string;
+  rating2Platform?: string;
 }
 
 interface WorkshopListResponse {
@@ -128,7 +131,7 @@ export const workshopApi = {
   /**
    * Create a new workshop (admin only).
    */
-  create: async (data: Omit<Partial<Workshop>, 'slots'> & { slots?: Partial<WorkshopSlot>[] }) => {
+  create: async (data: Partial<Workshop>) => {
     const res = await apiClient.post('/workshops', data);
     return res.data;
   },
@@ -136,7 +139,7 @@ export const workshopApi = {
   /**
    * Update an existing workshop by ID (admin only).
    */
-  update: async (id: string, data: Omit<Partial<Workshop>, 'slots'> & { slots?: Partial<WorkshopSlot>[] }) => {
+  update: async (id: string, data: Partial<Workshop>) => {
     const res = await apiClient.patch(`/workshops/${id}`, data);
     return res.data;
   },

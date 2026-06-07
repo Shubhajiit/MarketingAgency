@@ -45,9 +45,8 @@ ChartJS.register(
 );
 
 interface AdminStats {
-  totalUsers: number;
-  totalWorkshops: number;
-  totalBookings: number;
+  totalWorkshopBuyers: number;
+  totalCourses: number;
   totalVideos: number;
   totalRevenue: number;
 }
@@ -61,58 +60,11 @@ interface RecentBooking {
   createdAt: string;
 }
 
-// Visual mock entries matching the image exactly to pad/ensure high fidelity
-const MOCK_BOOKINGS = [
-  {
-    _id: 'mock1',
-    user: { name: 'Blonde Drizzle', email: 'blonde@example.com', _id: '54124' },
-    workshop: { title: 'Digital Marketing Fundamentals' },
-    paymentStatus: 'paid', // Success
-    amount: 445.00,
-    createdAt: new Date().toISOString(),
-    cardType: 'mastercard',
-    cardDigits: '1264',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
-  },
-  {
-    _id: 'mock2',
-    user: { name: 'Kuiper Split', email: 'kuiper@example.com', _id: '54124' },
-    workshop: { title: 'Introduction to Python Programming' },
-    paymentStatus: 'cancelled', // Cancel
-    amount: 345.00,
-    createdAt: new Date().toISOString(),
-    cardType: 'visa',
-    cardDigits: '3658',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
-  },
-  {
-    _id: 'mock3',
-    user: { name: 'Diva Bliss', email: 'diva@example.com', _id: '54124' },
-    workshop: { title: 'Machine Learning and Applications' },
-    paymentStatus: 'paid', // Success
-    amount: 645.00,
-    createdAt: new Date().toISOString(),
-    cardType: 'amex',
-    cardDigits: '1264',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150'
-  },
-  {
-    _id: 'mock4',
-    user: { name: 'Kuiper Split', email: 'kuiper2@example.com', _id: '54124' },
-    workshop: { title: 'Leveraging Data for Decision Making' },
-    paymentStatus: 'pending', // Pending
-    amount: 645.00,
-    createdAt: new Date().toISOString(),
-    cardType: 'mastercard',
-    cardDigits: '1264',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150'
-  }
-];
-
 export default function AdminStatsPage() {
   const { user: authUser } = useAuthStore();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
+  const [chartData, setChartData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter/Toggle states for mock interaction
@@ -125,6 +77,7 @@ export default function AdminStatsPage() {
         const res = await apiClient.get('/admin/stats');
         setStats(res.data.data.stats);
         setRecentBookings(res.data.data.recentBookings || []);
+        setChartData(res.data.data.chartData || null);
       } catch (err) {
         console.error('Failed to fetch admin stats', err);
       } finally {
@@ -145,9 +98,7 @@ export default function AdminStatsPage() {
     );
   }
 
-  // Build high fidelity padded transaction list:
-  // If we have actual bookings in the database, map them. If we have fewer than 4, pad them with the mock bookings.
-  const displayBookings = [...recentBookings.map((b, idx) => ({
+  const displayBookings = recentBookings.map((b, idx) => ({
     _id: b._id,
     user: {
       name: b.user?.name || 'Customer Name',
@@ -163,31 +114,32 @@ export default function AdminStatsPage() {
     avatar: idx % 2 === 0 
       ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' 
       : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
-  })), ...MOCK_BOOKINGS].slice(0, Math.max(4, recentBookings.length));
+  }));
 
   // --- CHART.JS CONFIGURATIONS ---
 
   // 1. Overview Stacked Bar Chart
+  const overviewLabels = chartData?.labels || ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const overviewData = {
-    labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    labels: overviewLabels,
     datasets: [
       {
         label: 'Other',
-        data: [15, 12, 18, 20, 10, 15, 12],
+        data: chartData?.overview?.other || [0, 0, 0, 0, 0, 0, 0],
         backgroundColor: '#c7c4f7',
         borderRadius: 4,
         barThickness: 14,
       },
       {
         label: 'Students',
-        data: [20, 24, 15, 25, 12, 23, 16],
+        data: chartData?.overview?.students || [0, 0, 0, 0, 0, 0, 0],
         backgroundColor: '#8f8af4',
         borderRadius: 4,
         barThickness: 14,
       },
       {
         label: 'Teachers',
-        data: [26, 29, 21, 35, 15, 22, 18],
+        data: chartData?.overview?.teachers || [0, 0, 0, 0, 0, 0, 0],
         backgroundColor: '#6366f1',
         borderRadius: 4,
         barThickness: 14,
@@ -240,11 +192,11 @@ export default function AdminStatsPage() {
 
   // 2. Student Analysis Line Chart
   const studentAnalysisData = {
-    labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    labels: overviewLabels,
     datasets: [
       {
         label: 'Enrolled',
-        data: [42, 50, 32, 24, 38, 44, 32],
+        data: chartData?.studentAnalysis?.enrolled || [0, 0, 0, 0, 0, 0, 0],
         borderColor: '#8f8af4',
         borderWidth: 2,
         pointBackgroundColor: '#8f8af4',
@@ -266,7 +218,7 @@ export default function AdminStatsPage() {
       },
       {
         label: 'Left',
-        data: [15, 8, 20, 14, 10, 15, 11],
+        data: chartData?.studentAnalysis?.left || [0, 0, 0, 0, 0, 0, 0],
         borderColor: '#ef4444',
         borderWidth: 1.5,
         pointBackgroundColor: '#ef4444',
@@ -333,13 +285,13 @@ export default function AdminStatsPage() {
 
       {/* 4 Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card 1: Total Students */}
+        {/* Card 1: Workshops Buyers */}
         <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[120px] transition-all hover:shadow-sm">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-xs font-semibold text-gray-400">Total Students</span>
+              <span className="text-xs font-semibold text-gray-400">Workshops Buyers</span>
               <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalUsers || 72056).toLocaleString('en-US')}
+                {(stats?.totalWorkshopBuyers || 0).toLocaleString('en-US')}
               </h3>
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#efeefc] text-[#6366f1] flex items-center justify-center">
@@ -369,7 +321,7 @@ export default function AdminStatsPage() {
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Course</span>
               <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalWorkshops || 12056).toLocaleString('en-US')}
+                {(stats?.totalCourses || 0).toLocaleString('en-US')}
               </h3>
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#eef2ff] text-[#3b82f6] flex items-center justify-center">
@@ -399,7 +351,7 @@ export default function AdminStatsPage() {
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Video</span>
               <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalVideos || 31056).toLocaleString('en-US')}
+                {(stats?.totalVideos || 0).toLocaleString('en-US')}
               </h3>
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#fae8ff] text-[#d946ef] flex items-center justify-center">
@@ -429,10 +381,7 @@ export default function AdminStatsPage() {
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Earning</span>
               <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {stats?.totalRevenue !== undefined 
-                  ? `₹${stats.totalRevenue.toLocaleString('en-IN')}`
-                  : `$8,05,056`
-                }
+                ₹{(stats?.totalRevenue || 0).toLocaleString('en-IN')}
               </h3>
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#f59e0b] flex items-center justify-center">
@@ -562,117 +511,121 @@ export default function AdminStatsPage() {
             <span>View All</span>
             <span className="text-[10px] ml-0.5">&gt;</span>
           </button>
-        </div>
-
-        {/* Mobile View (Cards) */}
+        </div>        {/* Mobile View (Cards) */}
         <div className="md:hidden divide-y divide-[#f4f5f8] px-4 bg-white">
-          {displayBookings.map((booking) => {
-            const isPaid = booking.paymentStatus === 'paid';
-            const isCancelled = booking.paymentStatus === 'cancelled';
-            const isPending = booking.paymentStatus === 'pending';
+          {displayBookings.length === 0 ? (
+            <div className="py-8 text-center text-gray-500 font-medium">
+              No transactions found
+            </div>
+          ) : (
+            displayBookings.map((booking) => {
+              const isPaid = booking.paymentStatus === 'paid';
+              const isCancelled = booking.paymentStatus === 'cancelled';
+              const isPending = booking.paymentStatus === 'pending';
 
-            return (
-              <div key={booking._id} className="py-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={booking.avatar} 
-                      alt={booking.user.name} 
-                      className="w-9 h-9 rounded-full object-cover border border-gray-105 shadow-xs shrink-0" 
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-bold text-[#1f2937] leading-tight text-xs">
-                        {booking.user.name}
+              return (
+                <div key={booking._id} className="py-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={booking.avatar} 
+                        alt={booking.user.name} 
+                        className="w-9 h-9 rounded-full object-cover border border-gray-105 shadow-xs shrink-0" 
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#1f2937] leading-tight text-xs">
+                          {booking.user.name}
+                        </span>
+                        <span className="text-[9.5px] text-gray-400 mt-0.5">
+                          ID: #{booking.user._id || '54124'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-extrabold text-xs text-[#1f2937] block">
+                        ${booking.amount.toFixed(2)}
                       </span>
-                      <span className="text-[9.5px] text-gray-400 mt-0.5">
-                        ID: #{booking.user._id || '54124'}
+                      <span className="text-[9.5px] text-gray-400 block mt-0.5">
+                        {new Date(booking.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-extrabold text-xs text-[#1f2937] block">
-                      ${booking.amount.toFixed(2)}
-                    </span>
-                    <span className="text-[9.5px] text-gray-400 block mt-0.5">
-                      {new Date(booking.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="bg-[#f8f9fe]/60 rounded-xl p-3 space-y-2 text-xs">
-                  <div className="flex justify-between items-center gap-2">
-                    <span className="text-gray-400 font-medium shrink-0">Course:</span>
-                    <span className="font-medium text-gray-700 text-right truncate max-w-[180px]">{booking.workshop.title}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 font-medium">Method:</span>
-                    <div className="flex items-center gap-1.5">
-                      {booking.cardType === 'mastercard' && (
-                        <div className="flex -space-x-1 overflow-hidden shrink-0">
-                          <span className="w-3 h-3 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
-                          <span className="w-3 h-3 rounded-full bg-[#f9a01b] inline-block -ml-1 mix-blend-multiply"></span>
-                        </div>
-                      )}
-                      {booking.cardType === 'visa' && (
-                        <span className="text-[9px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.2 rounded border border-blue-100 shrink-0">
-                          VISA
+                  <div className="bg-[#f8f9fe]/60 rounded-xl p-3 space-y-2 text-xs">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-gray-400 font-medium shrink-0">Course:</span>
+                      <span className="font-medium text-gray-700 text-right truncate max-w-[180px]">{booking.workshop.title}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 font-medium">Method:</span>
+                      <div className="flex items-center gap-1.5">
+                        {booking.cardType === 'mastercard' && (
+                          <div className="flex -space-x-1 overflow-hidden shrink-0">
+                            <span className="w-3.5 h-3.5 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
+                            <span className="w-3.5 h-3.5 rounded-full bg-[#f9a01b] inline-block -ml-1.5 mix-blend-multiply"></span>
+                          </div>
+                        )}
+                        {booking.cardType === 'visa' && (
+                          <span className="text-[9px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.2 rounded border border-blue-100 shrink-0">
+                            VISA
+                          </span>
+                        )}
+                        {booking.cardType === 'amex' && (
+                          <span className="text-[8px] font-bold text-sky-600 bg-sky-50 px-1 py-0.2 rounded border border-sky-100 shrink-0">
+                            AMEX
+                          </span>
+                        )}
+                        <span className="text-gray-500 font-medium text-[10px]">
+                          **** {booking.cardDigits}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 font-medium">Status:</span>
+                      {isPaid && (
+                        <span className="inline-block bg-[#eefbf6] text-[#2ac78b] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                          Success
                         </span>
                       )}
-                      {booking.cardType === 'amex' && (
-                        <span className="text-[8px] font-bold text-sky-600 bg-sky-50 px-1 py-0.2 rounded border border-sky-100 shrink-0">
-                          AMEX
+                      {isCancelled && (
+                        <span className="inline-block bg-[#fdf2f2] text-[#f05252] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                          Cancel
                         </span>
                       )}
-                      <span className="text-gray-500 font-medium text-[10px]">
-                        **** {booking.cardDigits}
-                      </span>
+                      {isPending && (
+                        <span className="inline-block bg-[#fffbeb] text-[#f59e0b] text-[10px] font-bold px-2 py-0.5 rounded-md">
+                          Pending
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 font-medium">Status:</span>
-                    {isPaid && (
-                      <span className="inline-block bg-[#eefbf6] text-[#2ac78b] text-[10px] font-bold px-2 py-0.5 rounded-md">
-                        Success
-                      </span>
-                    )}
-                    {isCancelled && (
-                      <span className="inline-block bg-[#fdf2f2] text-[#f05252] text-[10px] font-bold px-2 py-0.5 rounded-md">
-                        Cancel
-                      </span>
-                    )}
-                    {isPending && (
-                      <span className="inline-block bg-[#fffbeb] text-[#f59e0b] text-[10px] font-bold px-2 py-0.5 rounded-md">
-                        Pending
-                      </span>
-                    )}
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <button 
+                      title="View Details"
+                      className="flex-1 py-1.5 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                    >
+                      <Eye size={12} className="stroke-[2.5]" />
+                      <span>View</span>
+                    </button>
+                    <button 
+                      title="Approve / Edit"
+                      className="flex-1 py-1.5 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                    >
+                      <Check size={12} className="stroke-[3]" />
+                      <span>Approve</span>
+                    </button>
+                    <button 
+                      title="Delete Transaction"
+                      className="w-8 h-8 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors shrink-0"
+                    >
+                      <Trash2 size={12} className="stroke-[2.5]" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button 
-                    title="View Details"
-                    className="flex-1 py-1.5 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
-                  >
-                    <Eye size={12} className="stroke-[2.5]" />
-                    <span>View</span>
-                  </button>
-                  <button 
-                    title="Approve / Edit"
-                    className="flex-1 py-1.5 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
-                  >
-                    <Check size={12} className="stroke-[3]" />
-                    <span>Approve</span>
-                  </button>
-                  <button 
-                    title="Delete Transaction"
-                    className="w-8 h-8 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors shrink-0"
-                  >
-                    <Trash2 size={12} className="stroke-[2.5]" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Desktop View (Table) */}
@@ -714,117 +667,125 @@ export default function AdminStatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f4f5f8] text-sm text-[#1f2937]">
-              {displayBookings.map((booking) => {
-                const isPaid = booking.paymentStatus === 'paid';
-                const isCancelled = booking.paymentStatus === 'cancelled';
-                const isPending = booking.paymentStatus === 'pending';
+              {displayBookings.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500 font-medium bg-white">
+                    No transactions found
+                  </td>
+                </tr>
+              ) : (
+                displayBookings.map((booking) => {
+                  const isPaid = booking.paymentStatus === 'paid';
+                  const isCancelled = booking.paymentStatus === 'cancelled';
+                  const isPending = booking.paymentStatus === 'pending';
 
-                return (
-                  <tr key={booking._id} className="hover:bg-[#f8f9fe]/50 transition-colors">
-                    {/* User profile with initials or image & dynamic ID */}
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={booking.avatar} 
-                          alt={booking.user.name} 
-                          className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
-                        />
-                        <div className="flex flex-col">
-                          <span className="font-bold text-[#1f2937] leading-tight">
-                            {booking.user.name}
-                          </span>
-                          <span className="text-[10.5px] text-gray-400 mt-0.5 leading-none">
-                            User ID: #{booking.user._id || '54124'}
+                  return (
+                    <tr key={booking._id} className="hover:bg-[#f8f9fe]/50 transition-colors">
+                      {/* User profile with initials or image & dynamic ID */}
+                      <td className="px-6 py-4.5">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={booking.avatar} 
+                            alt={booking.user.name} 
+                            className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
+                          />
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#1f2937] leading-tight">
+                              {booking.user.name}
+                            </span>
+                            <span className="text-[10.5px] text-gray-400 mt-0.5 leading-none">
+                              User ID: #{booking.user._id || '54124'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Workshop title */}
+                      <td className="px-6 py-4.5 font-medium text-gray-600 max-w-[280px] truncate">
+                        {booking.workshop.title}
+                      </td>
+
+                      {/* Amount / Price */}
+                      <td className="px-6 py-4.5 font-bold text-[#1f2937] tracking-tight">
+                        ${booking.amount.toFixed(2)}
+                      </td>
+
+                      {/* Payment methods with visual logos */}
+                      <td className="px-6 py-4.5">
+                        <div className="flex items-center gap-2">
+                          {booking.cardType === 'mastercard' && (
+                            <div className="flex -space-x-1 overflow-hidden shrink-0">
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#f9a01b] inline-block -ml-1.5 mix-blend-multiply"></span>
+                            </div>
+                          )}
+                          {booking.cardType === 'visa' && (
+                            <span className="text-[11px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.5 rounded border border-blue-100 shrink-0">
+                              VISA
+                            </span>
+                          )}
+                          {booking.cardType === 'amex' && (
+                            <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1 py-0.5 rounded border border-sky-100 shrink-0">
+                              AMEX
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-500 font-medium tracking-wider">
+                            **** {booking.cardDigits}
                           </span>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Workshop title */}
-                    <td className="px-6 py-4.5 font-medium text-gray-600 max-w-[280px] truncate">
-                      {booking.workshop.title}
-                    </td>
-
-                    {/* Amount / Price */}
-                    <td className="px-6 py-4.5 font-bold text-[#1f2937] tracking-tight">
-                      ${booking.amount.toFixed(2)}
-                    </td>
-
-                    {/* Payment methods with visual logos */}
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-2">
-                        {booking.cardType === 'mastercard' && (
-                          <div className="flex -space-x-1 overflow-hidden shrink-0">
-                            <span className="w-3.5 h-3.5 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
-                            <span className="w-3.5 h-3.5 rounded-full bg-[#f9a01b] inline-block -ml-1.5 mix-blend-multiply"></span>
-                          </div>
-                        )}
-                        {booking.cardType === 'visa' && (
-                          <span className="text-[11px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.5 rounded border border-blue-100 shrink-0">
-                            VISA
+                      {/* Status Badge matching the exact mockup tags */}
+                      <td className="px-6 py-4.5">
+                        {isPaid && (
+                          <span className="inline-block bg-[#eefbf6] text-[#2ac78b] text-xs font-bold px-3 py-1 rounded-lg">
+                            Success
                           </span>
                         )}
-                        {booking.cardType === 'amex' && (
-                          <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1 py-0.5 rounded border border-sky-100 shrink-0">
-                            AMEX
+                        {isCancelled && (
+                          <span className="inline-block bg-[#fdf2f2] text-[#f05252] text-xs font-bold px-3 py-1 rounded-lg">
+                            Cancel
                           </span>
                         )}
-                        <span className="text-xs text-gray-500 font-medium tracking-wider">
-                          **** {booking.cardDigits}
-                        </span>
-                      </div>
-                    </td>
+                        {isPending && (
+                          <span className="inline-block bg-[#fffbeb] text-[#f59e0b] text-xs font-bold px-3 py-1 rounded-lg">
+                            Pending
+                          </span>
+                        )}
+                      </td>
 
-                    {/* Status Badge matching the exact mockup tags */}
-                    <td className="px-6 py-4.5">
-                      {isPaid && (
-                        <span className="inline-block bg-[#eefbf6] text-[#2ac78b] text-xs font-bold px-3 py-1 rounded-lg">
-                          Success
-                        </span>
-                      )}
-                      {isCancelled && (
-                        <span className="inline-block bg-[#fdf2f2] text-[#f05252] text-xs font-bold px-3 py-1 rounded-lg">
-                          Cancel
-                        </span>
-                      )}
-                      {isPending && (
-                        <span className="inline-block bg-[#fffbeb] text-[#f59e0b] text-xs font-bold px-3 py-1 rounded-lg">
-                          Pending
-                        </span>
-                      )}
-                    </td>
+                      {/* Actions button strip (Blue view eye, Green check edit, Red/Orange trash delete) */}
+                      <td className="px-6 py-4.5">
+                        <div className="flex items-center gap-2">
+                          {/* Eye icon - Blue button */}
+                          <button 
+                            title="View Details"
+                            className="w-7 h-7 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors"
+                          >
+                            <Eye size={13} className="stroke-[2.5]" />
+                          </button>
+                          
+                          {/* Check icon - Green button */}
+                          <button 
+                            title="Approve / Edit"
+                            className="w-7 h-7 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors"
+                          >
+                            <Check size={13} className="stroke-[3]" />
+                          </button>
 
-                    {/* Actions button strip (Blue view eye, Green check edit, Red/Orange trash delete) */}
-                    <td className="px-6 py-4.5">
-                      <div className="flex items-center gap-2">
-                        {/* Eye icon - Blue button */}
-                        <button 
-                          title="View Details"
-                          className="w-7 h-7 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors"
-                        >
-                          <Eye size={13} className="stroke-[2.5]" />
-                        </button>
-                        
-                        {/* Check icon - Green button */}
-                        <button 
-                          title="Approve / Edit"
-                          className="w-7 h-7 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors"
-                        >
-                          <Check size={13} className="stroke-[3]" />
-                        </button>
-
-                        {/* Trash icon - Red button */}
-                        <button 
-                          title="Delete Transaction"
-                          className="w-7 h-7 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors"
-                        >
-                          <Trash2 size={13} className="stroke-[2.5]" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          {/* Trash icon - Red button */}
+                          <button 
+                            title="Delete Transaction"
+                            className="w-7 h-7 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors"
+                          >
+                            <Trash2 size={13} className="stroke-[2.5]" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

@@ -79,7 +79,7 @@ export default function CartDrawer() {
           price: selectedCourse.price,
           originalPrice: selectedCourse.originalPrice,
           discount: selectedCourse.discount,
-          thumbnail: selectedCourse.thumbnail,
+          mentorPicture: selectedCourse.mentorPicture,
           isActive: true
         };
         if (!enrolled.some((c: unknown) => {
@@ -200,10 +200,10 @@ export default function CartDrawer() {
                 {selectedCourse.instructorName && (
                   <div className="flex items-center gap-1.5 mt-1.5 text-[11.5px] font-medium text-slate-500">
                     <span>By</span>
-                    {selectedCourse.thumbnail && (
+                    {selectedCourse.mentorPicture && (
                       <div className="w-5 h-5 rounded-full overflow-hidden border border-slate-200 shrink-0 bg-white flex items-center justify-center">
                         <img
-                          src={selectedCourse.thumbnail}
+                          src={selectedCourse.mentorPicture}
                           alt={selectedCourse.instructorName}
                           className="w-full h-full object-cover"
                         />

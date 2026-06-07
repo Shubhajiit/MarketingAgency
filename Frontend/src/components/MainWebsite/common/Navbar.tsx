@@ -403,14 +403,14 @@ export default function Navbar() {
                                                             <p className="text-[12px] text-slate-500 leading-relaxed mt-1 line-clamp-2">{w.subtitle}</p>
                                                         )}
                                                         <div className="flex items-center gap-2 mt-1.5">
-                                                            {w.batchNumber && (
+                                                            {(w as any).batchNumber && (
                                                                 <span className="text-[9px] font-bold text-[#6366f1] bg-[#efeefc] px-1.5 py-0.5 rounded uppercase tracking-wider">
-                                                                    {w.batchNumber}
+                                                                    {(w as any).batchNumber}
                                                                 </span>
                                                             )}
-                                                            {w.startDate && (
+                                                            {(w as any).startDate && (
                                                                 <span className="text-[10px] text-gray-400 font-medium">
-                                                                    Starts {new Date(w.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                                    Starts {new Date((w as any).startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -558,8 +558,8 @@ export default function Navbar() {
                                                 onClick={() => setIsMenuOpen(false)}
                                             >
                                                 {w.title}
-                                                {w.batchNumber && (
-                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{w.batchNumber}</span>
+                                                {(w as any).batchNumber && (
+                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{(w as any).batchNumber}</span>
                                                 )}
                                             </Link>
                                         ))

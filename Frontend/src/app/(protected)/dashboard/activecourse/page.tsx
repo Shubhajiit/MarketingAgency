@@ -68,7 +68,7 @@ export default function ActiveCoursesPage() {
       validityText: "Lifetime",
       thumbnailType: c.thumbnailType || undefined,
       circlesColor: c.circlesColor,
-      thumbnail: c.thumbnail || c.instructorImage,
+      mentorPicture: c.mentorPicture || c.instructorImage,
       instructorImage: c.instructorImage,
       isGraphicOnly: c.isGraphicOnly,
       graphicType: c.graphicType

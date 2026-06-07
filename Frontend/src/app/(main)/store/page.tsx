@@ -146,7 +146,7 @@ export default function StorePage() {
       price: course.price,
       originalPrice: course.originalPrice,
       discount: course.discount,
-      thumbnail: course.thumbnail || course.instructorImage,
+      mentorPicture: course.mentorPicture || course.instructorImage,
       instructorName,
       instructorBio,
       level

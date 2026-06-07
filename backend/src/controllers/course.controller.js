@@ -114,7 +114,7 @@ exports.enrollInCourse = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    if (user.enrolledCourses.includes(courseId)) {
+    if (user.enrolledCourses.some(id => id.toString() === courseId.toString())) {
       return res.status(400).json({ success: false, message: 'Already enrolled in this course' });
     }
 

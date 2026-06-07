@@ -6,6 +6,7 @@ import Image from "next/image";
 export interface Course {
   id: string;
   title: string;
+  instructorName?: string;
   category: "popular" | "pro-specialist" | "short" | "advanced";
   tag: string;
   hours: string;
@@ -14,7 +15,7 @@ export interface Course {
   discount: string;
   bgGradient: string;
   circlesColor?: string;
-  thumbnail?: string;
+  mentorPicture?: string;
   instructorImage?: string;
   isGraphicOnly?: boolean;
   graphicType?: "ai" | "seo" | "ppc" | "strategy";
@@ -28,6 +29,18 @@ export interface Course {
   validityText?: string;
   thumbnailType?: "dsa" | "cpp";
   isActive?: boolean;
+
+  // Metadata properties
+  metaType?: string;
+  metaTypeSubtitle?: string;
+  metaRating?: string;
+  metaReviewsCount?: string;
+  metaLevel?: string;
+  metaLevelSubtitle?: string;
+  metaDuration?: string;
+  metaDurationSubtitle?: string;
+  metaHandsOn?: string;
+  metaHandsOnSubtitle?: string;
 }
 
 interface CourseCardProps {
@@ -147,7 +160,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
               {course.title}
             </h3>
             <span className="text-xs md:text-sm text-slate-400 font-normal mt-1">
-              {course.authorName || "Love Babbar"}
+              {course.instructorName || course.authorName || "Love Babbar"}
             </span>
           </div>
 
@@ -220,7 +233,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
     );
   }
 
-  const courseImg = course.thumbnail || course.instructorImage;
+  const courseImg = course.mentorPicture || course.instructorImage;
 
   // Fallback / original styling if needed
   return (
@@ -255,7 +268,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           </h3>
 
           <p className="text-[9px] md:text-[11px] text-slate-500 font-semibold tracking-wide mt-1 md:mt-2">
-            {course.hours}
+            {course.instructorName ? `Instructor: ${course.instructorName}` : course.hours}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-1 md:gap-3 mt-3 w-full">

@@ -11,11 +11,7 @@ const courseSchema = new mongoose.Schema({
     enum: ['popular', 'pro-specialist', 'short', 'advanced'],
     default: 'popular'
   },
-  tag: {
-    type: String,
-    default: ''
-  },
-  hours: {
+  instructorName: {
     type: String,
     default: ''
   },
@@ -31,40 +27,54 @@ const courseSchema = new mongoose.Schema({
     type: String,
     default: '0%'
   },
-  bgGradient: {
-    type: String,
-    default: 'from-[#6366f1] to-[#4f46e5]'
-  },
-  circlesColor: {
+  mentorPicture: {
     type: String,
     default: ''
-  },
-  thumbnail: {
-    type: String,
-    default: ''
-  },
-  isGraphicOnly: {
-    type: Boolean,
-    default: false
-  },
-  graphicType: {
-    type: String,
-    enum: ['ai', 'seo', 'ppc', 'strategy', ''],
-    default: ''
-  },
-  primaryCtaText: {
-    type: String,
-    enum: ['Download Brochure', 'View Course'],
-    default: 'Download Brochure'
-  },
-  secondaryCtaText: {
-    type: String,
-    enum: ['View Course', 'Buy Now'],
-    default: 'View Course'
   },
   isActive: {
     type: Boolean,
     default: true
+  },
+  // Metadata fields for course details page banner
+  metaType: {
+    type: String,
+    default: 'Professional Certification'
+  },
+  metaTypeSubtitle: {
+    type: String,
+    default: 'Learn, practice, and apply job-ready skills with expert guidance'
+  },
+  metaRating: {
+    type: String,
+    default: '4.8'
+  },
+  metaReviewsCount: {
+    type: String,
+    default: '3,150'
+  },
+  metaLevel: {
+    type: String,
+    default: 'Intermediate level'
+  },
+  metaLevelSubtitle: {
+    type: String,
+    default: 'Recommended experience'
+  },
+  metaDuration: {
+    type: String,
+    default: '23'
+  },
+  metaDurationSubtitle: {
+    type: String,
+    default: 'Learn at your own pace'
+  },
+  metaHandsOn: {
+    type: String,
+    default: 'Hands-on learning'
+  },
+  metaHandsOnSubtitle: {
+    type: String,
+    default: 'Learn more'
   }
 }, { timestamps: true });
 

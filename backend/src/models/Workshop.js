@@ -1,17 +1,12 @@
 const mongoose = require('mongoose');
 
 // ─── Sub-schemas ──────────────────────────────────────────────
-const slotSchema = new mongoose.Schema({
-  date: { type: Date, required: true },
-  startTime: { type: String, required: true },
-  endTime: { type: String, required: true },
-  totalSeats: { type: Number, default: 100 },
-  bookedSeats: { type: Number, default: 0 },
-  isAvailable: { type: Boolean, default: true },
-  meetingLink: { type: String, default: '' },
-}, { _id: true });
-
 const highlightSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
+}, { _id: false });
+
+const whatYouWillLearnStepSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
 }, { _id: false });
@@ -29,6 +24,12 @@ const targetAudienceSchema = new mongoose.Schema({
 const expertSchema = new mongoose.Schema({
   name: { type: String, required: true },
   role: { type: String, default: '' },
+  image: { type: String, default: '' },
+}, { _id: false });
+
+const courseOutcomeSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
   image: { type: String, default: '' },
 }, { _id: false });
 
@@ -53,32 +54,18 @@ const workshopSchema = new mongoose.Schema(
     subtitle: { type: String, default: '' },
     description: { type: String, default: '' },
     instructor: { type: String, default: '' },
+    instructorImage: { type: String, default: '' },
+    instructorDescription: { type: String, default: '' },
 
     // Pricing
     price: { type: Number, required: true, default: 0 },
+    originalPrice: { type: Number, default: 0 },
+    priceCaption: { type: String, default: '' },
+    bonusDeadlineText: { type: String, default: '' },
     currency: { type: String, enum: ['INR', 'USD', 'EUR', 'GBP'], default: 'INR' },
 
     // Media (URL strings — Cloudinary URLs will go here later)
     thumbnail: { type: String, default: '' },
-    heroImage: { type: String, default: '' },
-    brochureUrl: { type: String, default: '' },
-    hasBrochure: { type: Boolean, default: true },
-
-    // Batch / Schedule
-    batchNumber: { type: String, default: '' },
-    startDate: { type: Date, default: null },
-    workshopTime: { type: String, default: '' }, // e.g. "10 AM IST", "6 PM GMT"
-    duration: { type: String, default: '' },
-    durationDetail: { type: String, default: '' },
-    applicationDeadline: { type: Date, default: null },
-
-    // Fee display overrides
-    fee: { type: String, default: '' },
-    feeNote: { type: String, default: '' },
-
-    // Eligibility
-    eligibility: { type: String, default: '' },
-    eligibilityDetail: { type: String, default: '' },
 
     // Tags
     tags: { type: [String], default: [] },
@@ -91,8 +78,19 @@ const workshopSchema = new mongoose.Schema(
     modules: { type: [moduleSchema], default: [] },
     targetAudience: { type: [targetAudienceSchema], default: [] },
     learningOutcomes: { type: [String], default: [] },
+    whatYouWillLearn: { type: [whatYouWillLearnStepSchema], default: [] },
+    courseOutcomes: { type: [courseOutcomeSchema], default: [] },
     experts: { type: [expertSchema], default: [] },
-    slots: { type: [slotSchema], default: [] },
+    heroPoints: { type: [String], default: [] },
+    workshopDates: { type: [Date], default: [] },
+
+    // Ratings
+    rating1Value: { type: String, default: '4.5/5' },
+    rating1Count: { type: String, default: '(725)' },
+    rating1Platform: { type: String, default: 'Trustpilot' },
+    rating2Value: { type: String, default: '4.07/5' },
+    rating2Count: { type: String, default: '(88)' },
+    rating2Platform: { type: String, default: 'Rating Facts' },
   },
   { timestamps: true }
 );
@@ -121,7 +119,7 @@ workshopSchema.pre('save', async function (next) {
 });
 
 // ─── Indexes ──────────────────────────────────────────────────
-workshopSchema.index({ isActive: 1, startDate: 1 });
+workshopSchema.index({ isActive: 1 });
 workshopSchema.index({ tags: 1 });
 
 module.exports = mongoose.model('Workshop', workshopSchema);

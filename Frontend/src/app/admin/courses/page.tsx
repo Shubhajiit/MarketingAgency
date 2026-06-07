@@ -19,6 +19,7 @@ import {
 
 interface CourseFormData {
   title: string;
+  instructorName: string;
   category: 'popular' | 'pro-specialist' | 'short' | 'advanced';
   tag: string;
   hours: string;
@@ -27,17 +28,30 @@ interface CourseFormData {
   discount: string;
   bgGradient: string;
   circlesColor: string;
-  thumbnail: string;
+  mentorPicture: string;
   instructorImage: string;
   isGraphicOnly: boolean;
   graphicType: 'ai' | 'seo' | 'ppc' | 'strategy' | '';
   primaryCtaText: 'Download Brochure' | 'View Course';
   secondaryCtaText: 'View Course' | 'Buy Now';
   isActive: boolean;
+
+  // Metadata configuration fields
+  metaType: string;
+  metaTypeSubtitle: string;
+  metaRating: string;
+  metaReviewsCount: string;
+  metaLevel: string;
+  metaLevelSubtitle: string;
+  metaDuration: string;
+  metaDurationSubtitle: string;
+  metaHandsOn: string;
+  metaHandsOnSubtitle: string;
 }
 
 const defaultFormData: CourseFormData = {
   title: '',
+  instructorName: '',
   category: 'popular',
   tag: '',
   hours: '',
@@ -46,13 +60,25 @@ const defaultFormData: CourseFormData = {
   discount: '0%',
   bgGradient: 'from-[#6366f1] to-[#4f46e5]',
   circlesColor: '',
-  thumbnail: '',
+  mentorPicture: '',
   instructorImage: '',
   isGraphicOnly: false,
   graphicType: '',
   primaryCtaText: 'Download Brochure',
   secondaryCtaText: 'View Course',
   isActive: true,
+
+  // Default metadata configurations
+  metaType: 'Professional Certification',
+  metaTypeSubtitle: 'Learn, practice, and apply job-ready skills with expert guidance',
+  metaRating: '4.8',
+  metaReviewsCount: '3,150',
+  metaLevel: 'Intermediate level',
+  metaLevelSubtitle: 'Recommended experience',
+  metaDuration: '23',
+  metaDurationSubtitle: 'Learn at your own pace',
+  metaHandsOn: 'Hands-on learning',
+  metaHandsOnSubtitle: 'Learn more',
 };
 
 export default function AdminCoursesPage() {
@@ -65,6 +91,38 @@ export default function AdminCoursesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
+
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  // Manage mount and transition classes for slide-over drawer
+  useEffect(() => {
+    if (showModal) {
+      setMounted(true);
+      const timer = setTimeout(() => {
+        setVisible(true);
+      }, 10);
+      return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
+      const timer = setTimeout(() => {
+        setMounted(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [showModal]);
+
+  // Prevent background scrolling when drawer is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showModal]);
 
   // Fetch all courses (including inactive)
   const fetchCourses = useCallback(async () => {
@@ -101,7 +159,7 @@ export default function AdminCoursesPage() {
     try {
       const res = await coursesApi.uploadImage(file);
       if (res.success && res.url) {
-        updateField('thumbnail', res.url);
+        updateField('mentorPicture', res.url);
         updateField('instructorImage', res.url);
       } else {
         setError('Upload failed: Invalid response from server');
@@ -118,6 +176,7 @@ export default function AdminCoursesPage() {
     setEditingCourse(course);
     setFormData({
       title: course.title || '',
+      instructorName: course.instructorName || '',
       category: course.category || 'popular',
       tag: course.tag || '',
       hours: course.hours || '',
@@ -126,13 +185,25 @@ export default function AdminCoursesPage() {
       discount: course.discount || '0%',
       bgGradient: course.bgGradient || 'from-[#6366f1] to-[#4f46e5]',
       circlesColor: course.circlesColor || '',
-      thumbnail: course.thumbnail || '',
+      mentorPicture: course.mentorPicture || '',
       instructorImage: course.instructorImage || '',
       isGraphicOnly: !!course.isGraphicOnly,
       graphicType: course.graphicType || '',
       primaryCtaText: course.primaryCtaText || 'Download Brochure',
       secondaryCtaText: course.secondaryCtaText || 'View Course',
       isActive: course.isActive !== false,
+
+      // Metadata properties
+      metaType: course.metaType || 'Professional Certification',
+      metaTypeSubtitle: course.metaTypeSubtitle || 'Learn, practice, and apply job-ready skills with expert guidance',
+      metaRating: course.metaRating || '4.8',
+      metaReviewsCount: course.metaReviewsCount || '3,150',
+      metaLevel: course.metaLevel || 'Intermediate level',
+      metaLevelSubtitle: course.metaLevelSubtitle || 'Recommended experience',
+      metaDuration: course.metaDuration || '23',
+      metaDurationSubtitle: course.metaDurationSubtitle || 'Learn at your own pace',
+      metaHandsOn: course.metaHandsOn || 'Hands-on learning',
+      metaHandsOnSubtitle: course.metaHandsOnSubtitle || 'Learn more',
     });
     setShowModal(true);
     setError('');
@@ -146,6 +217,7 @@ export default function AdminCoursesPage() {
     try {
       const payload: Partial<Course> = {
         title: formData.title.trim(),
+        instructorName: formData.instructorName.trim(),
         category: formData.category,
         tag: formData.tag.trim(),
         hours: formData.hours.trim(),
@@ -154,13 +226,25 @@ export default function AdminCoursesPage() {
         discount: formData.discount.trim(),
         bgGradient: formData.bgGradient.trim(),
         circlesColor: formData.circlesColor.trim(),
-        thumbnail: formData.thumbnail.trim(),
-        instructorImage: formData.instructorImage.trim() || formData.thumbnail.trim(),
+        mentorPicture: formData.mentorPicture.trim(),
+        instructorImage: formData.instructorImage.trim() || formData.mentorPicture.trim(),
         isGraphicOnly: formData.isGraphicOnly,
         graphicType: formData.graphicType || undefined,
         primaryCtaText: formData.primaryCtaText,
         secondaryCtaText: formData.secondaryCtaText,
         isActive: formData.isActive,
+
+        // Metadata properties
+        metaType: (formData.metaType || '').trim(),
+        metaTypeSubtitle: (formData.metaTypeSubtitle || '').trim(),
+        metaRating: (formData.metaRating || '').trim(),
+        metaReviewsCount: (formData.metaReviewsCount || '').trim(),
+        metaLevel: (formData.metaLevel || '').trim(),
+        metaLevelSubtitle: (formData.metaLevelSubtitle || '').trim(),
+        metaDuration: (formData.metaDuration || '').trim(),
+        metaDurationSubtitle: (formData.metaDurationSubtitle || '').trim(),
+        metaHandsOn: (formData.metaHandsOn || '').trim(),
+        metaHandsOnSubtitle: (formData.metaHandsOnSubtitle || '').trim(),
       };
 
       if (editingCourse) {
@@ -265,8 +349,8 @@ export default function AdminCoursesPage() {
                     <tr key={cid} className="hover:bg-[#f8f8ff] transition-colors group">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          {c.thumbnail || c.instructorImage ? (
-                            <img src={c.thumbnail || c.instructorImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
+                          {c.mentorPicture || c.instructorImage ? (
+                            <img src={c.mentorPicture || c.instructorImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
                           ) : (
                             <div className={`w-10 h-10 rounded-lg bg-gradient-to-tr ${c.bgGradient} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
                               {c.title.charAt(0)}
@@ -348,291 +432,315 @@ export default function AdminCoursesPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-[#f8f9fc] rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 my-auto">
+      {/* Create/Edit Drawer */}
+      {mounted && (
+        <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
+          {/* Backdrop Overlay with smooth transition */}
+          <div
+            className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
+              visible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setShowModal(false)}
+          />
+
+          {/* Slide-out Panel (Full Screen) */}
+          <div
+            className={`relative bg-white w-screen h-screen shadow-2xl flex flex-col z-10 transition-transform duration-300 ease-in-out ${
+              visible ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
             {/* Header */}
-            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200 bg-white rounded-t-2xl">
+            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200 bg-white shrink-0">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                <h2 className="text-xl font-bold text-gray-900 tracking-tight">
                   {editingCourse ? 'Edit Course' : 'Create Certification Course'}
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-1">
                   Configure the card design and metadata of your course.
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-7 space-y-4 max-h-[70vh] overflow-y-auto bg-white rounded-b-2xl">
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
-                  <AlertTriangle size={14} />
-                  {error}
-                </div>
-              )}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden bg-white">
+              {/* Form Scrollable Area */}
+              <div className="flex-1 overflow-y-auto p-7 md:p-10 space-y-6 w-full">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium flex items-center gap-2">
+                    <AlertTriangle size={14} />
+                    {error}
+                  </div>
+                )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Title</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) => updateField('title', e.target.value)}
-                    placeholder="e.g. Social Media Marketing Course"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1]"
-                  />
+                <div className="pb-2 border-b border-gray-100 mb-2">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Details</h3>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => updateField('category', e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20"
-                  >
-                    <option value="popular">Popular Courses</option>
-                    <option value="pro-specialist">Pro & Specialist Courses</option>
-                    <option value="short">Short Courses</option>
-                    <option value="advanced">Advanced Courses</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Tag / Badge</label>
-                  <input
-                    type="text"
-                    value={formData.tag}
-                    onChange={(e) => updateField('tag', e.target.value)}
-                    placeholder="e.g. DMI PRO"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Duration / Format</label>
-                  <input
-                    type="text"
-                    value={formData.hours}
-                    onChange={(e) => updateField('hours', e.target.value)}
-                    placeholder="e.g. 27 Hours • Self-Paced"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Price (INR)</label>
-                  <input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => updateField('price', Number(e.target.value))}
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Original Price (INR)</label>
-                  <input
-                    type="number"
-                    value={formData.originalPrice}
-                    onChange={(e) => updateField('originalPrice', Number(e.target.value))}
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Discount Text</label>
-                  <input
-                    type="text"
-                    value={formData.discount}
-                    onChange={(e) => updateField('discount', e.target.value)}
-                    placeholder="e.g. 30%"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Background Gradient CSS</label>
-                  <input
-                    type="text"
-                    value={formData.bgGradient}
-                    onChange={(e) => updateField('bgGradient', e.target.value)}
-                    placeholder="e.g. from-[#e52d6a] to-[#d81b60]"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Circles Accent Color</label>
-                  <input
-                    type="text"
-                    value={formData.circlesColor}
-                    onChange={(e) => updateField('circlesColor', e.target.value)}
-                    placeholder="e.g. #00c58d"
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Thumbnail / Image</label>
-                
-                {/* File Uploader Box */}
-                <div className="flex flex-col sm:flex-row gap-4 items-center p-4 bg-gray-50 border border-gray-200 rounded-xl">
-                  {formData.thumbnail || formData.instructorImage ? (
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shrink-0 group/preview bg-white">
-                      <img
-                        src={formData.thumbnail || formData.instructorImage}
-                        alt="Course preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          updateField('thumbnail', '');
-                          updateField('instructorImage', '');
-                        }}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl bg-gray-200/50 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 shrink-0 select-none">
-                      <Upload size={20} />
-                    </div>
-                  )}
-
-                  <div className="flex-1 w-full space-y-2">
-                    <div className="flex items-center gap-3">
-                      <label className="relative flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 cursor-pointer shadow-xs active:scale-[0.98] transition-all">
-                        {uploading ? (
-                          <>
-                            <Loader2 size={14} className="animate-spin text-gray-500" />
-                            <span>Uploading...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload size={14} className="text-gray-500" />
-                            <span>Upload Image</span>
-                          </>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          disabled={uploading}
-                          className="hidden"
-                        />
-                      </label>
-                      <span className="text-[10px] text-gray-400 font-medium">PNG, JPG, SVG up to 5MB</span>
-                    </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Course Title</label>
                     <input
                       type="text"
-                      value={formData.thumbnail || formData.instructorImage}
-                      onChange={(e) => {
-                        updateField('thumbnail', e.target.value);
-                        updateField('instructorImage', e.target.value);
-                      }}
-                      placeholder="Or paste external image URL here..."
-                      className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 bg-white"
+                      required
+                      value={formData.title || ''}
+                      onChange={(e) => updateField('title', e.target.value)}
+                      placeholder="e.g. Social Media Marketing Course"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Instructor Name</label>
+                    <input
+                      type="text"
+                      value={formData.instructorName || ''}
+                      onChange={(e) => updateField('instructorName', e.target.value)}
+                      placeholder="e.g. Dr. Sarah Jenkins"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</label>
+                    <select
+                      value={formData.category || 'popular'}
+                      onChange={(e) => updateField('category', e.target.value)}
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all"
+                    >
+                      <option value="popular">Popular Courses</option>
+                      <option value="pro-specialist">Pro & Specialist Courses</option>
+                      <option value="short">Short Courses</option>
+                      <option value="advanced">Advanced Courses</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Discount Text</label>
+                    <input
+                      type="text"
+                      value={formData.discount || ''}
+                      onChange={(e) => updateField('discount', e.target.value)}
+                      placeholder="e.g. 30%"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Price (INR)</label>
+                    <input
+                      type="number"
+                      value={formData.price ?? 0}
+                      onChange={(e) => updateField('price', Number(e.target.value))}
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Original Price (INR)</label>
+                    <input
+                      type="number"
+                      value={formData.originalPrice ?? 0}
+                      onChange={(e) => updateField('originalPrice', Number(e.target.value))}
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 lg:col-span-2">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Mentor picture</label>
+                    
+                    {/* Compact File Uploader Box */}
+                    <div className="flex flex-col sm:flex-row gap-4 items-center p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+                      {formData.mentorPicture || formData.instructorImage ? (
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 shrink-0 group/preview bg-white shadow-xs">
+                          <img
+                            src={formData.mentorPicture || formData.instructorImage}
+                            alt="Mentor picture preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateField('mentorPicture', '');
+                              updateField('instructorImage', '');
+                            }}
+                            className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg bg-gray-200/50 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 shrink-0 select-none">
+                          <Upload size={18} />
+                        </div>
+                      )}
+
+                      <div className="flex-1 w-full">
+                        <div className="flex items-center gap-3">
+                          <label className="relative flex items-center justify-center gap-2 px-5 py-2.5 border border-gray-200 hover:border-gray-300 rounded-xl text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 cursor-pointer shadow-xs active:scale-[0.98] transition-all">
+                            {uploading ? (
+                              <>
+                                <Loader2 size={12} className="animate-spin text-gray-500" />
+                                <span>Uploading...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={12} className="text-gray-500" />
+                                <span>Upload Image</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={uploading}
+                              className="hidden"
+                            />
+                          </label>
+                          <span className="text-xs text-gray-400 font-medium">PNG, JPG, SVG up to 5MB</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metadata Configuration Section */}
+                <div className="pb-2 border-b border-gray-100 mb-2 mt-8">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Card & Page Metadata</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Column 1: Type & Subtitle */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Header / Certification Type</label>
+                    <input
+                      type="text"
+                      value={formData.metaType || ''}
+                      onChange={(e) => updateField('metaType', e.target.value)}
+                      placeholder="e.g. Professional Certification"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5 md:col-span-1 lg:col-span-3">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Certification Subtitle</label>
+                    <input
+                      type="text"
+                      value={formData.metaTypeSubtitle || ''}
+                      onChange={(e) => updateField('metaTypeSubtitle', e.target.value)}
+                      placeholder="e.g. Learn, practice, and apply job-ready skills with expert guidance"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  {/* Column 2: Rating & Reviews */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating</label>
+                    <input
+                      type="text"
+                      value={formData.metaRating || ''}
+                      onChange={(e) => updateField('metaRating', e.target.value)}
+                      placeholder="e.g. 4.8"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Reviews Count</label>
+                    <input
+                      type="text"
+                      value={formData.metaReviewsCount || ''}
+                      onChange={(e) => updateField('metaReviewsCount', e.target.value)}
+                      placeholder="e.g. 3,150"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  {/* Column 3: Level */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</label>
+                    <input
+                      type="text"
+                      value={formData.metaLevel || ''}
+                      onChange={(e) => updateField('metaLevel', e.target.value)}
+                      placeholder="e.g. Intermediate level"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Level Subtitle</label>
+                    <input
+                      type="text"
+                      value={formData.metaLevelSubtitle || ''}
+                      onChange={(e) => updateField('metaLevelSubtitle', e.target.value)}
+                      placeholder="e.g. Recommended experience"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  {/* Column 4: Duration */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Duration / Hours</label>
+                    <input
+                      type="text"
+                      value={formData.metaDuration || ''}
+                      onChange={(e) => updateField('metaDuration', e.target.value)}
+                      placeholder="e.g. 23"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Duration Subtitle</label>
+                    <input
+                      type="text"
+                      value={formData.metaDurationSubtitle || ''}
+                      onChange={(e) => updateField('metaDurationSubtitle', e.target.value)}
+                      placeholder="e.g. Learn at your own pace"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+
+                  {/* Column 5: Hands-on */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Hands-on Learning Title</label>
+                    <input
+                      type="text"
+                      value={formData.metaHandsOn || ''}
+                      onChange={(e) => updateField('metaHandsOn', e.target.value)}
+                      placeholder="e.g. Hands-on learning"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Hands-on Link Text</label>
+                    <input
+                      type="text"
+                      value={formData.metaHandsOnSubtitle || ''}
+                      onChange={(e) => updateField('metaHandsOnSubtitle', e.target.value)}
+                      placeholder="e.g. Learn more"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="border border-gray-100 rounded-xl p-4 space-y-3 bg-gray-50/50">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="isGraphicOnly"
-                    checked={formData.isGraphicOnly}
-                    onChange={(e) => updateField('isGraphicOnly', e.target.checked)}
-                    className="w-4 h-4 text-[#6366f1] focus:ring-[#6366f1] border-gray-300 rounded"
-                  />
-                  <label htmlFor="isGraphicOnly" className="text-xs font-bold text-gray-700">Display Minimalist Graphic Card Thumbnail (No Instructor Portrait)</label>
-                </div>
-
-                {formData.isGraphicOnly && (
-                  <div className="flex flex-col gap-1.5 pl-6">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Graphic Thumbnail Type</label>
-                    <select
-                      value={formData.graphicType}
-                      onChange={(e) => updateField('graphicType', e.target.value)}
-                      className="w-full px-3.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white"
-                    >
-                      <option value="">None / Custom</option>
-                      <option value="ai">AI Graphic Theme</option>
-                      <option value="seo">SEO Checkered Grid Theme</option>
-                      <option value="ppc">PPC Graphic Theme</option>
-                      <option value="strategy">Digital Strategy Theme</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Primary Button CTA</label>
-                  <select
-                    value={formData.primaryCtaText}
-                    onChange={(e) => updateField('primaryCtaText', e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg bg-white"
-                  >
-                    <option value="Download Brochure">Download Brochure</option>
-                    <option value="View Course">View Course</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Secondary Link CTA</label>
-                  <select
-                    value={formData.secondaryCtaText}
-                    onChange={(e) => updateField('secondaryCtaText', e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-lg bg-white"
-                  >
-                    <option value="View Course">View Course</option>
-                    <option value="Buy Now">Buy Now</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => updateField('isActive', e.target.checked)}
-                  className="w-4 h-4 text-[#6366f1] focus:ring-[#6366f1] border-gray-300 rounded"
-                />
-                <label htmlFor="isActive" className="text-xs font-bold text-gray-700">Set Course as Active (Display on Main Website)</label>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-150">
+              {/* Sticky Footer */}
+              <div className="px-7 py-5 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center justify-center gap-2 px-5 py-2 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 active:scale-[0.98]"
                 >
                   {submitting && <Loader2 size={14} className="animate-spin" />}
                   Save Course

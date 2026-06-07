@@ -11,7 +11,7 @@ exports.listWorkshops = async (req, res) => {
 
     const [workshops, total] = await Promise.all([
       Workshop.find(filter)
-        .sort({ startDate: 1, createdAt: -1 })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .select('-__v'),
@@ -74,12 +74,13 @@ exports.createWorkshop = async (req, res) => {
   try {
     const {
       title, subtitle, description, instructor,
-      price, currency, thumbnail, heroImage, brochureUrl, hasBrochure,
-      batchNumber, startDate, workshopTime, duration, durationDetail,
-      fee, feeNote, eligibility, eligibilityDetail,
-      applicationDeadline, tags, isActive,
-      highlights, modules, targetAudience, learningOutcomes,
-      experts, slots, slug,
+      instructorImage, instructorDescription,
+      price, originalPrice, priceCaption, bonusDeadlineText, currency, thumbnail,
+      tags, isActive,
+      highlights, modules, targetAudience, learningOutcomes, whatYouWillLearn, courseOutcomes,
+      experts, heroPoints, workshopDates, slug,
+      rating1Value, rating1Count, rating1Platform,
+      rating2Value, rating2Count, rating2Platform,
     } = req.body;
 
     if (!title) {
@@ -91,30 +92,31 @@ exports.createWorkshop = async (req, res) => {
       subtitle: subtitle || '',
       description: description || '',
       instructor: instructor || '',
+      instructorImage: instructorImage || '',
+      instructorDescription: instructorDescription || '',
       price: Number(price) || 0,
+      originalPrice: Number(originalPrice) || 0,
+      priceCaption: priceCaption || '',
+      bonusDeadlineText: bonusDeadlineText || '',
       currency: currency || 'INR',
       thumbnail: thumbnail || '',
-      heroImage: heroImage || '',
-      brochureUrl: brochureUrl || '',
-      hasBrochure: hasBrochure !== undefined ? Boolean(hasBrochure) : true,
-      batchNumber: batchNumber || '',
-      startDate: startDate || null,
-      workshopTime: workshopTime || '',
-      duration: duration || '',
-      durationDetail: durationDetail || '',
-      fee: fee || '',
-      feeNote: feeNote || '',
-      eligibility: eligibility || '',
-      eligibilityDetail: eligibilityDetail || '',
-      applicationDeadline: applicationDeadline || null,
       tags: Array.isArray(tags) ? tags.filter(Boolean) : [],
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       highlights: highlights || [],
       modules: modules || [],
       targetAudience: targetAudience || [],
       learningOutcomes: learningOutcomes || [],
+      whatYouWillLearn: whatYouWillLearn || [],
+      courseOutcomes: courseOutcomes || [],
       experts: experts || [],
-      slots: slots || [],
+      heroPoints: heroPoints || [],
+      workshopDates: workshopDates || [],
+      rating1Value: rating1Value || '4.5/5',
+      rating1Count: rating1Count || '(725)',
+      rating1Platform: rating1Platform || 'Trustpilot',
+      rating2Value: rating2Value || '4.07/5',
+      rating2Count: rating2Count || '(88)',
+      rating2Platform: rating2Platform || 'Rating Facts',
     };
 
     // Allow manual slug override
@@ -145,12 +147,13 @@ exports.updateWorkshop = async (req, res) => {
 
     const allowedFields = [
       'title', 'subtitle', 'description', 'instructor',
-      'price', 'currency', 'thumbnail', 'heroImage', 'brochureUrl', 'hasBrochure',
-      'batchNumber', 'startDate', 'workshopTime', 'duration', 'durationDetail',
-      'fee', 'feeNote', 'eligibility', 'eligibilityDetail',
-      'applicationDeadline', 'tags', 'isActive',
-      'highlights', 'modules', 'targetAudience', 'learningOutcomes',
-      'experts', 'slots', 'slug',
+      'instructorImage', 'instructorDescription',
+      'price', 'originalPrice', 'priceCaption', 'bonusDeadlineText', 'currency', 'thumbnail',
+      'tags', 'isActive',
+      'highlights', 'modules', 'targetAudience', 'learningOutcomes', 'whatYouWillLearn', 'courseOutcomes',
+      'experts', 'heroPoints', 'workshopDates', 'slug',
+      'rating1Value', 'rating1Count', 'rating1Platform',
+      'rating2Value', 'rating2Count', 'rating2Platform',
     ];
 
     for (const field of allowedFields) {
@@ -202,12 +205,12 @@ exports.adminListWorkshops = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [workshops, total] = await Promise.all([
-      Workshop.find({})
+      Workshop.find({ isActive: { $ne: false } })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
         .select('-__v'),
-      Workshop.countDocuments({}),
+      Workshop.countDocuments({ isActive: { $ne: false } }),
     ]);
 
     res.status(200).json({
