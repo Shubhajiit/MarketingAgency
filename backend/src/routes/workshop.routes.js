@@ -18,6 +18,7 @@ router.get('/:slug', workshopController.getWorkshopBySlug);
 router.post('/', protect, workshopController.createWorkshop);
 router.patch('/:id', protect, workshopController.updateWorkshop);
 router.delete('/:id', protect, workshopController.deleteWorkshop);
+router.post('/:id/register', protect, workshopController.registerForWorkshop);
 
 const fs = require('fs');
 const path = require('path');

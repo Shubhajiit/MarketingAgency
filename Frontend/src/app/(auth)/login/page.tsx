@@ -183,17 +183,21 @@ function SearchParamsSync({ setIsSignUp }: { setIsSignUp: React.Dispatch<React.S
 
 function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || null;
   const { user, login, register, googleLogin, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated && user) {
       if (user.role === 'admin') {
         router.replace('/admin/dashboard');
+      } else if (redirectTo) {
+        router.replace(redirectTo);
       } else {
         router.replace('/dashboard');
       }
     }
-  }, [isAuthLoading, isAuthenticated, user, router]);
+  }, [isAuthLoading, isAuthenticated, user, router, redirectTo]);
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -203,6 +207,8 @@ function LoginPageContent() {
         const res = await googleLogin(tokenResponse.access_token);
         if (res?.user?.role === 'admin') {
           router.replace('/admin/dashboard');
+        } else if (redirectTo) {
+          router.replace(redirectTo);
         } else {
           router.replace('/dashboard');
         }
@@ -375,6 +381,8 @@ function LoginPageContent() {
         const res = await login(email, password);
         if (res?.user?.role === 'admin') {
           router.push('/admin/dashboard');
+        } else if (redirectTo) {
+          router.push(redirectTo);
         } else {
           router.push('/dashboard');
         }
@@ -383,6 +391,8 @@ function LoginPageContent() {
         const res = await login(email, password);
         if (res?.user?.role === 'admin') {
           router.push('/admin/dashboard');
+        } else if (redirectTo) {
+          router.push(redirectTo);
         } else {
           router.push('/dashboard');
         }
@@ -937,5 +947,9 @@ function LoginPageContent() {
 }
 
 export default function LoginPage() {
-  return <LoginPageContent />;
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  );
 }

@@ -32,6 +32,37 @@ export interface WorkshopCourseOutcome {
   image: string;
 }
 
+export interface WorkshopRegistration {
+  _id: string;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+    phoneNumber?: string;
+    whatsappNumber?: string;
+    avatar?: string;
+  };
+  workshopId: {
+    _id: string;
+    title: string;
+    slug: string;
+    price: number;
+    currency: string;
+  };
+  workshopTitle: string;
+  workshopSlug: string;
+  name: string;
+  email: string;
+  phone: string;
+  whatsappNumber: string;
+  selectedDate: string;
+  amountPaid: number;
+  currency: string;
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentId?: string;
+  createdAt: string;
+}
+
 export interface Workshop {
   _id: string;
   title: string;
@@ -163,6 +194,36 @@ export const workshopApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return res.data;
+  },
+
+  /**
+   * Register a logged-in user for a workshop.
+   */
+  registerForWorkshop: async (
+    workshopId: string,
+    data: {
+      name: string;
+      email: string;
+      phone: string;
+      whatsappNumber?: string;
+      selectedDate: string;
+    }
+  ) => {
+    const res = await apiClient.post<{ success: boolean; data: { registration: WorkshopRegistration }; message: string }>(
+      `/workshops/${workshopId}/register`,
+      data
+    );
+    return res.data;
+  },
+
+  /**
+   * Admin: get all workshop registrations.
+   */
+  getWorkshopRegistrations: async () => {
+    const res = await apiClient.get<{ success: boolean; data: { registrations: WorkshopRegistration[] } }>(
+      '/admin/workshop-registrations'
+    );
     return res.data;
   },
 };

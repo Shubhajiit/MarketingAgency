@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'next/navigation';
-
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
 
 interface FormState {
@@ -65,64 +65,115 @@ function WorkshopSkeleton() {
   return (
     <div className="flex-1 flex flex-col bg-white animate-pulse">
       <main className="flex-1 flex flex-col">
-        {/* Hero Section Skeleton */}
-        <section className="bg-white pt-3 md:pt-5 pb-1 md:pb-2 px-4 md:px-8 w-full flex items-center justify-center">
-          <div className="max-w-8xl mx-auto w-full bg-[#FCF8F5] rounded-3xl border border-[#F2ECE4]/70 p-6 md:p-10 lg:p-12 flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch min-h-[480px]">
-            {/* Left: Workshop Image Box */}
-            <div className="w-full lg:w-[50%] flex items-center justify-center">
-              <div className="bg-white border border-[#EADFD3] rounded-2xl overflow-hidden aspect-[16/9] md:aspect-[4/3] max-w-full lg:max-w-[520px] w-full min-h-[160px] sm:min-h-[200px] md:min-h-[300px] shadow-xs flex items-center justify-center bg-slate-200/40" />
-            </div>
+        {/* Centered Top Content Skeleton */}
+        <section className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden">
+          <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-3 px-1 sm:px-4 w-full">
+            <div className="h-10 bg-slate-200/60 rounded w-72 md:w-96" />
+            <div className="h-5 bg-slate-200/60 rounded w-64 md:w-80 mt-1" />
+            <div className="h-4 bg-slate-200/40 rounded w-5/6 max-w-2xl mt-2 hidden md:block" />
+          </div>
 
-            {/* Right: Content details */}
-            <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left">
-              <div className="flex flex-col items-start gap-4">
-                <div className="h-6 bg-slate-200/60 rounded-full w-28 border border-gray-200/20" />
-                <div className="h-10 bg-slate-200/60 rounded w-4/5" />
-                <div className="h-4 bg-slate-200/60 rounded w-full" />
-                <div className="h-4 bg-slate-200/60 rounded w-5/6" />
-
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mt-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex flex-col gap-2">
-                      <div className="h-3 bg-slate-200/60 rounded w-1/2" />
-                      <div className="h-5 bg-slate-200/60 rounded w-2/3" />
-                    </div>
-                  ))}
+          {/* Main Blue Bordered Card Skeleton */}
+          <div className="max-w-5xl mx-auto w-full bg-white rounded-2xl border-[3px] border-[#0052FF] p-5 md:p-6 lg:p-8 shadow-[6px_6px_0px_#0052FF] relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
+            
+            {/* Left Column Skeleton */}
+            <div className="w-full lg:w-[50%] flex flex-col justify-between gap-4 lg:gap-6">
+              <div>
+                <div className="bg-slate-200/40 border border-gray-200 rounded-2xl overflow-hidden aspect-[16/9] w-full" />
+                {/* Logos marquee placeholder */}
+                <div className="pt-3 mt-3 md:pt-6 md:mt-6 px-2">
+                  <div className="h-6 bg-slate-200/30 rounded w-full" />
                 </div>
               </div>
 
-              {/* Bottom Row */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E5DCD3]/50 pt-5 mt-6 w-full">
-                <div className="h-12 bg-slate-200/60 rounded-lg w-full sm:w-[280px]" />
-                <div className="h-8 bg-slate-200/60 rounded w-28" />
+              {/* Ratings Row Skeleton */}
+              <div className="grid grid-cols-2 gap-3 md:flex md:flex-row md:gap-5 px-2 mt-2 w-full">
+                <div className="bg-slate-200/30 border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-start gap-2 sm:gap-4 shadow-sm w-full md:w-52 min-h-[60px] md:min-h-[64px]">
+                  <div className="w-8 h-8 rounded-full bg-slate-200/60 shrink-0" />
+                  <div className="flex flex-col gap-1.5 flex-1">
+                    <div className="h-3.5 bg-slate-200/60 rounded w-16" />
+                    <div className="h-3 bg-slate-200/40 rounded w-12" />
+                  </div>
+                </div>
+                <div className="bg-slate-200/30 border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-start gap-2 sm:gap-4 shadow-sm w-full md:w-52 min-h-[60px] md:min-h-[64px]">
+                  <div className="w-8 h-8 rounded-full bg-slate-200/60 shrink-0" />
+                  <div className="flex flex-col gap-1.5 flex-1">
+                    <div className="h-3.5 bg-slate-200/60 rounded w-16" />
+                    <div className="h-3 bg-slate-200/40 rounded w-12" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="w-full lg:w-[50%] flex flex-col justify-start gap-4">
+              {/* Highlights Grid Skeleton */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-slate-200/20 border border-slate-200/40 rounded-xl p-4 flex items-center gap-3 h-[64px]">
+                    <div className="w-6 h-6 rounded-full bg-slate-200/60 shrink-0" />
+                    <div className="h-3.5 bg-slate-200/50 rounded w-28 flex-1" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Button & Deadline Skeleton */}
+              <div className="flex flex-col items-center w-full">
+                <div className="w-full bg-slate-200/60 rounded-xl h-16" />
+                <div className="h-4 bg-slate-200/40 rounded w-3/4 mt-4" />
+
+                {/* Dates Selection Skeleton */}
+                <div className="mt-7 w-full flex flex-col items-center">
+                  <div className="h-5 bg-slate-200/60 rounded w-20 mb-3" />
+                  <div className="grid grid-cols-3 gap-3 md:gap-4 w-full justify-center max-w-[490px]">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="w-[130px] sm:w-[150px] h-[72px] border border-gray-200 rounded-xl px-3 py-3 flex flex-row items-center justify-center gap-2 bg-slate-200/30"
+                      >
+                        <div className="w-6 h-6 rounded bg-slate-200/60 shrink-0" />
+                        <div className="flex flex-col gap-1 flex-1">
+                          <div className="h-3 bg-slate-200/60 rounded w-8" />
+                          <div className="h-4 bg-slate-200/60 rounded w-12" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Instructor Card Skeleton */}
+          <div className="max-w-2xl w-full mx-auto flex justify-center mt-12 px-4">
+            <div className="w-full max-w-xl bg-white border-[2.5px] border-[#0052FF] rounded-2xl p-5 md:p-6 shadow-[6px_6px_0px_#0052FF] flex flex-row items-center gap-5">
+              <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-full bg-slate-200/60" />
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="h-3 bg-slate-200/60 rounded w-20" />
+                <div className="h-5 bg-slate-200/60 rounded w-40" />
+                <div className="h-3.5 bg-slate-200/40 rounded w-48 mt-1" />
+                <div className="h-3.5 bg-slate-200/40 rounded w-40" />
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Stats / Details Bar Skeleton */}
-        <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-8 px-4 md:px-16 w-full">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:divide-x divide-gray-300">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex flex-col items-start gap-3 md:px-8 first:pl-0">
-                <div className="h-3 bg-slate-200/60 rounded w-1/3" />
-                <div className="h-5 bg-slate-200/60 rounded w-2/3" />
+          {/* Checkmarks Grid Skeleton */}
+          <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 mt-10 mb-8 px-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-slate-200/60 shrink-0" />
+                <div className="h-4 bg-slate-200/40 rounded w-5/6 flex-1" />
               </div>
             ))}
           </div>
-        </section>
 
-        {/* Dynamic section spacer */}
-        <section className="bg-white py-16 px-4 md:px-16 w-full border-t border-gray-100">
-          <div className="max-w-7xl mx-auto flex flex-col gap-6">
-            <div className="h-8 bg-slate-200/60 rounded w-1/4" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="bg-[#f8f9fa] p-8 rounded-lg h-36 border border-gray-50/60" />
-              ))}
-            </div>
+          {/* Register CTA Button Skeleton */}
+          <div className="max-w-2xl w-full mx-auto mt-4 mb-6 px-4">
+            <div className="w-full bg-slate-200/60 rounded-lg h-14" />
           </div>
+
         </section>
       </main>
     </div>
@@ -132,12 +183,42 @@ function WorkshopSkeleton() {
 // ─── Main Dynamic Workshop Page ─────────────────────────────
 export default function DynamicWorkshopPage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCheckout = searchParams ? searchParams.get('checkout') === 'true' : false;
   const slug = typeof params.slug === 'string' ? params.slug : '';
+  const { user, isAuthenticated, login, register } = useAuth();
 
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  // ─── Date Selection ──────────────────────────────────────────
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showNoDateToast, setShowNoDateToast] = useState(false);
+
+  // ─── Auth Modal (inline login/register) ──────────────────────
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
+  const [authName, setAuthName] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authShowPassword, setAuthShowPassword] = useState(false);
+
+  // ─── Booking Modal ───────────────────────────────────────────
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingName, setBookingName] = useState('');
+  const [bookingEmail, setBookingEmail] = useState('');
+  const [bookingPhone, setBookingPhone] = useState('');
+  const [bookingWhatsapp, setBookingWhatsapp] = useState('');
+  const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean }>({});
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'success'>('form');
 
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
@@ -372,6 +453,157 @@ Email: contact@aiscale.com
     });
   };
 
+  // ─── Booking Flow Handlers ──────────────────────────────────
+
+  // Called when user clicks a price button
+  const handlePriceButtonClick = () => {
+    if (!workshop) return;
+    const datesList = (workshop as any)?.workshopDates;
+    const hasMultipleDates = datesList && datesList.length > 1;
+
+    // If multiple dates exist and none selected, show toast
+    if (hasMultipleDates && !selectedDate) {
+      setShowNoDateToast(true);
+      setTimeout(() => setShowNoDateToast(false), 3000);
+      return;
+    }
+
+    // Auto-select first date if only one date or no date selection needed
+    const dateToUse = selectedDate || (datesList && datesList.length > 0 ? datesList[0] : new Date().toISOString());
+    if (!selectedDate) setSelectedDate(dateToUse);
+
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pending_booking_workshop_id', workshop._id);
+      sessionStorage.setItem('pending_booking_date', dateToUse);
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + '?checkout=true')}`);
+    } else {
+      router.push(`${window.location.pathname}?checkout=true`);
+    }
+  };
+
+  // Opens the booking form pre-filled with user data
+  const openBookingModal = () => {
+    if (user) {
+      setBookingName(user.name || '');
+      setBookingEmail(user.email || '');
+      setBookingPhone((user as any).phoneNumber || '');
+      setBookingWhatsapp((user as any).whatsappNumber || '');
+    }
+    setPaymentStep('form');
+    setBookingErrors({});
+    setShowBookingModal(true);
+    setShowAuthModal(false);
+  };
+
+  // Auto-resume booking flow if returning from login page
+  useEffect(() => {
+    if (isAuthenticated && workshop) {
+      const pendingWorkshopId = sessionStorage.getItem('pending_booking_workshop_id');
+      const pendingDate = sessionStorage.getItem('pending_booking_date');
+
+      if (pendingWorkshopId === workshop._id) {
+        if (pendingDate) {
+          setSelectedDate(pendingDate);
+        }
+        // Clean up session storage
+        sessionStorage.removeItem('pending_booking_workshop_id');
+        sessionStorage.removeItem('pending_booking_date');
+
+        // Redirect to checkout page
+        router.push(`${window.location.pathname}?checkout=true`);
+      }
+    }
+  }, [isAuthenticated, workshop]);
+
+  // Prefill booking form when checkout page is opened and user is logged in
+  useEffect(() => {
+    if (isCheckout && user) {
+      setBookingName(prev => prev || user.name || '');
+      setBookingEmail(prev => prev || user.email || '');
+      setBookingPhone(prev => prev || (user as any).phoneNumber || '');
+      setBookingWhatsapp(prev => prev || (user as any).whatsappNumber || '');
+    }
+  }, [isCheckout, user]);
+
+  // Auth modal: handle login
+  const handleAuthLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+    try {
+      await login(authEmail, authPassword);
+      // After login, open booking modal
+      setTimeout(() => {
+        openBookingModal();
+      }, 200);
+    } catch (err: any) {
+      setAuthError(err?.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Auth modal: handle register
+  const handleAuthRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    if (authPassword !== authConfirmPassword) {
+      setAuthError('Passwords do not match');
+      return;
+    }
+    if (authPassword.length < 6) {
+      setAuthError('Password must be at least 6 characters');
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      await register(authName, authEmail, authPassword);
+      await login(authEmail, authPassword);
+      setTimeout(() => {
+        openBookingModal();
+      }, 200);
+    } catch (err: any) {
+      setAuthError(err?.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Booking form validation & submission
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean } = {};
+    if (!bookingName.trim()) errs.name = true;
+    if (!bookingEmail.trim() || !/\S+@\S+\.\S+/.test(bookingEmail)) errs.email = true;
+    if (!bookingPhone.trim() || !/^\d{7,15}$/.test(bookingPhone.replace(/[\s\-()]/g, ''))) errs.phone = true;
+    if (!bookingWhatsapp.trim() || !/^\d{7,15}$/.test(bookingWhatsapp.replace(/[\s\-()]/g, ''))) errs.whatsapp = true;
+    setBookingErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setBookingSubmitting(true);
+    setPaymentStep('paying');
+
+    try {
+      // Simulate payment processing (1.5s), then register
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      await workshopApi.registerForWorkshop(workshop!._id, {
+        name: bookingName.trim(),
+        email: bookingEmail.trim(),
+        phone: bookingPhone.trim(),
+        whatsappNumber: bookingWhatsapp.trim(),
+        selectedDate: selectedDate || new Date().toISOString(),
+      });
+
+      setPaymentStep('success');
+    } catch (err: any) {
+      setPaymentStep('form');
+      setAuthError('Registration failed. Please try again.');
+    } finally {
+      setBookingSubmitting(false);
+    }
+  };
+
   if (notFound) return <WorkshopNotFound />;
   if (loading || !workshop) return <WorkshopSkeleton />;
 
@@ -391,520 +623,566 @@ Email: contact@aiscale.com
   const buttonPrefix = cleanedName.toLowerCase().startsWith("become") ? "" : "Become A ";
   const buttonSuffix = cleanedName.toLowerCase().endsWith("expert") ? " Now At" : " Expert Now At";
 
+  if (isCheckout) {
+    const selectedCountry = countryCodes.find(c => c.code === formData.phoneCode) || countryCodes[0];
+    return (
+      <div className="flex-1 flex flex-col bg-white min-h-screen">
+        <div className="w-full bg-[#000000] text-center py-3 px-4 flex items-center justify-center min-h-[50px] shadow-sm">
+          <p className="text-[#FCD12A] font-extrabold text-xs md:text-sm tracking-wide leading-snug uppercase">
+            CONGRATS! YOU ARE JUST ONE STEP AWAY FROM MASTERING AI TOOLS FOR {cleanedName.toUpperCase()} USING AI
+          </p>
+        </div>
+
+        <div className="flex-1 bg-white flex flex-col items-center justify-start py-8 px-4 font-sans">
+          <h2 className="text-center text-gray-900 font-bold text-lg md:text-2xl tracking-tight max-w-2xl leading-snug">
+            Anyone from any field can attend this workshop.
+          </h2>
+          <p className="text-center text-gray-800 text-sm md:text-lg font-medium mt-2 mb-8">
+            Simply Pay <span className="line-through text-red-500 font-bold mx-1">₹{(workshop as any).originalPrice || 1999}</span>{" "}
+            <span className="text-red-600 font-extrabold text-lg md:text-xl mx-1">₹{workshop.price || 199} + GST</span> and Get Started
+          </p>
+
+          <div className="w-full max-w-[500px] bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col mb-12">
+            <div className="bg-[#0B132B] px-6 py-5 flex flex-col items-center justify-center relative">
+              <button
+                type="button"
+                onClick={() => router.push(`${window.location.pathname}`)}
+                className="absolute top-4 right-4 text-white/70 hover:text-white cursor-pointer"
+                title="Go Back"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <span className="text-white text-xs font-semibold tracking-[0.12em] uppercase text-center max-w-[90%]">
+                {cleanedName.toUpperCase()} USING AI WORKSHOP
+              </span>
+              {selectedDate && (
+                <span className="text-white/95 text-[11px] font-bold tracking-[0.05em] uppercase mt-2 bg-white/10 px-3 py-0.5 rounded-full border border-white/15">
+                  📅 {new Date(selectedDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </span>
+              )}
+            </div>
+
+            {paymentStep === 'success' ? (
+              <div className="p-8 flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-green-50 border-4 border-green-100 flex items-center justify-center mb-5">
+                  <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">🎉 Booking Confirmed!</h3>
+                <p className="text-gray-500 text-sm font-medium mb-5 leading-relaxed">
+                  Thank you, <strong className="text-gray-900">{bookingName}</strong>! You're registered for
+                </p>
+                <div className="w-full bg-blue-50 border border-blue-100 rounded-xl p-4 text-left mb-5">
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Workshop</p>
+                  <p className="text-sm font-bold text-gray-900 mb-2">{workshop.title}</p>
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-sm font-bold text-gray-900 mb-2">{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}</p>
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Amount Paid</p>
+                  <p className="text-sm font-black text-green-600">₹{workshop.price?.toLocaleString('en-IN') || 0}/-</p>
+                </div>
+                <p className="text-xs text-gray-400 font-medium mb-5">Confirmation details sent to <strong className="text-gray-600">{bookingEmail}</strong> & on WhatsApp</p>
+                <button
+                  onClick={() => {
+                    router.push(`${window.location.pathname}`);
+                  }}
+                  className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-sm transition-colors cursor-pointer"
+                >
+                  Go Back
+                </button>
+              </div>
+            ) : paymentStep === 'paying' ? (
+              <div className="p-10 flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-blue-50 border-4 border-blue-100 flex items-center justify-center mb-6">
+                  <svg className="animate-spin w-10 h-10 text-[#0052FF]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Processing Payment...</h3>
+                <p className="text-gray-400 text-sm font-medium">Please wait, do not close this window</p>
+                <div className="mt-6 w-full bg-gray-50 rounded-xl p-4 text-left">
+                  <div className="flex justify-between text-sm font-semibold text-gray-700 mb-1"><span>{workshop.title}</span><span>₹{workshop.price?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-xs text-gray-400"><span>Selected Date</span><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleBookingSubmit} className="p-5 md:p-6 flex flex-col gap-3">
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-[11px] font-bold text-gray-800 tracking-wide">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bookingName}
+                    onChange={e => { setBookingName(e.target.value); setBookingErrors(p => ({ ...p, name: false })); }}
+                    placeholder="Your Name"
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${bookingErrors.name ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-black'}`}
+                  />
+                  {bookingErrors.name && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
+                </div>
+
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-[11px] font-bold text-gray-800 tracking-wide">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={bookingEmail}
+                    onChange={e => { setBookingEmail(e.target.value); setBookingErrors(p => ({ ...p, email: false })); }}
+                    placeholder="example@example.com"
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${bookingErrors.email ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-black'}`}
+                  />
+                  {bookingErrors.email && <p className="text-[10px] text-red-500 font-semibold">⚠️ Valid email required</p>}
+                </div>
+
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-[11px] font-bold text-gray-800 tracking-wide">
+                    Mobile Number (WhatsApp Number) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2 relative">
+                    <div
+                      onClick={() => setIsCountrySelectOpen(!isCountrySelectOpen)}
+                      className="flex items-center gap-1 px-3 py-2.5 border border-gray-200 rounded-xl bg-white cursor-pointer select-none text-sm text-black font-semibold hover:border-gray-400 transition-colors"
+                    >
+                      <span>{selectedCountry.flag}</span>
+                      <span className="text-black">{selectedCountry.code}</span>
+                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+
+                    {isCountrySelectOpen && (
+                      <div className="absolute top-[105%] left-0 z-50 bg-white border border-gray-200 rounded-xl shadow-xl w-[220px] max-h-[200px] overflow-y-auto py-1">
+                        {countryCodes.map((c) => (
+                          <div
+                            key={c.code}
+                            onClick={() => selectPhoneCode(c.code)}
+                            className="px-4 py-2 hover:bg-slate-50 text-sm flex items-center justify-between cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>{c.flag}</span>
+                              <span className="font-semibold text-black">{c.code}</span>
+                            </div>
+                            <span className="text-xs text-gray-400">{c.country}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <input
+                      type="tel"
+                      required
+                      value={bookingPhone}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setBookingPhone(val);
+                        setBookingWhatsapp(val);
+                        setBookingErrors(p => ({ ...p, phone: false, whatsapp: false }));
+                      }}
+                      placeholder="9876543210"
+                      className={`flex-1 text-sm text-black px-4 py-2.5 border rounded-xl focus:outline-none transition-colors ${bookingErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-black'}`}
+                    />
+                  </div>
+                  {bookingErrors.phone && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
+                </div>
+
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-[11px] font-bold text-gray-800 tracking-wide">
+                    Age <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    defaultValue=""
+                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                  >
+                    <option value="" disabled className="text-gray-400">Select your age group</option>
+                    <option value="Under 18" className="text-black">Under 18</option>
+                    <option value="18-24" className="text-black">18-24</option>
+                    <option value="25-34" className="text-black">25-34</option>
+                    <option value="35-44" className="text-black">35-44</option>
+                    <option value="45-54" className="text-black">45-54</option>
+                    <option value="55+" className="text-black">55+</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-[11px] font-bold text-gray-800 tracking-wide">
+                    Profession <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    defaultValue=""
+                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                  >
+                    <option value="" disabled className="text-gray-400">Select your profession</option>
+                    <option value="Student" className="text-black">Student</option>
+                    <option value="Working Professional" className="text-black">Working Professional</option>
+                    <option value="Job Seeker" className="text-black">Job Seeker</option>
+                    <option value="Business Owner / Entrepreneur" className="text-black">Business Owner / Entrepreneur</option>
+                    <option value="Others" className="text-black">Others</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={bookingSubmitting}
+                  className="w-full bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-sm md:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-[0_4px_12px_rgba(0,0,0,0.15)] mt-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Pay Now & Register — ₹{workshop.price || 199} + GST
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex-1 flex flex-col bg-white transition-all duration-300 ${showStickyBar ? 'pb-[130px] sm:pb-[90px]' : ''}`}>
       <main className="flex-1 flex flex-col">
         {/* Hero Section — White Card UI (dynamic from DB) */}
         {!loading && workshop && (
-          slug === 'executive-programme-in-generative-ai-business-innovation' ? (
-            <section
-              className="relative bg-white pt-4 md:pt-12 pb-24 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
-              id="workshop-hero-section"
-              style={{
-                backgroundImage: 'radial-gradient(#cbd5e1 1.5px, transparent 1.5px)',
-                backgroundSize: '24px 24px',
-              }}
-            >
-              {/* Centered Top Content */}
-              <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-2 md:gap-3 px-1 sm:px-4 w-full">
-                <h1 className="text-3xl md:text-[45px] font-semibold text-gray-900 tracking-tight leading-tight [&_u]:no-underline [&_u]:border-b-[5px] [&_u]:border-[#0052FF] [&_u]:pb-1 [&_u]:inline-block w-full max-w-none animate-fade-in">
-                  One Day <span className="text-[#0052FF] font-extrabold">AI</span> <span className="">MasterClass</span>
-                </h1>
+          <section
+            className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
+            id="workshop-hero-section"
+            style={{
+              backgroundImage: 'radial-gradient(#cbd5e1 1.5px, transparent 1.5px)',
+              backgroundSize: '24px 24px',
+            }}
+          >
+            {/* Centered Top Content */}
+            <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-2 md:gap-3 px-1 sm:px-4 w-full">
+              <h1 
+                className="text-3xl md:text-[45px] font-semibold text-gray-900 tracking-tight leading-tight [&_u]:no-underline [&_u]:border-b-[5px] [&_u]:border-[#0052FF] [&_u]:pb-1 [&_u]:inline-block w-full max-w-none animate-fade-in"
+                dangerouslySetInnerHTML={{ __html: workshop.title }}
+              />
+              {workshop.subtitle && (
                 <p className="text-base md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
-                  Learn. Implement. Grow. Master AI. Save time.
+                  {workshop.subtitle}
                 </p>
-                <p className="text-xs md:text-sm font-semibold text-black leading-relaxed max-w-4xl mt-1">
-                  Take your Python skills to the next level with our intensive 30-day cohort. Learn from industry experts, work on real-world projects, and become a proficient Python developer in just one month!
+              )}
+              {workshop.description && (
+                <p className="hidden md:block text-xs md:text-sm font-semibold text-black leading-relaxed max-w-4xl mt-1">
+                  {workshop.description}
                 </p>
-              </div>
+              )}
+            </div>
 
-              {/* Main Blue Bordered Card */}
-              <div className="max-w-5xl mx-auto w-full bg-white rounded-2xl border-[3px] border-[#0052FF] p-5 md:p-6 lg:p-8 shadow-[6px_6px_0px_#0052FF] relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
-                {/* Left Column: Image & Logos */}
-                <div className="w-full lg:w-[50%] flex flex-col justify-between gap-6">
-                  <div>
+            {/* Main Blue Bordered Card */}
+            <div className="max-w-5xl mx-auto w-full bg-white rounded-2xl border-[3px] border-[#0052FF] p-5 md:p-6 lg:p-8 shadow-[6px_6px_0px_#0052FF] relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
+              {/* Left Column: Image & Logos */}
+              <div className="w-full lg:w-[50%] flex flex-col justify-start lg:justify-between gap-4 lg:gap-6">
+                <div>
 
-                    <div className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden aspect-[16/9] shadow-sm flex items-center justify-center">
-                      <img
-                        src={workshop.thumbnail || "https://res.cloudinary.com/dppgindsc/image/upload/v1780774475/workshops/lqcuatyi3elxhrqbtkdn.png"}
-                        alt="0 to Hero In Python Banner"
-                        className="w-full h-full object-cover object-center"
-                      />
-                    </div>
+                  <div className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden aspect-[16/9] shadow-sm flex items-center justify-center">
+                    <img
+                      src={workshop.thumbnail || "https://res.cloudinary.com/dppgindsc/image/upload/v1780774475/workshops/lqcuatyi3elxhrqbtkdn.png"}
+                      alt={workshop.title}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
 
-                    {/* Logos marquee: continuously scrolls right-to-left */}
-                    <div className="pt-6 mt-6 px-2">
-                      <div className="relative overflow-hidden">
-                        <div className="marquee flex items-center gap-6" aria-hidden>
-                          <div className="flex items-center gap-6">
-                            <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                            <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain" />
-                            <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain" />
-                            <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain" />
-                            <div className="flex items-center gap-1.5">
-                              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                                <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                              </svg>
-                              <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                            </div>
-                          </div>
-
-                          {/* duplicate for seamless loop */}
-                          <div className="flex items-center gap-6">
-                            <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                            <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain" />
-                            <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain" />
-                            <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain" />
-                            <div className="flex items-center gap-1.5">
-                              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                                <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                              </svg>
-                              <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                            </div>
+                  {/* Logos marquee: continuously scrolls right-to-left */}
+                  <div className="pt-3 mt-3 md:pt-6 md:mt-6 px-2">
+                    <div className="relative overflow-hidden">
+                      <div className="marquee flex items-center gap-6" aria-hidden>
+                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
+                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
+                            </svg>
+                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
                           </div>
                         </div>
 
-                        <style jsx>{`
-                          @keyframes marquee {
-                            0% { transform: translateX(0); }
-                            100% { transform: translateX(-50%); }
-                          }
-                          .marquee {
-                            display: flex;
-                            gap: 8rem;
-                            align-items: center;
-                            min-width: 200%;
-                            animation: marquee 16s linear infinite;
-                          }
-                        `}</style>
+                        {/* duplicate for seamless loop */}
+                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
+                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
+                            </svg>
+                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Ratings Row under Logos strip */}
-                  <div className="flex flex-row flex-wrap items-center gap-5 px-2 mt-2 w-full">
-                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center justify-start gap-4 shadow-sm w-44 md:w-52 min-h-[64px]">
-                      <img src="/Rating/TrustStar.png" alt={(workshop as any).rating1Platform || "Trustpilot"} className="w-8 h-8 shrink-0 object-contain" />
-                      <div className="flex flex-col items-start leading-tight">
-                        <span className="text-sm font-bold text-gray-900 mb-0.5">
-                          {((workshop as any).rating1Value || "4.5/5")} {((workshop as any).rating1Count || "(725)")}
-                        </span>
-                        <span className="text-[13px] font-semibold text-gray-900 tracking-tight">
-                          {((workshop as any).rating1Platform || "Trustpilot")}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center justify-start gap-4 shadow-sm w-44 md:w-52 min-h-[64px]">
-                      <img src="/Rating/ReviewStar.png" alt={(workshop as any).rating2Platform || "Rating Facts"} className="w-8 h-8 shrink-0 object-contain" />
-                      <div className="flex flex-col items-start leading-tight">
-                        <span className="text-sm font-bold text-gray-900 mb-0.5">
-                          {((workshop as any).rating2Value || "4.07/5")} {((workshop as any).rating2Count || "(88)")}
-                        </span>
-                        <span className="text-[13px] font-semibold text-gray-900 tracking-tight">
-                          {((workshop as any).rating2Platform || "Rating Facts")}
-                        </span>
-                      </div>
+                      <style jsx>{`
+                        @keyframes marquee {
+                          0% { transform: translateX(0); }
+                          100% { transform: translateX(-50%); }
+                        }
+                        .marquee {
+                          display: flex;
+                          gap: 8rem;
+                          align-items: center;
+                          min-width: 200%;
+                          animation: marquee 16s linear infinite;
+                        }
+                      `}</style>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column: Bullets, Button, Deadline */}
-                <div className="w-full lg:w-[50%] flex flex-col justify-start gap-4">
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {((workshop as any).heroPoints && (workshop as any).heroPoints.length > 0
-                      ? (workshop as any).heroPoints
-                      : [
-                        "25 Lessons With Case Studies",
-                        "Mega Webinar on Jun 14, 2026",
-                        "Get Certificate Of Completion",
-                        "No prior knowledge of python or AI required"
-                      ]
-                    ).map((text: string, idx: number) => (
-                      <div key={idx} className="bg-blue-50/60 border border-blue-100/30 rounded-xl p-4 flex items-center gap-3 shadow-xs">
-                        <img src="/WorkshopHeroTick/check.png" alt="check" className="w-6 h-6 object-contain shrink-0" />
-                        <span className="text-xs md:text-sm font-bold text-gray-800 leading-snug">{text}</span>
-                      </div>
-                    ))}
+                {/* Ratings Row under Logos strip */}
+                <div className="grid grid-cols-2 gap-3 md:flex md:flex-row md:gap-5 px-2 mt-2 w-full">
+                  <div className="bg-white border border-gray-200 rounded-xl px-2.5 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-start gap-2 sm:gap-4 shadow-sm w-full md:w-52 min-h-[60px] md:min-h-[64px]">
+                    <img src="/Rating/TrustStar.png" alt={(workshop as any).rating1Platform || "Trustpilot"} className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 object-contain" />
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className="text-[11px] sm:text-sm font-bold text-gray-900 mb-0.5">
+                        {((workshop as any).rating1Value || "4.5/5")} {((workshop as any).rating1Count || "(725)")}
+                      </span>
+                      <span className="text-[10px] sm:text-[13px] font-semibold text-gray-900 tracking-tight">
+                        {((workshop as any).rating1Platform || "Trustpilot")}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Yellow Button & Deadline Group */}
-                  <div className="flex flex-col items-center w-full">
-                    <button
-                      onClick={() => setIsRegisterModalOpen(true)}
-                      className="w-full bg-[#FCD12A] hover:bg-[#E6BD22] active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all flex flex-col items-center justify-center gap-1 cursor-pointer text-center"
-                    >
-                      <span className="font-semibold text-sm md:text-[17px] tracking-tight">
-                        {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
+                  <div className="bg-white border border-gray-200 rounded-xl px-2.5 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-start gap-2 sm:gap-4 shadow-sm w-full md:w-52 min-h-[60px] md:min-h-[64px]">
+                    <img src="/Rating/ReviewStar.png" alt={(workshop as any).rating2Platform || "Rating Facts"} className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 object-contain" />
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className="text-[11px] sm:text-sm font-bold text-gray-900 mb-0.5">
+                        {((workshop as any).rating2Value || "4.07/5")} {((workshop as any).rating2Count || "(88)")}
                       </span>
-                      <span className="flex items-center gap-2 whitespace-nowrap">
-                        <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
-                          ₹{(workshop as any).originalPrice || 1999}
-                        </span>
-                        <span className="text-gray-900 text-lg md:text-xl font-semibold">
-                          ₹{workshop.price || 199}/-
-                        </span>
+                      <span className="text-[10px] sm:text-[13px] font-semibold text-gray-900 tracking-tight">
+                        {((workshop as any).rating2Platform || "Rating Facts")}
                       </span>
-                    </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                      {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
-                    </p>
+              {/* Right Column: Bullets, Button, Deadline */}
+              <div className="w-full lg:w-[50%] flex flex-col justify-start gap-4">
+                {/* Highlights Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {((workshop as any).heroPoints && (workshop as any).heroPoints.length > 0
+                    ? (workshop as any).heroPoints
+                    : [
+                      "25 Lessons With Case Studies",
+                      "Mega Webinar on Jun 14, 2026",
+                      "Get Certificate Of Completion",
+                      "No prior knowledge of python or AI required"
+                    ]
+                  ).map((text: string, idx: number) => (
+                    <div key={idx} className="bg-blue-50/60 border border-blue-100/30 rounded-xl p-4 flex items-center gap-3 shadow-xs">
+                      <img src="/WorkshopHeroTick/check.png" alt="check" className="w-6 h-6 object-contain shrink-0" />
+                      <span className="text-xs md:text-sm font-bold text-gray-800 leading-snug">{text}</span>
+                    </div>
+                  ))}
+                </div>
 
-                    <div className="mt-7 w-full flex flex-col items-center">
-                      <h4 className="text-sm md:text-base font-extrabold text-gray-900 tracking-wide uppercase mb-3 border-b-2 border-[#0052FF] pb-1">
-                        Held On
-                      </h4>
-                      {(() => {
-                        const datesList = (workshop as any).workshopDates && (workshop as any).workshopDates.length > 0
-                          ? (workshop as any).workshopDates
-                          : [
-                            new Date('2026-06-03T10:00:00Z'),
-                            new Date('2026-06-04T10:00:00Z'),
-                            new Date('2026-06-05T10:00:00Z')
-                          ];
-                        const gridColsClass = datesList.length === 1
-                          ? 'grid-cols-1 max-w-[150px]'
-                          : datesList.length === 2
-                            ? 'grid-cols-2 max-w-[320px]'
-                            : 'grid-cols-3 max-w-[490px]';
+                {/* Yellow Button & Deadline Group */}
+                <div className="flex flex-col items-center w-full">
+                  <button
+                    onClick={handlePriceButtonClick}
+                    className="w-full active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all hover:brightness-105 flex flex-col items-center justify-center gap-1 cursor-pointer text-center"
+                    style={{ backgroundImage: 'linear-gradient(157deg, #F2E829 0%, #FDBD1A 100%)' }}
+                  >
+                    <span className="font-semibold text-sm md:text-[17px] tracking-tight">
+                      {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
+                    </span>
+                    <span className="flex items-center gap-2 whitespace-nowrap">
+                      <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
+                        ₹{(workshop as any).originalPrice || 1999}
+                      </span>
+                      <span className="text-gray-900 text-lg md:text-xl font-semibold">
+                        ₹{workshop.price || 199}/-
+                      </span>
+                    </span>
+                  </button>
 
-                        return (
-                          <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
-                            {datesList.map((dateVal: string | Date, idx: number) => {
-                              const dateObj = new Date(dateVal);
-                              const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                              const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                  <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
+                    {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                  </p>
 
-                              return (
-                                <div
-                                  key={idx}
-                                  className="w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-3 md:px-4 py-3 flex flex-row items-center justify-center gap-2.5 cursor-pointer transition-all bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02] group"
-                                >
-                                  <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
-                                  <div className="flex flex-col items-start text-left leading-none">
-                                    <span className="text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 text-gray-500 group-hover:text-[#0052FF]">
-                                      {weekday}
-                                    </span>
-                                    <span className="text-xs md:text-sm font-semibold text-gray-900 leading-none">
-                                      {dayMonth}
-                                    </span>
-                                  </div>
+                  <div className="mt-7 w-full flex flex-col items-center">
+                    <h4 className="text-sm md:text-base font-extrabold text-gray-900 tracking-wide uppercase mb-3 border-b-2 border-[#0052FF] pb-1">
+                      Held On
+                    </h4>
+                    {(() => {
+                      const datesList = (workshop as any).workshopDates && (workshop as any).workshopDates.length > 0
+                        ? (workshop as any).workshopDates
+                        : [
+                          new Date('2026-06-03T10:00:00Z'),
+                          new Date('2026-06-04T10:00:00Z'),
+                          new Date('2026-06-05T10:00:00Z')
+                        ];
+                      const gridColsClass = datesList.length === 1
+                        ? 'grid-cols-1 max-w-[150px]'
+                        : datesList.length === 2
+                          ? 'grid-cols-2 max-w-[320px]'
+                          : 'grid-cols-3 max-w-[490px]';
+
+                      return (
+                        <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
+                          {datesList.map((dateVal: string | Date, idx: number) => {
+                            const dateObj = new Date(dateVal);
+                            const isoStr = dateObj.toISOString();
+                            const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                            const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                            const isSelected = selectedDate === isoStr;
+
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedDate(isoStr)}
+                                className={`w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-3 md:px-4 py-3 flex flex-row items-center justify-center gap-2.5 cursor-pointer transition-[transform,colors,shadow] duration-200 ease-out group ${isSelected
+                                    ? 'border-[#0052FF] bg-[#0052FF] shadow-[0_2px_12px_rgba(0,82,255,0.3)] scale-[1.03]'
+                                    : 'bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02]'
+                                  }`}
+                              >
+                                <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
+                                <div className="flex flex-col items-start text-left leading-none">
+                                  <span className={`text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500 group-hover:text-[#0052FF]'}`}>
+                                    {weekday}
+                                  </span>
+                                  <span className={`text-xs md:text-sm font-semibold leading-none ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                    {dayMonth}
+                                  </span>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Spacer */}
-              <div className="h-12 w-full"></div>
-
-              {/* Instructor Card */}
-              <div className="max-w-2xl w-full mx-auto flex justify-center z-10 px-4">
-                <div className="w-full max-w-xl bg-white border-[2.5px] border-[#0052FF] rounded-2xl p-5 md:p-6 shadow-[6px_6px_0px_#0052FF] flex flex-row items-center gap-5">
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-full overflow-hidden border-2 border-black bg-slate-900 flex items-center justify-center">
-                    <img
-                      src={(workshop as any).instructorImage || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80"}
-                      alt={workshop.instructor || "Aman Saurav"}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-[11px] md:text-xs font-black tracking-widest text-black">INSTRUCTOR</span>
-                    <h3 className="text-base md:text-[19px] font-black text-gray-950 mt-0.5 leading-tight">{workshop.instructor || "Aman Saurav"}</h3>
-                    {((workshop as any).instructorDescription || "(IIT Delhi) Senior Data Analyst\nDirector at AI for Techies")
-                      .split("\n")
-                      .map((line: string, idx: number) => (
-                        <p key={idx} className={`text-xs md:text-sm text-gray-800 font-bold leading-snug ${idx === 0 ? 'mt-1.5' : 'mt-0.5'}`}>
-                          {line}
-                        </p>
-                      ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Checkmarks Grid */}
-              <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 mt-10 mb-8 z-10 px-4">
-                {(workshop.learningOutcomes && workshop.learningOutcomes.length > 0
-                  ? workshop.learningOutcomes
-                  : [
-                    "Learn Python from basic",
-                    "Debug python code in seconds using AI",
-                    "Create interactive visualisations in Python in minutes",
-                    "Create website in Python using AI while saving 95% of time",
-                    "Solve real-world case studies",
-                    "Write code in python by using AI in seconds"
-                  ]
-                ).map((text, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <svg className="w-6.5 h-6.5 text-[#22C55E] shrink-0" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm md:text-base font-bold text-gray-800 leading-snug text-left">{text}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Blue Registration CTA Button */}
-              <div className="max-w-2xl w-full mx-auto mt-4 mb-6 z-10 px-4">
-                <button
-                  onClick={() => setIsRegisterModalOpen(true)}
-                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2.5 cursor-pointer text-center text-sm md:text-lg tracking-wide"
-                >
-                  <span className="font-semibold">
-                    {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
-                  </span>
-                  <span className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
-                      ₹{(workshop as any).originalPrice || 1999}
-                    </span>
-                    <span className="text-white text-base md:text-xl font-black">
-                      ₹{workshop.price || 199}/-
-                    </span>
-                  </span>
-                </button>
-              </div>
-
-              {/* Natural Wavy SVG Separator */}
-              <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-0 pointer-events-none">
-                <svg
-                  viewBox="0 0 1440 120"
-                  preserveAspectRatio="none"
-                  className="relative block w-full h-[60px] md:h-[100px] lg:h-[120px]"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <defs>
-                    <linearGradient id="curve-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#0052FF" stopOpacity={0.8} />
-                      <stop offset="35%" stopColor="#0EA5E9" stopOpacity={0.7} />
-                      <stop offset="70%" stopColor="#38BDF8" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.9} />
-                    </linearGradient>
-                    <linearGradient id="curve-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.4} />
-                      <stop offset="50%" stopColor="#93C5FD" stopOpacity={0.6} />
-                      <stop offset="100%" stopColor="#0052FF" stopOpacity={0.5} />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Base white fill to cleanly mask/transition the dot background */}
-                  <path
-                    d="M0,80 C360,130 720,30 1080,105 C1260,130 1440,90 1440,90 L1440,120 L0,120 Z"
-                    fill="#FFFFFF"
-                  />
-
-                  {/* Thin strokes representing the curves in the image */}
-                  <path
-                    d="M0,75 C360,125 720,25 1080,100 C1260,125 1440,85 1440,85"
-                    fill="none"
-                    stroke="url(#curve-grad-1)"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M0,90 C400,130 800,40 1200,110 C1320,120 1440,95 1440,95"
-                    fill="none"
-                    stroke="#0052FF"
-                    strokeWidth="0.75"
-                    strokeOpacity={0.4}
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-            </section>
-          ) : (
-            <section className="bg-white pt-3 md:pt-5 pb-1 md:pb-2 px-4 md:px-8 w-full flex items-center justify-center font-sans" id="workshop-hero-section">
-              <div className="max-w-8xl mx-auto w-full bg-[#FCF8F5] rounded-3xl border border-[#F2ECE4]/70 p-6 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(255,255,255,1)] flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch">
-
-                {/* Left: Workshop Image */}
-                <div className="w-full lg:w-[50%] flex items-center justify-center">
-                  <div className="bg-transparent border-0 border-b border-gray-200/80 rounded-none overflow-hidden aspect-auto max-w-full lg:max-w-[520px] w-full h-[200px] sm:h-[240px] md:h-auto min-h-0 shadow-[0_6px_12px_rgba(255,255,255,0.95)] flex items-center justify-center md:bg-white md:border md:border-[#EADFD3] md:rounded-2xl md:aspect-[4/3] md:min-h-[300px] md:shadow-xs">
-                    {workshop.thumbnail ? (
-                      <img
-                        src={workshop.thumbnail}
-                        alt={workshop.title}
-                        className="w-full h-full object-cover object-center"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center gap-3 text-[#C4B5A5]">
-                        <svg className="w-14 h-14 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-xs font-semibold tracking-wide opacity-60">Image coming soon</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right: Content */}
-                <div className="w-full lg:w-[55%] flex flex-col justify-between py-2 text-left font-sans gap-y-4">
-                  {/* Section 1: Title, Subtitle, Metadata Grid */}
-                  <div className="flex flex-col items-start w-full order-1">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold text-[#111827] leading-[1.15] tracking-tight mb-2 w-full">
-                      {workshop.title}
-                    </h1>
-                    {workshop.subtitle && (
-                      <p className="text-gray-600 text-sm md:text-[15px] font-medium leading-relaxed mb-6">
-                        {workshop.subtitle}
-                      </p>
-                    )}
-
-                    {/* Metadata Grid: Date / Time / Duration */}
-                    <div className="grid grid-cols-3 gap-4 md:gap-8 w-full border-t border-b border-[#E5DCD3]/50 py-4 mb-2">
-                      <div>
-                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Date</span>
-                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                          {(workshop as any).startDate
-                            ? new Date((workshop as any).startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                            : 'Coming Soon'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Time</span>
-                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                          {(workshop as any).workshopTime || 'TBD'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] md:text-[11px] font-bold text-[#64748B] tracking-wider uppercase mb-1 block">Duration</span>
-                        <span className="text-sm md:text-base font-extrabold text-[#1E293B] block">
-                          {(workshop as any).duration || 'TBD'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Section 2: Experts / Mentors */}
-                  {workshop.experts && workshop.experts.length > 0 && (
-                    <div className="w-full mb-2 order-3 md:order-2 border-t md:border-t-0 border-[#E5DCD3]/30 pt-4 md:pt-0">
-                      <span className="text-[10px] md:text-xs font-bold text-[#64748B] uppercase tracking-widest mb-3.5 block">Mentors</span>
-                      <div className="flex flex-wrap items-center gap-5 md:gap-8">
-                        {workshop.experts.slice(0, 2).map((expert, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            {expert.image ? (
-                              <img
-                                src={expert.image}
-                                alt={expert.name}
-                                className="w-10 h-10 rounded-full object-cover border border-[#E5DCD3] shadow-xs shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 border border-[#E5DCD3]">
-                                {expert.name.charAt(0)}
                               </div>
-                            )}
-                            <div className="flex flex-col text-left">
-                              <span className="text-xs md:text-sm font-bold text-gray-900 leading-tight">{expert.name}</span>
-                              <span className="text-[10px] md:text-[11px] font-medium text-gray-500 leading-none mt-0.5">{expert.role}</span>
-                            </div>
-                          </div>
-                        ))}
-                        {workshop.experts.length > 2 && (
-                          <span className="text-xs md:text-sm font-bold text-gray-500 hover:text-gray-950 transition-colors cursor-pointer hover:underline">
-                            +{workshop.experts.length - 2} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Section 3: Register button + Price */}
-                  <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 border-t-0 md:border-t border-[#E5DCD3]/50 pt-2 md:pt-5 mt-1 md:mt-2 w-full font-sans order-2 md:order-3">
-                    <div className="flex items-center gap-1.5 sm:gap-3 font-sans shrink-0">
-                      {(workshop as any).fee ? (
-                        <>
-                          <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">{(workshop as any).fee}</span>
-                          {(workshop as any).feeNote && <span className="text-[10px] sm:text-xs font-semibold text-gray-400">{(workshop as any).feeNote}</span>}
-                        </>
-                      ) : workshop.price > 0 ? (
-                        <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">
-                          {workshop.currency === 'INR' ? '₹' : workshop.currency}{workshop.price.toLocaleString('en-IN')}
-                        </span>
-                      ) : (
-                        <span className="text-2xl sm:text-3xl font-black text-[#22c55e] tracking-tight font-sans">FREE</span>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => setIsRegisterModalOpen(true)}
-                      id="workshop-register-btn"
-                      className="bg-[#7CD19B] hover:bg-[#6ec289] active:scale-[0.98] text-[#134F2C] text-xs sm:text-sm md:text-base font-extrabold py-2.5 md:py-4 px-4 sm:px-8 rounded-lg shadow-xs transition-all flex items-center gap-2 cursor-pointer w-auto sm:w-[280px] justify-center font-sans shrink-0"
-                    >
-                      Register Now
-                      <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
-
                 </div>
               </div>
-            </section>
-          )
+            </div>
+
+            {/* Spacer */}
+            <div className="h-12 w-full"></div>
+
+            {/* Instructor Card */}
+            <div className="max-w-2xl w-full mx-auto flex justify-center z-10 px-4">
+              <div className="w-full max-w-xl bg-white border-[2.5px] border-[#0052FF] rounded-2xl p-5 md:p-6 shadow-[6px_6px_0px_#0052FF] flex flex-row items-center gap-5">
+                <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-full overflow-hidden border-2 border-black bg-slate-900 flex items-center justify-center">
+                  <img
+                    src={(workshop as any).instructorImage || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80"}
+                    alt={workshop.instructor || "Aman Saurav"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] md:text-xs font-black tracking-widest text-black">INSTRUCTOR</span>
+                  <h3 className="text-base md:text-[19px] font-black text-gray-950 mt-0.5 leading-tight">{workshop.instructor || "Aman Saurav"}</h3>
+                  {((workshop as any).instructorDescription || "(IIT Delhi) Senior Data Analyst\nDirector at AI for Techies")
+                    .split("\n")
+                    .map((line: string, idx: number) => (
+                      <p key={idx} className={`text-xs md:text-sm text-gray-800 font-bold leading-snug ${idx === 0 ? 'mt-1.5' : 'mt-0.5'}`}>
+                        {line}
+                      </p>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Checkmarks Grid */}
+            <div className="max-w-4xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-6 mt-10 mb-8 z-10 px-4">
+              {(workshop.learningOutcomes && workshop.learningOutcomes.length > 0
+                ? workshop.learningOutcomes
+                : [
+                  "Learn Python from basic",
+                  "Debug python code in seconds using AI",
+                  "Create interactive visualisations in Python in minutes",
+                  "Create website in Python using AI while saving 95% of time",
+                  "Solve real-world case studies",
+                  "Write code in python by using AI in seconds"
+                ]
+              ).map((text, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <img src="/WorkshopHeroTick/GreenTick.png" alt="check" className="w-6.5 h-6.5 object-contain shrink-0" />
+                  <span className="text-sm md:text-base font-bold text-gray-800 leading-snug text-left">{text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Blue Registration CTA Button */}
+            <div className="max-w-2xl w-full mx-auto mt-4 mb-6 z-10 px-4">
+              <button
+                onClick={handlePriceButtonClick}
+                className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
+              >
+                <span className="font-semibold leading-tight">
+                  {(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}
+                </span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
+                    ₹{(workshop as any).originalPrice || 1999}
+                  </span>
+                  <span className="text-white text-base md:text-xl font-black">
+                    ₹{workshop.price || 199}/-
+                  </span>
+                </span>
+              </button>
+            </div>
+
+            {/* Natural Wavy SVG Separator */}
+            <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-0 pointer-events-none">
+              <svg
+                viewBox="0 0 1440 120"
+                preserveAspectRatio="none"
+                className="relative block w-full h-[60px] md:h-[100px] lg:h-[120px]"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="curve-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#0052FF" stopOpacity={0.8} />
+                    <stop offset="35%" stopColor="#0EA5E9" stopOpacity={0.7} />
+                    <stop offset="70%" stopColor="#38BDF8" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.9} />
+                  </linearGradient>
+                  <linearGradient id="curve-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.4} />
+                    <stop offset="50%" stopColor="#93C5FD" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#0052FF" stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
+
+                {/* Base white fill to cleanly mask/transition the dot background */}
+                <path
+                  d="M0,80 C360,130 720,30 1080,105 C1260,130 1440,90 1440,90 L1440,120 L0,120 Z"
+                  fill="#FFFFFF"
+                />
+
+                {/* Thin strokes representing the curves in the image */}
+                <path
+                  d="M0,75 C360,125 720,25 1080,100 C1260,125 1440,85 1440,85"
+                  fill="none"
+                  stroke="url(#curve-grad-1)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M0,90 C400,130 800,40 1200,110 C1320,120 1440,95 1440,95"
+                  fill="none"
+                  stroke="#0052FF"
+                  strokeWidth="0.75"
+                  strokeOpacity={0.4}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </section>
         )}
 
         {!loading && workshop && (
           <>
-            {/* Stats / Details Bar */}
-            {slug !== 'executive-programme-in-generative-ai-business-innovation' && (
-              <section className="border-t border-b border-gray-200 bg-[#f8f8f8] py-5 md:py-8 px-4 md:px-16 w-full z-10 font-sans" id="workshop-details-grid-bar">
-                <div className={`max-w-7xl mx-auto grid grid-cols-1 ${slug === 'executive-programme-in-generative-ai-business-innovation' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-8 md:gap-0 md:divide-x divide-gray-300`}>
-                  <div className="flex flex-col items-start md:px-8 first:pl-0">
-                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">STARTS ON</span>
-                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block">
-                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '26 May 2026' : (formatDisplayDate((workshop as any).startDate) || 'TBD')}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-start md:px-8">
-                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">DURATION</span>
-                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1">
-                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '2 Weeks' : ((workshop as any).duration || 'TBD')}
-                    </span>
-                    {(slug === 'executive-programme-in-generative-ai-business-innovation' || (workshop as any).durationDetail) && (
-                      <span className="text-xs font-medium text-gray-500 leading-normal block">
-                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? '3-4 hours/week' : (workshop as any).durationDetail}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-start md:px-8">
-                    <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">PROGRAMME FEE</span>
-                    <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1 font-sans">
-                      {slug === 'executive-programme-in-generative-ai-business-innovation' ? '₹149,999' : ((workshop as any).fee || `${workshop.currency === 'INR' ? '₹' : '$'}${workshop.price.toLocaleString()}`)}
-                    </span>
-                    {(slug === 'executive-programme-in-generative-ai-business-innovation' || (workshop as any).feeNote) && (
-                      <span className="text-xs font-medium text-gray-500 leading-normal block mb-1.5">
-                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? 'NO GST' : (workshop as any).feeNote}
-                      </span>
-                    )}
-                    <a href="#" className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:underline leading-relaxed block transition-colors">
-                      Flexible Payment Options Available
-                    </a>
-                  </div>
-                  {slug !== 'executive-programme-in-generative-ai-business-innovation' && (
-                    <div className="flex flex-col items-start md:pl-8 md:pr-0">
-                      <span className="text-[11px] font-semibold text-gray-500 tracking-wider uppercase mb-2 block">ELIGIBILITY</span>
-                      <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight block mb-1.5">
-                        {(workshop as any).eligibility || 'Open to all'}
-                      </span>
-                      {(workshop as any).eligibilityDetail && (
-                        <span className="text-xs font-medium text-gray-500 leading-relaxed block">
-                          {(workshop as any).eligibilityDetail}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
             {/* What You'll Learn Section */}
-            {((workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0) || slug === 'executive-programme-in-generative-ai-business-innovation') && (
-              <section className="bg-white py-12 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
+            <section className="bg-white pt-6 pb-12 md:py-12 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
                 <div className="max-w-7xl w-full mx-auto flex flex-col items-center text-center">
                   <h2 className="text-2xl sm:text-[32px] font-black text-gray-900 tracking-tight leading-tight">
                     What You&apos;ll Learn
@@ -989,27 +1267,23 @@ Email: contact@aiscale.com
                   </div>
                 </div>
               </section>
-            )}
 
             {/* Application Deadline */}
-            {((workshop as any).applicationDeadline || slug === 'executive-programme-in-generative-ai-business-innovation') && (
-              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-                <div className="w-full max-w-4xl p-[3px] rounded-2xl bg-gradient-to-r from-[#FF007A] via-[#7F00FF] via-[#001AFF] to-[#00E080] shadow-[0_0_30px_rgba(255,0,122,0.18),0_0_30px_rgba(0,26,255,0.18),0_0_30px_rgba(0,224,128,0.18)]">
-                  <div className="w-full bg-[#f5f5f5] py-6 md:py-8 px-6 text-center rounded-[13px]">
-                    <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application <span className="text-[#0052FF]">Deadline</span></h2>
-                    <p className="text-gray-600 text-sm md:text-base font-normal">
-                      Apply by <span className="font-bold text-[#0052FF]">
-                        {slug === 'executive-programme-in-generative-ai-business-innovation' ? '28 May 2026' : formatDisplayDate((workshop as any).applicationDeadline)}
-                      </span> at 11:59 PM
+            <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
+              <div className="w-full max-w-4xl p-[3px] rounded-2xl bg-gradient-to-r from-[#FF007A] via-[#7F00FF] via-[#001AFF] to-[#00E080] shadow-[0_0_30px_rgba(255,0,122,0.18),0_0_30px_rgba(0,26,255,0.18),0_0_30px_rgba(0,224,128,0.18)]">
+                <div className="w-full bg-[#f5f5f5] py-6 md:py-8 px-6 text-center rounded-[13px]">
+                  <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application <span className="text-[#0052FF]">Deadline</span></h2>
+                  <p className="text-gray-600 text-sm md:text-base font-normal">
+                    Apply by <span className="font-bold text-[#0052FF]">
+                      {(workshop as any).applicationDeadline ? formatDisplayDate((workshop as any).applicationDeadline) : '28 May 2026'}
+                    </span> at 11:59 PM
                     </p>
                   </div>
                 </div>
               </section>
-            )}
 
             {/* What you'll learn in this Cohort Section */}
-            {((workshop.courseOutcomes && workshop.courseOutcomes.length > 0) || slug === 'executive-programme-in-generative-ai-business-innovation') && (
-              <section className="w-full bg-[#EBF5FF] pb-16 md:pb-24 relative font-sans" id="workshop-what-you-learn">
+            <section className="w-full bg-[#EBF5FF] pb-16 md:pb-24 relative font-sans" id="workshop-what-you-learn">
                 {/* SVG Curve transition from white to light-blue */}
                 <div className="w-full bg-white leading-none">
                   <svg
@@ -1063,27 +1337,27 @@ Email: contact@aiscale.com
                     {(workshop.courseOutcomes && workshop.courseOutcomes.length > 0
                       ? workshop.courseOutcomes
                       : [
-                          {
-                            image: "/DemoPicture/workdetails1.png",
-                            title: "Generate Codes in any language with AI",
-                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
-                          },
-                          {
-                            image: "/DemoPicture/workdetails2.png",
-                            title: "Manage data efficiently with AI",
-                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
-                          },
-                          {
-                            image: "/DemoPicture/workdetails1.png",
-                            title: "Generate Codes in any language with AI",
-                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
-                          },
-                          {
-                            image: "/DemoPicture/workdetails2.png",
-                            title: "Manage data efficiently with AI",
-                            description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
-                          }
-                        ]
+                        {
+                          image: "/DemoPicture/workdetails1.png",
+                          title: "Generate Codes in any language with AI",
+                          description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                        },
+                        {
+                          image: "/DemoPicture/workdetails2.png",
+                          title: "Manage data efficiently with AI",
+                          description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                        },
+                        {
+                          image: "/DemoPicture/workdetails1.png",
+                          title: "Generate Codes in any language with AI",
+                          description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                        },
+                        {
+                          image: "/DemoPicture/workdetails2.png",
+                          title: "Manage data efficiently with AI",
+                          description: "Discover how AI streamlines data processing, transforming raw data into actionable insights swiftly."
+                        }
+                      ]
                     ).map((outcome, idx) => (
                       <div key={idx} className="flex flex-col items-center text-center w-[85%] md:w-[48%] shrink-0 snap-start">
                         <div className="w-full bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 p-2">
@@ -1104,62 +1378,60 @@ Email: contact@aiscale.com
                   </div>
                 </div>
               </section>
-            )}
 
             {/* What is this program for Section */}
-            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
-              <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-program-for">
+            <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-program-for">
                 <div className="max-w-6xl w-full mx-auto flex flex-col items-center text-center">
                   <h2 className="text-[26px] md:text-[36px] font-bold text-gray-900 tracking-tight mb-12">
                     What is this program for?
                   </h2>
 
                   {/* 3 Columns */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full max-w-4xl justify-center items-start mb-12">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-12 w-full max-w-4xl justify-center items-start mb-12">
                     {/* Student */}
                     <div className="flex flex-col items-center text-center group">
-                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                      <div className="w-20 h-20 sm:w-36 sm:h-36 md:w-40 md:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
                         <img
                           src="/LandingPage/student_3d.png"
                           alt="Student"
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <span className="text-lg md:text-xl font-bold text-gray-800">Student</span>
+                      <span className="text-xs sm:text-base md:text-xl font-bold text-gray-800">Student</span>
                     </div>
 
                     {/* Working Professionals */}
                     <div className="flex flex-col items-center text-center group">
-                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                      <div className="w-20 h-20 sm:w-36 sm:h-36 md:w-40 md:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
                         <img
                           src="/LandingPage/professional_3d.png"
                           alt="Working Professionals"
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <span className="text-lg md:text-xl font-bold text-gray-800">Working Professionals</span>
+                      <span className="text-xs sm:text-base md:text-xl font-bold text-gray-800">Working Professionals</span>
                     </div>
 
                     {/* Job Seekers */}
                     <div className="flex flex-col items-center text-center group">
-                      <div className="w-40 h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                      <div className="w-20 h-20 sm:w-36 sm:h-36 md:w-40 md:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
                         <img
                           src="/LandingPage/job_seeker_3d.png"
                           alt="Job Seekers"
                           className="w-full h-full object-contain"
                         />
                       </div>
-                      <span className="text-lg md:text-xl font-bold text-gray-800">Job Seekers</span>
+                      <span className="text-xs sm:text-base md:text-xl font-bold text-gray-800">Job Seekers</span>
                     </div>
                   </div>
 
                   {/* Blue CTA Button */}
                   <div className="max-w-2xl w-full mx-auto z-10 px-4">
                     <button
-                      onClick={() => setIsRegisterModalOpen(true)}
-                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                      onClick={handlePriceButtonClick}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
                     >
-                      <span className="font-semibold">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                      <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
                       <span className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
                         <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
@@ -1172,11 +1444,9 @@ Email: contact@aiscale.com
                   </div>
                 </div>
               </section>
-            )}
 
             {/* Did You Know? Section */}
-            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
-              <section className="bg-[#EBF5FF]/50 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-100" id="workshop-did-you-know">
+            <section className="bg-[#EBF5FF]/50 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-100" id="workshop-did-you-know">
                 <div className="max-w-6xl w-full mx-auto flex flex-col items-center text-center">
                   <h2 className="text-[26px] md:text-[36px] font-black text-gray-900 tracking-tight mb-2">
                     Did You Know?
@@ -1215,10 +1485,10 @@ Email: contact@aiscale.com
                   {/* Blue CTA Button */}
                   <div className="max-w-2xl w-full mx-auto z-10 px-4">
                     <button
-                      onClick={() => setIsRegisterModalOpen(true)}
-                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                      onClick={handlePriceButtonClick}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
                     >
-                      <span className="font-semibold">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                      <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
                       <span className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
                         <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
@@ -1231,11 +1501,9 @@ Email: contact@aiscale.com
                   </div>
                 </div>
               </section>
-            )}
 
             {/* Meet your Mentors Section */}
-            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
-              <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-meet-mentors">
+            <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-meet-mentors">
                 <div className="max-w-6xl w-full mx-auto flex flex-col items-center">
                   <h2 className="text-[26px] md:text-[36px] font-semibold text-gray-900 tracking-tight text-center mb-12">
                     Meet your Mentors
@@ -1304,11 +1572,9 @@ Email: contact@aiscale.com
                   </div>
                 </div>
               </section>
-            )}
 
             {/* Frequently Asked Questions (FAQs) Section */}
-            {slug === 'executive-programme-in-generative-ai-business-innovation' && (
-              <section className="bg-[#EBF5FF]/30 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-50" id="workshop-faqs">
+            <section className="bg-[#EBF5FF]/30 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-50" id="workshop-faqs">
                 <div className="max-w-5xl w-full mx-auto flex flex-col items-center text-center">
                   <h2 className="text-[26px] md:text-[36px] font-black text-gray-900 tracking-tight mb-2">
                     Frequently Asked Questions (FAQs)
@@ -1330,10 +1596,10 @@ Email: contact@aiscale.com
                   {/* Blue CTA Button */}
                   <div className="max-w-2xl w-full mx-auto z-10 px-4 mb-10">
                     <button
-                      onClick={() => setIsRegisterModalOpen(true)}
-                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-row items-center justify-center gap-2 cursor-pointer text-center text-sm md:text-lg tracking-wide"
+                      onClick={handlePriceButtonClick}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
                     >
-                      <span className="font-semibold">Become A Python Using AI Expert Now At</span>
+                      <span className="font-semibold leading-tight">Become A Python Using AI Expert Now At</span>
                       <span className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹1999</span>
                         <span className="text-white text-base md:text-xl font-semibold">₹199/-</span>
@@ -1389,7 +1655,6 @@ Email: contact@aiscale.com
 
                 </div>
               </section>
-            )}
 
 
 
@@ -1402,165 +1667,164 @@ Email: contact@aiscale.com
         )}
       </main>
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setShowSuccessModal(false)}></div>
-          <div className="relative bg-white rounded-lg p-8 shadow-2xl max-w-md w-full border border-gray-100 flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-5 text-[#22c55e]">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-black text-gray-900 mb-3 tracking-tight">
-              {(workshop as any)?.hasBrochure !== false ? 'Brochure Downloaded Successfully!' : 'Registered Successfully!'}
-            </h3>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6 font-medium">
-              Thank you, <strong className="text-gray-900 font-semibold">{formData.firstName}</strong>.
-              {(workshop as any)?.hasBrochure !== false ? (
-                <> The brochure has been generated and downloaded to your device.</>
-              ) : (
-                <> You have successfully registered for the workshop.</>
-              )}
-              {(workshop as any)?.startDate && (
-                <> We have also emailed you details about the upcoming batch starting on <strong className="text-gray-900 font-semibold">{formatDisplayDate((workshop as any).startDate)}</strong>.</>
-              )}
-            </p>
-            <button onClick={() => setShowSuccessModal(false)} className="bg-gray-900 hover:bg-black text-white font-bold py-2.5 px-8 rounded text-sm transition-colors w-full focus:outline-none">
-              Close
-            </button>
-          </div>
+      {/* ─── No-date-selected Toast ──────────────────────────── */}
+      {showNoDateToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] bg-gray-900 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-300">
+          <svg className="w-4 h-4 text-yellow-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>
+          Please select a date first
         </div>
       )}
 
-      {/* Register / Brochure Modal */}
-      {isRegisterModalOpen && (
+      {/* ─── Booking Details Modal ─────────────────────────────── */}
+      {showBookingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsRegisterModalOpen(false)}></div>
-          <div className="relative bg-white rounded-xl p-5 md:p-6 shadow-2xl max-w-[480px] w-full border border-gray-100 flex flex-col animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={() => setIsRegisterModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <h2 className="text-lg md:text-xl font-black tracking-tight text-gray-900 mb-1 font-sans">
-              {(workshop as any)?.hasBrochure !== false ? 'Register & Get Brochure' : 'Register for Workshop'}
-            </h2>
-            <p className="text-xs text-gray-500 font-medium mb-4">
-              {(workshop as any)?.hasBrochure !== false
-                ? 'Fill in your details to register and download the programme brochure.'
-                : 'Fill in your details to register and book your slot.'}
-            </p>
-            <form onSubmit={handleFormSubmit} className="flex flex-col gap-3 text-left">
-              {/* First Name & Last Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleInputChange} id="brochure-firstName-input"
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${errors.firstName ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`} />
-                  {errors.firstName && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => paymentStep === 'form' && setShowBookingModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden animate-in fade-in zoom-in duration-200">
+
+            {paymentStep === 'success' ? (
+              /* ─ Success Screen ─ */
+              <div className="p-8 flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-green-50 border-4 border-green-100 flex items-center justify-center mb-5">
+                  <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <div className="flex flex-col">
-                  <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} id="brochure-lastName-input"
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${errors.lastName ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`} />
-                  {errors.lastName && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
+                <h3 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">🎉 Booking Confirmed!</h3>
+                <p className="text-gray-500 text-sm font-medium mb-5 leading-relaxed">
+                  Thank you, <strong className="text-gray-900">{bookingName}</strong>! You're registered for
+                </p>
+                <div className="w-full bg-blue-50 border border-blue-100 rounded-xl p-4 text-left mb-5">
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Workshop</p>
+                  <p className="text-sm font-bold text-gray-900 mb-2">{workshop.title}</p>
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-sm font-bold text-gray-900 mb-2">{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}</p>
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Amount Paid</p>
+                  <p className="text-sm font-black text-green-600">₹{workshop.price?.toLocaleString('en-IN') || 0}/-</p>
+                </div>
+                <p className="text-xs text-gray-400 font-medium mb-5">Confirmation details sent to <strong className="text-gray-600">{bookingEmail}</strong> & on WhatsApp</p>
+                <button onClick={() => setShowBookingModal(false)} className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-sm transition-colors cursor-pointer">
+                  Close
+                </button>
+              </div>
+            ) : paymentStep === 'paying' ? (
+              /* ─ Payment Processing Screen ─ */
+              <div className="p-10 flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-blue-50 border-4 border-blue-100 flex items-center justify-center mb-6">
+                  <svg className="animate-spin w-10 h-10 text-[#0052FF]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Processing Payment...</h3>
+                <p className="text-gray-400 text-sm font-medium">Please wait, do not close this window</p>
+                <div className="mt-6 w-full bg-gray-50 rounded-xl p-4 text-left">
+                  <div className="flex justify-between text-sm font-semibold text-gray-700 mb-1"><span>{workshop.title}</span><span>₹{workshop.price?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-xs text-gray-400"><span>Selected Date</span><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
                 </div>
               </div>
-
-              {/* Email */}
-              <div className="flex flex-col">
-                <input type="text" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} id="brochure-email-input"
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`} />
-                {errors.email && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
-              </div>
-
-              {/* Phone */}
-              <div className="flex flex-col">
-                <div className="flex flex-row relative">
-                  <button type="button" onClick={() => setIsCountrySelectOpen(!isCountrySelectOpen)} id="phone-code-select-toggle"
-                    className="flex items-center gap-1 px-2 border border-r-0 border-gray-300 bg-gray-50 rounded-l hover:bg-gray-100 transition-colors select-none text-sm shrink-0 min-w-[70px] justify-between cursor-pointer">
-                    <span className="text-base">{selectedCountry.flag}</span>
-                    <svg className={`w-3 h-3 text-gray-500 transition-transform ${isCountrySelectOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+            ) : (
+              /* ─ Booking Form ─ */
+              <>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-[#0052FF] to-[#0EA5E9] px-6 pt-6 pb-7">
+                  <button onClick={() => setShowBookingModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white cursor-pointer">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
-                  {isCountrySelectOpen && (
-                    <div className="absolute bottom-full left-0 mb-1 w-48 bg-white border border-gray-200 rounded shadow-lg py-1 z-50 max-h-56 overflow-y-auto">
-                      {countryCodes.map((c) => (
-                        <button key={c.code} type="button" onClick={() => selectPhoneCode(c.code)}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-2.5 text-gray-700 cursor-pointer">
-                          <span className="text-base shrink-0">{c.flag}</span>
-                          <span className="font-semibold text-gray-900 w-10">{c.code}</span>
-                          <span className="text-gray-500 truncate">{c.country}</span>
-                        </button>
-                      ))}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                     </div>
-                  )}
-                  <div className="relative flex-1">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none select-none text-xs text-gray-400 font-bold">
-                      {formData.phoneCode}
+                    <div>
+                      <p className="text-white/80 text-xs font-semibold uppercase tracking-wider">Step 2 of 2</p>
+                      <h2 className="text-white font-black text-lg tracking-tight">Complete Your Registration</h2>
                     </div>
-                    <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} id="brochure-phone-input"
-                      className={`w-full text-sm pl-12 pr-3 py-2 border rounded-r focus:outline-none transition-colors ${errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l' : 'border-gray-300 focus:border-gray-900 border-l'}`} />
+                  </div>
+                  {/* Order Summary Pill */}
+                  <div className="bg-white/10 rounded-xl p-3 mt-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">Workshop</p>
+                        <p className="text-white text-xs font-bold leading-snug mt-0.5 max-w-[200px]">{workshop.title}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">Date</p>
+                        <p className="text-white text-xs font-bold mt-0.5">{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="border-t border-white/20 mt-2 pt-2 flex justify-between items-center">
+                      <span className="text-white/70 text-[10px] font-bold uppercase tracking-wider">Amount</span>
+                      <span className="text-white font-black text-base">₹{workshop.price?.toLocaleString('en-IN') || 0}/-</span>
+                    </div>
                   </div>
                 </div>
-                {errors.phone && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
-              </div>
 
-              {/* Job Title & Work Experience */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <input type="text" name="jobTitle" placeholder="Job Title" value={formData.jobTitle} onChange={handleInputChange} id="brochure-jobTitle-input"
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${errors.jobTitle ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`} />
-                  {errors.jobTitle && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
-                </div>
-                <div className="flex flex-col relative">
-                  <select name="workExperience" value={formData.workExperience} onChange={handleInputChange} id="brochure-workExperience-select"
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors appearance-none bg-white pr-8 cursor-pointer ${errors.workExperience ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`}>
-                    <option value="" disabled hidden>Work Experience</option>
-                    <option value="Entry Level">Entry Level (0-2 years)</option>
-                    <option value="Mid Level">Mid Level (3-5 years)</option>
-                    <option value="Senior Level">Senior Level (5-10 years)</option>
-                    <option value="Executive Level">Executive Level (10+ years)</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                {/* Form */}
+                <form onSubmit={handleBookingSubmit} className="px-6 py-5 flex flex-col gap-3">
+                  <p className="text-xs text-gray-500 font-semibold -mb-1">All fields are mandatory</p>
+
+                  {/* Name */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 block">Full Name</label>
+                    <input
+                      type="text"
+                      value={bookingName}
+                      onChange={e => { setBookingName(e.target.value); setBookingErrors(p => ({ ...p, name: false })); }}
+                      placeholder="Your full name"
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg focus:outline-none transition-colors ${bookingErrors.name ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#0052FF]'}`}
+                    />
+                    {bookingErrors.name && <p className="text-[10px] text-red-500 font-semibold mt-0.5">⚠️ Required</p>}
                   </div>
-                  {errors.workExperience && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
-                </div>
-              </div>
 
-              {/* City */}
-              <div className="flex flex-col">
-                <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleInputChange} id="brochure-city-input"
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${errors.city ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-300 focus:border-gray-900'}`} />
-                {errors.city && <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1"><span className="text-xs">⚠️</span> Required</span>}
-              </div>
+                  {/* Email */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-1 block">Email Address</label>
+                    <input
+                      type="email"
+                      value={bookingEmail}
+                      onChange={e => { setBookingEmail(e.target.value); setBookingErrors(p => ({ ...p, email: false })); }}
+                      placeholder="your@email.com"
+                      className={`w-full text-sm px-3 py-2.5 border rounded-lg focus:outline-none transition-colors ${bookingErrors.email ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#0052FF]'}`}
+                    />
+                    {bookingErrors.email && <p className="text-[10px] text-red-500 font-semibold mt-0.5">⚠️ Valid email required</p>}
+                  </div>
 
-              {/* Disclaimer */}
-              <p className="text-[10px] leading-relaxed text-gray-500 mt-0.5 select-none font-medium">
-                By clicking the button below, you agree to receive communications via Email/Call/WhatsApp/SMS from MICA &amp;{' '}
-                <a href="#" className="underline font-semibold text-gray-600 hover:text-gray-900">Emeritus</a> about this programme. <a href="#" className="underline font-semibold text-gray-600 hover:text-gray-900">Privacy Policy</a>.
-              </p>
+                  {/* Phone + WhatsApp */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 block">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={bookingPhone}
+                        onChange={e => { setBookingPhone(e.target.value); setBookingErrors(p => ({ ...p, phone: false })); }}
+                        placeholder="9876543210"
+                        className={`w-full text-sm px-3 py-2.5 border rounded-lg focus:outline-none transition-colors ${bookingErrors.phone ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#0052FF]'}`}
+                      />
+                      {bookingErrors.phone && <p className="text-[10px] text-red-500 font-semibold mt-0.5">⚠️ Required</p>}
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 mb-1 block">WhatsApp Number</label>
+                      <input
+                        type="tel"
+                        value={bookingWhatsapp}
+                        onChange={e => { setBookingWhatsapp(e.target.value); setBookingErrors(p => ({ ...p, whatsapp: false })); }}
+                        placeholder="9876543210"
+                        className={`w-full text-sm px-3 py-2.5 border rounded-lg focus:outline-none transition-colors ${bookingErrors.whatsapp ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#0052FF]'}`}
+                      />
+                      {bookingErrors.whatsapp && <p className="text-[10px] text-red-500 font-semibold mt-0.5">⚠️ Required</p>}
+                    </div>
+                  </div>
 
-              {/* Submit */}
-              <button type="submit" disabled={isSubmitting} id="brochure-submit-button"
-                className="mt-1 bg-[#cc0000] hover:bg-[#b30000] text-white text-center font-bold py-3 px-5 rounded uppercase tracking-wider text-xs md:text-[13px] transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 w-full flex items-center justify-center gap-2 cursor-pointer">
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    {(workshop as any)?.hasBrochure !== false ? 'Downloading...' : 'Registering...'}
-                  </>
-                ) : (
-                  (workshop as any)?.hasBrochure !== false ? 'REGISTER & DOWNLOAD BROCHURE' : 'REGISTER NOW'
-                )}
-              </button>
-            </form>
+                  <p className="text-[10px] text-gray-400 font-medium">
+                    By registering, you agree to receive updates via Email, Phone & WhatsApp about this workshop.
+                  </p>
+
+                  <button
+                    type="submit"
+                    disabled={bookingSubmitting}
+                    id="pay-and-register-btn"
+                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-black py-3.5 rounded-xl text-sm md:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-[0_4px_14px_rgba(0,82,255,0.3)]"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                    Pay Now & Register — ₹{workshop.price?.toLocaleString('en-IN') || 0}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -1577,25 +1841,29 @@ Email: contact@aiscale.com
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 via-green-500 to-teal-400" />
           <div className="max-w-7xl mx-auto px-4 md:px-16 py-4 md:py-5 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 md:gap-6">
             <div className="flex items-center justify-center sm:justify-start gap-2 md:gap-3 w-full sm:w-auto">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 items-center justify-center text-emerald-600 shrink-0 shadow-sm hidden sm:flex">
-                <svg className="w-4.5 h-4.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="w-8 h-8 rounded-full bg-red-50 border border-red-100 items-center justify-center text-red-600 shrink-0 shadow-sm hidden sm:flex">
+                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div className="flex flex-row items-center gap-2">
-                <span className="text-[13px] md:text-sm font-semibold text-emerald-800 tracking-tight">Free Access Ends in</span>
-                <span className="text-[13px] md:text-sm font-bold text-amber-500 tracking-wide bg-amber-50 px-2 py-0.5 rounded border border-amber-100/60 shadow-sm whitespace-nowrap">
-                  {formattedTime.mins} mins {formattedTime.secs} secs
+              <div className="flex flex-col items-start leading-tight text-left">
+                <span className="text-[11px] md:text-sm font-bold text-red-600 tracking-tight">
+                  {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
                 </span>
+                {selectedDate && (
+                  <span className="text-[10px] md:text-xs font-semibold text-gray-500 mt-0.5">
+                    Selected Date: {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  </span>
+                )}
               </div>
             </div>
-            <button onClick={handleScrollToBook}
-              className="relative group overflow-hidden bg-[#007f00] hover:bg-[#006600] active:scale-[0.98] text-white text-[13px] md:text-sm font-bold py-3 px-4 md:px-7 rounded shadow-[0_4px_14px_rgba(0,127,0,0.25)] hover:shadow-[0_6px_20px_rgba(0,127,0,0.35)] transition-all duration-200 shrink-0 w-full sm:w-auto flex justify-center">
+            <button onClick={handlePriceButtonClick}
+              className="relative group overflow-hidden bg-[#007f00] hover:bg-[#006600] active:scale-[0.98] text-white text-[13px] md:text-sm font-bold py-3 px-4 md:px-7 rounded shadow-[0_4px_14px_rgba(0,127,0,0.25)] hover:shadow-[0_6px_20px_rgba(0,127,0,0.35)] transition-all duration-200 shrink-0 w-full sm:w-auto flex justify-center cursor-pointer">
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
               <span className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2">
                 Book your Seat Now for
-                <span className="line-through text-green-200 font-semibold">₹2,999</span>
-                <span className="text-yellow-300 font-extrabold uppercase animate-bounce-slow">FREE</span>
+                <span className="line-through text-green-200 font-semibold">₹{(workshop as any).originalPrice || '2,999'}</span>
+                <span className="text-yellow-300 font-extrabold">₹{workshop.price?.toLocaleString('en-IN') || '199'}/-</span>
               </span>
             </button>
           </div>
@@ -1604,3 +1872,4 @@ Email: contact@aiscale.com
     </div>
   );
 }
+

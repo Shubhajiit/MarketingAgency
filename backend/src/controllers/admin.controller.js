@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Workshop = require('../models/Workshop');
 const Course = require('../models/Course');
+const WorkshopRegistration = require('../models/WorkshopRegistration');
 
 exports.getStats = async (req, res) => {
   try {
@@ -146,6 +147,24 @@ exports.getUsers = async (req, res) => {
     });
   } catch (error) {
     console.error('Get Users Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// ─── Admin: Get all workshop registrations ───────────────
+exports.getWorkshopRegistrations = async (req, res) => {
+  try {
+    const registrations = await WorkshopRegistration.find()
+      .populate('userId', 'name email phoneNumber whatsappNumber avatar')
+      .populate('workshopId', 'title slug price currency')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: { registrations },
+    });
+  } catch (error) {
+    console.error('Get Workshop Registrations Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

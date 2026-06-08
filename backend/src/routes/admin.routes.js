@@ -13,4 +13,7 @@ router.get('/workshops', protect, workshopController.adminListWorkshops);
 // Admin: users management & assignment
 router.get('/users', protect, adminController.getUsers);
 
+// Admin: workshop registrations
+router.get('/workshop-registrations', protect, adminController.getWorkshopRegistrations);
+
 module.exports = router;

@@ -1,4 +1,6 @@
 const Workshop = require('../models/Workshop');
+const WorkshopRegistration = require('../models/WorkshopRegistration');
+const User = require('../models/User');
 
 // ─── Public: List all active workshops ───────────────────────
 exports.listWorkshops = async (req, res) => {
@@ -228,5 +230,71 @@ exports.adminListWorkshops = async (req, res) => {
   } catch (error) {
     console.error('Admin List Workshops Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// ─── User: Register for a workshop (auth required) ────────────
+exports.registerForWorkshop = async (req, res) => {
+  try {
+    const { id } = req.params; // workshop _id
+    const { name, email, phone, whatsappNumber, selectedDate } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !phone || !selectedDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email, phone, and selectedDate are required',
+      });
+    }
+
+    // Find workshop
+    const workshop = await Workshop.findById(id);
+    if (!workshop || !workshop.isActive) {
+      return res.status(404).json({ success: false, message: 'Workshop not found' });
+    }
+
+    // Find the user
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Update user phone/whatsapp if they provided them
+    if (phone && !user.phoneNumber) user.phoneNumber = phone;
+    if (whatsappNumber && !user.whatsappNumber) user.whatsappNumber = whatsappNumber;
+
+    // Enroll user in workshop (avoid duplicates)
+    const alreadyEnrolled = user.enrolledWorkshops.some(
+      (wId) => wId.toString() === id
+    );
+    if (!alreadyEnrolled) {
+      user.enrolledWorkshops.push(id);
+    }
+    await user.save();
+
+    // Create registration record
+    const registration = await WorkshopRegistration.create({
+      userId: user._id,
+      workshopId: id,
+      workshopTitle: workshop.title,
+      workshopSlug: workshop.slug || '',
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      whatsappNumber: (whatsappNumber || '').trim(),
+      selectedDate: new Date(selectedDate),
+      amountPaid: workshop.price || 0,
+      currency: workshop.currency || 'INR',
+      paymentStatus: 'paid',
+    });
+
+    res.status(201).json({
+      success: true,
+      data: { registration },
+      message: 'Successfully registered for workshop',
+    });
+  } catch (error) {
+    console.error('Register For Workshop Error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Internal server error' });
   }
 };
