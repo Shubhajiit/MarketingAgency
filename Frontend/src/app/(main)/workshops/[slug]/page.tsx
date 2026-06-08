@@ -1509,65 +1509,135 @@ Email: contact@aiscale.com
                     Meet your Mentors
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl">
-                    {/* Left Column: Image and Name */}
-                    <div className="md:col-span-5 flex flex-col items-center">
-                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
-                        <img
-                          src="/LandingPage/aman_saurav.png"
-                          alt="Aman Saurav"
-                          className="w-full h-full object-cover rounded-[10px]"
-                        />
+                  <div className="flex flex-col gap-16 md:gap-24 w-full">
+                    {/* Mentor 1: Founder */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                      {/* Left Column: Image and Name */}
+                      <div className="md:col-span-5 flex flex-col items-center">
+                        <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                          <img
+                            src="/LandingPage/aman_saurav.png"
+                            alt="Aman Saurav"
+                            className="w-full h-full object-cover rounded-[10px]"
+                          />
+                        </div>
+                        <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                          Aman Saurav
+                        </h3>
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
-                        Aman Saurav
-                      </h3>
+
+                      {/* Right Column: Details */}
+                      <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
+                        {/* Founder Heading */}
+                        <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                          Founder
+                        </h4>
+                        {/* Checkmarks list */}
+                        <div className="flex flex-col gap-3 mb-6">
+                          {[
+                            "IIT Delhi Alumni",
+                            "Director of AI for Techies",
+                            "Senior Data Analyst"
+                          ].map((text, idx) => (
+                            <div key={idx} className="flex items-center gap-2.5">
+                              <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                              <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Paragraphs */}
+                        <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                          Hello, I'm a graduate of{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            IIT Delhi
+                          </span>{" "}
+                          and currently work as a{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            Senior Data Analyst
+                          </span>{" "}
+                          and Program{" "}
+                          <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                            Director at AI for Techies
+                          </span>
+                          . With over a decade of experience in the field, I've been teaching and mentoring learners in AI/ML, data analysis, Python, Excel, SQL, and related technologies.
+                        </p>
+
+                        <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                          I've had the privilege of guiding{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            over 20,000 students
+                          </span>{" "}
+                          and{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            professionals
+                          </span>{" "}
+                          through their data and AI journeys. Passionate about simplifying complex concepts and building real-world skills, I aim to empower individuals to confidently step into the world of data and technology.
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Right Column: Details */}
-                    <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
-                      {/* Checkmarks list */}
-                      <div className="flex flex-col gap-3 mb-6">
-                        {[
-                          "IIT Delhi Alumni",
-                          "Director of AI for Techies",
-                          "Senior Data Analyst"
-                        ].map((text, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5">
-                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
-                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
-                          </div>
-                        ))}
+                    {/* Mentor 2: Co-Founder */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                      {/* Left Column (Details) - Shows first on mobile, but second on desktop */}
+                      <div className="md:col-span-7 order-2 md:order-1 flex flex-col items-start text-left font-sans text-gray-800">
+                        {/* Co-Founder Heading */}
+                        <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                          Co-Founder
+                        </h4>
+                        {/* Checkmarks list */}
+                        <div className="flex flex-col gap-3 mb-6">
+                          {[
+                            "IIT Kharagpur Alumni",
+                            "Co-Founder of AI for Techies",
+                            "Senior AI & Tech Mentor"
+                          ].map((text, idx) => (
+                            <div key={idx} className="flex items-center gap-2.5">
+                              <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                              <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Paragraphs */}
+                        <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                          Hello, I'm a graduate of{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            IIT Kharagpur
+                          </span>{" "}
+                          and Co-Founder at{" "}
+                          <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                            AI for Techies
+                          </span>
+                          . With a deep passion for technology and artificial intelligence, I have spent years building scalable AI systems and designing educational programs that bridge the gap between academic theory and industry application.
+                        </p>
+
+                        <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                          Over my career, I've mentored{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            thousands of developers
+                          </span>{" "}
+                          and{" "}
+                          <span className="text-blue-600 underline font-bold cursor-pointer">
+                            professionals
+                          </span>{" "}
+                          in prompt engineering, generative AI, Python programming, and advanced automation. My goal is to equip every learner with the practical tools and logic required to excel in today's fast-paced tech landscape.
+                        </p>
                       </div>
 
-                      {/* Paragraphs */}
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
-                        Hello, I'm a graduate of{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          IIT Delhi
-                        </span>{" "}
-                        and currently work as a{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          Senior Data Analyst
-                        </span>{" "}
-                        and Program{" "}
-                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
-                          Director at AI for Techies
-                        </span>
-                        . With over a decade of experience in the field, I've been teaching and mentoring learners in AI/ML, data analysis, Python, Excel, SQL, and related technologies.
-                      </p>
-
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
-                        I've had the privilege of guiding{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          over 20,000 students
-                        </span>{" "}
-                        and{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          professionals
-                        </span>{" "}
-                        through their data and AI journeys. Passionate about simplifying complex concepts and building real-world skills, I aim to empower individuals to confidently step into the world of data and technology.
-                      </p>
+                      {/* Right Column (Image) - Shows second on mobile, but first on desktop relative to its side */}
+                      <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
+                        <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                          <img
+                            src="/LandingPage/co_founder.png"
+                            alt="Aditya Kachave"
+                            className="w-full h-full object-cover rounded-[10px]"
+                          />
+                        </div>
+                        <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                          Aditya Kachave
+                        </h3>
+                      </div>
                     </div>
                   </div>
                 </div>
