@@ -91,6 +91,9 @@ const workshopSchema = new mongoose.Schema(
     rating2Value: { type: String, default: '4.07/5' },
     rating2Count: { type: String, default: '(88)' },
     rating2Platform: { type: String, default: 'Rating Facts' },
+
+    // Type of Workshop
+    type: { type: String, enum: ['one-day', 'three-days'], default: 'one-day' },
   },
   { timestamps: true }
 );

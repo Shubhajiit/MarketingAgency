@@ -48,6 +48,7 @@ export interface WorkshopRegistration {
     slug: string;
     price: number;
     currency: string;
+    type?: 'one-day' | 'three-days';
   };
   workshopTitle: string;
   workshopSlug: string;
@@ -102,6 +103,7 @@ export interface Workshop {
   rating2Value?: string;
   rating2Count?: string;
   rating2Platform?: string;
+  type?: 'one-day' | 'three-days';
 }
 
 interface WorkshopListResponse {
@@ -129,7 +131,7 @@ export const workshopApi = {
    * List all ACTIVE workshops (public, no auth required).
    * Used by the Navbar popup and any public listing.
    */
-  listPublic: async (params?: { page?: number; limit?: number; tag?: string }) => {
+  listPublic: async (params?: { page?: number; limit?: number; tag?: string; type?: string }) => {
     const res = await apiClient.get<WorkshopListResponse>('/workshops', { params });
     return res.data;
   },
@@ -138,7 +140,7 @@ export const workshopApi = {
    * List ALL workshops including inactive (admin only, requires auth).
    * Used by the Admin Dashboard workshops page.
    */
-  list: async (params?: { page?: number; limit?: number; tag?: string }) => {
+  list: async (params?: { page?: number; limit?: number; tag?: string; type?: string }) => {
     const res = await apiClient.get<WorkshopListResponse>('/admin/workshops', { params });
     return res.data;
   },

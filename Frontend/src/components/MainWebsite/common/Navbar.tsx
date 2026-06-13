@@ -20,10 +20,13 @@ export default function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = React.useState(false);
     const [isMobileCoursesOpen, setIsMobileCoursesOpen] = React.useState(false);
     const [isMobileWorkshopsOpen, setIsMobileWorkshopsOpen] = React.useState(false);
+    const [isMobileThreeDaysOpen, setIsMobileThreeDaysOpen] = React.useState(false);
     const [isCoursesOpen, setIsCoursesOpen] = React.useState(false);
     const [isWorkshopsOpen, setIsWorkshopsOpen] = React.useState(false);
+    const [isThreeDaysOpen, setIsThreeDaysOpen] = React.useState(false);
     const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const workshopsTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+    const threeDaysTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
     const { user, isAuthenticated, isLoading } = useAuthStore();
     const { cartCount, openDrawer } = useCartStore();
     const pathname = usePathname();
@@ -38,8 +41,10 @@ export default function Navbar() {
         setIsProfileOpen(false);
         setIsMobileCoursesOpen(false);
         setIsMobileWorkshopsOpen(false);
+        setIsMobileThreeDaysOpen(false);
         setIsCoursesOpen(false);
         setIsWorkshopsOpen(false);
+        setIsThreeDaysOpen(false);
     }, [pathname]);
 
     // Live workshops data from API
@@ -74,6 +79,7 @@ export default function Navbar() {
         }
         setIsCoursesOpen(true);
         setIsWorkshopsOpen(false);
+        setIsThreeDaysOpen(false);
     };
 
     const handleMouseLeave = () => {
@@ -90,6 +96,7 @@ export default function Navbar() {
         }
         setIsWorkshopsOpen(true);
         setIsCoursesOpen(false);
+        setIsThreeDaysOpen(false);
         fetchLiveWorkshops();
     };
 
@@ -100,10 +107,29 @@ export default function Navbar() {
         }, 150);
     };
 
+    const handleThreeDaysMouseEnter = () => {
+        if (threeDaysTimeoutRef.current) {
+            clearTimeout(threeDaysTimeoutRef.current);
+            threeDaysTimeoutRef.current = null;
+        }
+        setIsThreeDaysOpen(true);
+        setIsWorkshopsOpen(false);
+        setIsCoursesOpen(false);
+        fetchLiveWorkshops();
+    };
+
+    const handleThreeDaysMouseLeave = () => {
+        if (threeDaysTimeoutRef.current) clearTimeout(threeDaysTimeoutRef.current);
+        threeDaysTimeoutRef.current = setTimeout(() => {
+            setIsThreeDaysOpen(false);
+        }, 150);
+    };
+
     React.useEffect(() => {
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             if (workshopsTimeoutRef.current) clearTimeout(workshopsTimeoutRef.current);
+            if (threeDaysTimeoutRef.current) clearTimeout(threeDaysTimeoutRef.current);
         };
     }, []);
 
@@ -117,29 +143,32 @@ export default function Navbar() {
 
                 <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-gray-800 tracking-wide">
                     {/* <a href="#" className="hover:text-[#009ee3]">HOME</a> */}
-                    <div
-                        className="h-full flex items-center"
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <a href="#" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
-                            COURSES
-                            <svg className={`w-3 h-3 transition-transform duration-200 ${isCoursesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </a>
-                    </div>
+                    <Link href="/courses" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        COURSES
+                    </Link>
                     <div
                         className="h-full flex items-center"
                         onMouseEnter={handleWorkshopsMouseEnter}
                         onMouseLeave={handleWorkshopsMouseLeave}
                     >
                         <a href="#" className="hover:text-[#009ee3] flex items-center gap-1 py-4 uppercase">
-                            LIVE WORKSHOPS
+                            ONE DAY WORKSHOP
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </a>
+                    </div>
+                    <div
+                        className="h-full flex items-center"
+                        onMouseEnter={handleThreeDaysMouseEnter}
+                        onMouseLeave={handleThreeDaysMouseLeave}
+                    >
+                        <Link href="/three-days-workshops" className="hover:text-[#009ee3] flex items-center gap-1 py-4 uppercase">
+                            THREE DAYS WORKSHOPS
+                            <svg className={`w-3 h-3 transition-transform duration-200 ${isThreeDaysOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </Link>
                     </div>
                     <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</a>
                     <a href="#" className="hover:text-[#009ee3]">CONTACT US</a>
@@ -188,169 +217,9 @@ export default function Navbar() {
                     )}
                 </nav>
 
-                {/* Courses Mega Menu Dropdown */}
-                {isCoursesOpen && (
-                    <div
-                        className="absolute top-full left-0 right-0 w-full bg-white border-t border-b border-gray-100 shadow-2xl z-50 py-10 transition-all duration-200"
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                        onClick={() => setIsCoursesOpen(false)}
-                    >
-                        <div className="max-w-screen-2xl mx-auto px-4 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-                            {/* Column 1: Intro */}
-                            <div className="flex flex-col pr-6">
-                                <span className="text-[#00c58d] text-sm font-bold tracking-wider uppercase block mb-1">Online Learning</span>
-                                <h2 className="text-[#1e2245] text-3xl font-black tracking-tight leading-tight mb-3">
-                                    World Class Certification
-                                </h2>
-                                <p className="text-gray-500 text-[14px] leading-relaxed mb-4">
-                                    DMI is the proven global standard for digital marketing certification with over 300,000+ members and over 75,000+ certified professionals worldwide.
-                                </p>
-                                <Link
-                                    href="/courses"
-                                    className="inline-flex items-center justify-center bg-[#00c58d] hover:bg-[#00b07c] text-white text-[13px] font-bold py-2.5 px-5 rounded transition-colors w-fit gap-1"
-                                >
-                                    View All Courses <span className="text-sm font-semibold">→</span>
-                                </Link>
-                            </div>
 
-                            {/* Column 2: Pro & Specialist Courses */}
-                            <div>
-                                <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
-                                    <RingIcon gradient="from-[#22c55e] to-[#3b82f6]" />
-                                    <h3 className="text-base font-bold text-gray-900">Pro & Specialist Courses</h3>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                DMI Pro
-                                            </strong>
-                                            Perfect for career switchers,
-                                            <span className="inline-block bg-[#e52d6a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm mx-1 uppercase tracking-wider align-middle">Popular</span>
-                                            owners and marketing managers.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Search Marketing
-                                            </strong>
-                                            Sharpen your search marketing strategy from SEO and PPC to analytics.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Social Media Marketing
-                                            </strong>
-                                            Perfect for those looking to fully grasp the social media landscape.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Strategy & Leadership
-                                            </strong>
-                                            For aspiring and emerging marketing leaders to gain the strategic, data-driven and AI-powered skills to drive performance, manage teams, and grow business impact.
-                                        </p>
-                                    </a>
-                                </div>
-                            </div>
 
-                            {/* Column 3: Advanced Courses */}
-                            <div>
-                                <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
-                                    <RingIcon gradient="from-[#10b981] to-[#06b6d4]" />
-                                    <h3 className="text-base font-bold text-gray-900">Advanced Courses</h3>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                DMI Expert
-                                            </strong>
-                                            Designed for marketing professionals looking to drive business growth and commercial success in a senior role
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Postgraduate Diploma In Digital Marketing
-                                            </strong>
-                                            Designed for professionals at various stages from Marketing Executives to CEO&apos;s, this programme offers cutting-edge digital marketing skills, strategic insights, and the latest industry best practices.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Masters (MSc) In Digital Marketing
-                                            </strong>
-                                            Master your digital marketing skills and elevate your career with BPP&apos;s Master&apos;s Programme taught by industry experts and the top practitioners in their fields globally.
-                                        </p>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {/* Column 4: Short Courses */}
-                            <div>
-                                <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
-                                    <RingIcon gradient="from-[#eab308] to-[#10b981]" />
-                                    <h3 className="text-base font-bold text-gray-900">Short Courses</h3>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Advanced AI
-                                            </strong>
-                                            Fast-track your AI skills with
-                                            <span className="inline-block bg-[#e52d6a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm mx-1 uppercase tracking-wider align-middle">NEW</span>
-                                            short interactive course. Learn the fundamentals of AI and understand AI data-driven marketing.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Search Engine Optimization (SEO)
-                                            </strong>
-                                            Rank better in search results through a mix of SEO strategies to make it easy for the right people to find you.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Paid Search (PPC)
-                                            </strong>
-                                            Develop PPC campaigns by understanding keywords, bidding and budget.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Social Media Marketing
-                                            </strong>
-                                            The perfect intro exploring today&apos;s rapidly changing social media landscape.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="group block p-1.5 -mx-1.5 rounded-md hover:bg-slate-50 transition-all duration-150">
-                                        <p className="text-[14px] leading-relaxed text-slate-500">
-                                            <strong className="text-[#1e2245] font-bold group-hover:text-[#009ee3] transition-colors duration-150 mr-1.5">
-                                                Digital Strategy
-                                            </strong>
-                                            Discover the fundamentals of developing a digital strategy.
-                                        </p>
-                                    </a>
-                                    <a href="#" className="text-sm font-bold text-[#1e2245] hover:text-[#009ee3] transition-colors duration-150 mt-1 block">
-                                        More...
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Workshops Mega Menu Dropdown */}
+                {/* One Day Workshops Mega Menu Dropdown */}
                 {isWorkshopsOpen && (
                     <div
                         className="absolute top-full left-0 right-0 w-full bg-white border-t border-b border-gray-100 shadow-2xl z-50 py-10 transition-all duration-200"
@@ -360,10 +229,10 @@ export default function Navbar() {
                     >
                         <div className="max-w-screen-2xl mx-auto px-4 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Column 1: Intro */}
-                            <div className="flex flex-col pr-6">
+                            <div className="flex flex-col pr-6 text-black">
                                 <span className="text-[#00c58d] text-sm font-bold tracking-wider uppercase block mb-1">Live Learning</span>
                                 <h2 className="text-[#1e2245] text-3xl font-black tracking-tight leading-tight mb-3">
-                                    Live Workshops
+                                    One Day Workshop
                                 </h2>
                                 <p className="text-gray-500 text-[14px] leading-relaxed mb-4">
                                     Join our expert-led live workshops with hands-on sessions, industry tools demos, and networking opportunities with professionals worldwide.
@@ -371,7 +240,7 @@ export default function Navbar() {
                             </div>
 
                             {/* Column 2-3: Dynamic Workshops */}
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 text-black">
                                 <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
                                     <RingIcon gradient="from-[#22c55e] to-[#3b82f6]" />
                                     <h3 className="text-base font-bold text-gray-900">Upcoming Workshops</h3>
@@ -380,11 +249,88 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {liveWorkshops.length > 0 ? (
-                                        liveWorkshops.map((w) => (
+                                    {liveWorkshops.filter(w => w.type !== 'three-days').length > 0 ? (
+                                        liveWorkshops.filter(w => w.type !== 'three-days').map((w) => (
                                             <Link
                                                 key={w._id}
-                                                href={`/workshops/${w.slug}`}
+                                                href={`/one-day-workshop/${w.slug}`}
+                                                className="group block p-3 -mx-1.5 rounded-lg hover:bg-slate-50 transition-all duration-150 border border-transparent hover:border-gray-100"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    {w.thumbnail ? (
+                                                        <img src={w.thumbnail} alt="" className="w-12 h-12 rounded-lg object-cover border border-gray-100 shrink-0 mt-0.5" />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-sm font-bold shrink-0 mt-0.5">
+                                                            {w.title.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <strong className="text-[#1e2245] text-[14px] font-bold group-hover:text-[#009ee3] transition-colors duration-150 block leading-snug">
+                                                            {w.title}
+                                                        </strong>
+                                                        {w.subtitle && (
+                                                            <p className="text-[12px] text-slate-500 leading-relaxed mt-1 line-clamp-2">{w.subtitle}</p>
+                                                        )}
+                                                        <div className="flex items-center gap-2 mt-1.5">
+                                                            {(w as any).batchNumber && (
+                                                                <span className="text-[9px] font-bold text-[#6366f1] bg-[#efeefc] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                                                    {(w as any).batchNumber}
+                                                                </span>
+                                                            )}
+                                                            {(w as any).startDate && (
+                                                                <span className="text-[10px] text-gray-400 font-medium">
+                                                                    Starts {new Date((w as any).startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))
+                                    ) : workshopsLoaded ? (
+                                        <p className="text-sm text-gray-400 col-span-2 py-4">No workshops available at the moment. Check back soon!</p>
+                                    ) : null}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Three Days Workshops Mega Menu Dropdown */}
+                {isThreeDaysOpen && (
+                    <div
+                        className="absolute top-full left-0 right-0 w-full bg-white border-t border-b border-gray-100 shadow-2xl z-50 py-10 transition-all duration-200"
+                        onMouseEnter={handleThreeDaysMouseEnter}
+                        onMouseLeave={handleThreeDaysMouseLeave}
+                        onClick={() => setIsThreeDaysOpen(false)}
+                    >
+                        <div className="max-w-screen-2xl mx-auto px-4 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* Column 1: Intro */}
+                            <div className="flex flex-col pr-6 text-black">
+                                <span className="text-[#00c58d] text-sm font-bold tracking-wider uppercase block mb-1">Live Learning</span>
+                                <h2 className="text-[#1e2245] text-3xl font-black tracking-tight leading-tight mb-3">
+                                    Three Days Workshops
+                                </h2>
+                                <p className="text-gray-500 text-[14px] leading-relaxed mb-4">
+                                    Join our comprehensive multi-day live workshops with deep-dive sessions, step-by-step implementations, and expert mentoring.
+                                </p>
+                            </div>
+
+                            {/* Column 2-3: Dynamic Workshops */}
+                            <div className="md:col-span-2 text-black">
+                                <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
+                                    <RingIcon gradient="from-[#22c55e] to-[#3b82f6]" />
+                                    <h3 className="text-base font-bold text-gray-900">Upcoming Workshops</h3>
+                                    {showLoader && (
+                                        <div className="ml-2 w-4 h-4 border-2 border-gray-300 border-t-[#009ee3] rounded-full animate-spin" />
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {liveWorkshops.filter(w => w.type === 'three-days').length > 0 ? (
+                                        liveWorkshops.filter(w => w.type === 'three-days').map((w) => (
+                                            <Link
+                                                key={w._id}
+                                                href={`/three-days-workshops/${w.slug}`}
                                                 className="group block p-3 -mx-1.5 rounded-lg hover:bg-slate-50 transition-all duration-150 border border-transparent hover:border-gray-100"
                                             >
                                                 <div className="flex items-start gap-3">
@@ -459,71 +405,9 @@ export default function Navbar() {
                     <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-50 w-full shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
                         <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</a>
 
-                        <button
-                            onClick={() => setIsMobileCoursesOpen(!isMobileCoursesOpen)}
-                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800"
-                        >
+                        <Link href="/courses" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">
                             COURSES
-                            <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileCoursesOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        {isMobileCoursesOpen && (
-                            <div className="pl-4 py-2 flex flex-col gap-4 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
-                                {/* Pro & Specialist */}
-                                <div>
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
-                                            <div className="w-full h-full bg-white rounded-full" />
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-900">Pro & Specialist Courses</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2 pl-5">
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
-                                            DMI Pro
-                                            <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">Popular</span>
-                                        </a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Marketing</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Strategy & Leadership</a>
-                                    </div>
-                                </div>
-                                {/* Advanced */}
-                                <div>
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#10b981] to-[#06b6d4] flex-shrink-0 flex items-center justify-center">
-                                            <div className="w-full h-full bg-white rounded-full" />
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-900">Advanced Courses</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2 pl-5">
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">DMI Expert</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Postgraduate Diploma In Digital Marketing</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Masters (MSc) In Digital Marketing</a>
-                                    </div>
-                                </div>
-                                {/* Short */}
-                                <div>
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#eab308] to-[#10b981] flex-shrink-0 flex items-center justify-center">
-                                            <div className="w-full h-full bg-white rounded-full" />
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-900">Short Courses</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2 pl-5">
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5">
-                                            Advanced AI
-                                            <span className="bg-[#e52d6a] text-white text-[9px] font-bold px-1 rounded-sm uppercase tracking-wider">NEW</span>
-                                        </a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Search Engine Optimization (SEO)</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Paid Search (PPC)</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Social Media Marketing</a>
-                                        <a href="#" className="text-xs text-gray-600 hover:text-[#009ee3]">Digital Strategy</a>
-                                        <a href="#" className="text-xs font-semibold text-[#1e2245] hover:text-[#009ee3]">More...</a>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        </Link>
 
                         <button
                             onClick={() => {
@@ -532,13 +416,13 @@ export default function Navbar() {
                             }}
                             className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
                         >
-                            LIVE WORKSHOPS
+                            ONE DAY WORKSHOP
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
                         {isMobileWorkshopsOpen && (
-                            <div className="pl-4 py-2 flex flex-col gap-3 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md">
+                            <div className="pl-4 py-2 flex flex-col gap-3 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="flex items-center gap-1.5 mb-1">
                                     <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
                                         <div className="w-full h-full bg-white rounded-full" />
@@ -549,11 +433,56 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 <div className="flex flex-col gap-2 pl-5">
-                                    {liveWorkshops.length > 0 ? (
-                                        liveWorkshops.map((w) => (
+                                    {liveWorkshops.filter(w => w.type !== 'three-days').length > 0 ? (
+                                        liveWorkshops.filter(w => w.type !== 'three-days').map((w) => (
                                             <Link
                                                 key={w._id}
-                                                href={`/workshops/${w.slug}`}
+                                                href={`/one-day-workshop/${w.slug}`}
+                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
+                                                onClick={() => setIsMenuOpen(false)}
+                                            >
+                                                {w.title}
+                                                {(w as any).batchNumber && (
+                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{(w as any).batchNumber}</span>
+                                                )}
+                                            </Link>
+                                        ))
+                                    ) : workshopsLoaded ? (
+                                        <span className="text-xs text-gray-400">No workshops available</span>
+                                    ) : null}
+                                </div>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => {
+                                setIsMobileThreeDaysOpen(!isMobileThreeDaysOpen);
+                                fetchLiveWorkshops();
+                            }}
+                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
+                        >
+                            THREE DAYS WORKSHOPS
+                            <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileThreeDaysOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        {isMobileThreeDaysOpen && (
+                            <div className="pl-4 py-2 flex flex-col gap-3 border-l border-gray-200 mt-1 mb-2 bg-gray-50/50 rounded-r-md animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <div className="w-3.5 h-3.5 rounded-full p-[2px] bg-gradient-to-r from-[#22c55e] to-[#3b82f6] flex-shrink-0 flex items-center justify-center">
+                                        <div className="w-full h-full bg-white rounded-full" />
+                                    </div>
+                                    <span className="text-xs font-bold text-gray-900">Upcoming Workshops</span>
+                                    {showLoader && (
+                                        <div className="ml-1 w-3 h-3 border-2 border-gray-300 border-t-[#009ee3] rounded-full animate-spin" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-2 pl-5">
+                                    {liveWorkshops.filter(w => w.type === 'three-days').length > 0 ? (
+                                        liveWorkshops.filter(w => w.type === 'three-days').map((w) => (
+                                            <Link
+                                                key={w._id}
+                                                href={`/three-days-workshops/${w.slug}`}
                                                 className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
                                                 onClick={() => setIsMenuOpen(false)}
                                             >

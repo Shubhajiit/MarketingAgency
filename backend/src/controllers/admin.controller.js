@@ -156,7 +156,7 @@ exports.getWorkshopRegistrations = async (req, res) => {
   try {
     const registrations = await WorkshopRegistration.find()
       .populate('userId', 'name email phoneNumber whatsappNumber avatar')
-      .populate('workshopId', 'title slug price currency')
+      .populate('workshopId', 'title slug price currency type')
       .sort({ createdAt: -1 });
 
     res.status(200).json({

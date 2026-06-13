@@ -64,9 +64,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <LayoutDashboard size={18} />
               <span>Dashboards</span>
             </Link>
-            <Link href="/admin/workshops" className={isActive('/admin/workshops') ? activeClass : inactiveClass}>
+            <Link href="/admin/one-day-workshops" className={isActive('/admin/one-day-workshops') ? activeClass : inactiveClass}>
               <BookOpen size={18} />
-              <span>Workshops</span>
+              <span>One Day Workshops</span>
+            </Link>
+            <Link href="/admin/three-days-workshops" className={isActive('/admin/three-days-workshops') ? activeClass : inactiveClass}>
+              <BookOpen size={18} />
+              <span>Three Days Workshops</span>
             </Link>
             <Link href="/admin/courses" className={isActive('/admin/courses') ? activeClass : inactiveClass}>
               <Award size={18} />

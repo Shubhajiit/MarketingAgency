@@ -5,11 +5,12 @@ const User = require('../models/User');
 // ─── Public: List all active workshops ───────────────────────
 exports.listWorkshops = async (req, res) => {
   try {
-    const { page = 1, limit = 20, tag } = req.query;
+    const { page = 1, limit = 20, tag, type } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const filter = { isActive: true };
     if (tag) filter.tags = { $in: [tag] };
+    if (type) filter.type = type;
 
     const [workshops, total] = await Promise.all([
       Workshop.find(filter)
@@ -83,6 +84,7 @@ exports.createWorkshop = async (req, res) => {
       experts, heroPoints, workshopDates, slug,
       rating1Value, rating1Count, rating1Platform,
       rating2Value, rating2Count, rating2Platform,
+      type,
     } = req.body;
 
     if (!title) {
@@ -119,6 +121,7 @@ exports.createWorkshop = async (req, res) => {
       rating2Value: rating2Value || '4.07/5',
       rating2Count: rating2Count || '(88)',
       rating2Platform: rating2Platform || 'Rating Facts',
+      type: type || 'one-day',
     };
 
     // Allow manual slug override
@@ -156,6 +159,7 @@ exports.updateWorkshop = async (req, res) => {
       'experts', 'heroPoints', 'workshopDates', 'slug',
       'rating1Value', 'rating1Count', 'rating1Platform',
       'rating2Value', 'rating2Count', 'rating2Platform',
+      'type',
     ];
 
     for (const field of allowedFields) {
@@ -203,11 +207,14 @@ exports.deleteWorkshop = async (req, res) => {
 // ─── Admin: List ALL workshops (including inactive) ───────────
 exports.adminListWorkshops = async (req, res) => {
   try {
-    const { page = 1, limit = 100 } = req.query;
+    const { page = 1, limit = 100, type } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
+    const filter = { isActive: { $ne: false } };
+    if (type) filter.type = type;
+
     const [workshops, total] = await Promise.all([
-      Workshop.find({ isActive: { $ne: false } })
+      Workshop.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))

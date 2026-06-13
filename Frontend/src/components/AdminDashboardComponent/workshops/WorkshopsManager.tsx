@@ -50,7 +50,7 @@ const defaultFormData: WorkshopFormData = {
   thumbnail: '',
   price: '0',
   originalPrice: '0',
-  priceCaption: 'Become A Python Using AI Expert Now At',
+  priceCaption: '',
   bonusDeadlineText: '',
   heroPoints: ['', '', '', ''],
   workshopDates: [],
@@ -200,7 +200,7 @@ function ImageUploadInput({
       } else {
         setError('Upload failed');
       }
-    } catch (err) {
+    } catch {
       setError('Upload failed');
     } finally {
       setUploading(false);
@@ -260,8 +260,51 @@ function ImageUploadInput({
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────────
-export default function AdminWorkshopsPage() {
+const extractDateRanges = (dates: string[]) => {
+  if (!dates || dates.length === 0) return [];
+  
+  // Sort dates ascending
+  const sortedDates = [...dates]
+    .map(d => new Date(d))
+    .sort((a, b) => a.getTime() - b.getTime());
+  
+  const ranges: { startDate: string; endDate: string }[] = [];
+  if (sortedDates.length === 0) return ranges;
+  
+  let currentStart = sortedDates[0];
+  let currentEnd = sortedDates[0];
+  
+  for (let i = 1; i < sortedDates.length; i++) {
+    const d = sortedDates[i];
+    // Check if consecutive (difference of exactly 1 day or similar, using 24h threshold)
+    const diff = d.getTime() - currentEnd.getTime();
+    const diffDays = Math.round(diff / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+      currentEnd = d;
+    } else {
+      ranges.push({
+        startDate: currentStart.toISOString().split('T')[0],
+        endDate: currentEnd.toISOString().split('T')[0]
+      });
+      currentStart = d;
+      currentEnd = d;
+    }
+  }
+  
+  ranges.push({
+    startDate: currentStart.toISOString().split('T')[0],
+    endDate: currentEnd.toISOString().split('T')[0]
+  });
+  
+  return ranges;
+};
+
+interface WorkshopsManagerProps {
+  type: 'one-day' | 'three-days';
+}
+
+export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -271,6 +314,24 @@ export default function AdminWorkshopsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
+  const [dateRanges, setDateRanges] = useState<{ startDate: string; endDate: string }[]>([]);
+
+  // Generate consecutive dates between start and end date (inclusive)
+  const generateConsecutiveDates = (start: string, end: string) => {
+    if (!start || !end) return [];
+    const dates: string[] = [];
+    const sDate = new Date(start);
+    const eDate = new Date(end);
+    if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) return [];
+    if (sDate > eDate) return [];
+
+    const current = new Date(sDate);
+    while (current <= eDate) {
+      dates.push(current.toISOString().split('T')[0]);
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  };
 
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -308,31 +369,49 @@ export default function AdminWorkshopsPage() {
     };
   }, [showModal]);
 
+  // Update workshopDates in formData when dateRanges changes (for three-days workshops)
+  useEffect(() => {
+    if (type === 'three-days') {
+      const allDates: string[] = [];
+      dateRanges.forEach((range) => {
+        const generated = generateConsecutiveDates(range.startDate, range.endDate);
+        allDates.push(...generated);
+      });
+      const uniqueDates = Array.from(new Set(allDates));
+      updateField('workshopDates', uniqueDates);
+    }
+  }, [dateRanges, type]);
+
   // Fetch workshops
   const fetchWorkshops = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await workshopApi.list({ limit: 100 });
+      const res = await workshopApi.list({ limit: 100, type });
       setWorkshops(res.data.workshops);
     } catch {
       setError('Failed to load workshops');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [type]);
 
   // Fetch registrations
   const fetchRegistrations = useCallback(async () => {
     try {
       setRegLoading(true);
       const res = await workshopApi.getWorkshopRegistrations();
-      setRegistrations(res.data.registrations);
+      // Filter registrations based on workshop type
+      const filtered = res.data.registrations.filter(r => {
+        const wType = r.workshopId?.type || (r as any).workshopType || 'one-day';
+        return wType === type;
+      });
+      setRegistrations(filtered);
     } catch {
       // silently fail
     } finally {
       setRegLoading(false);
     }
-  }, []);
+  }, [type]);
 
   useEffect(() => {
     fetchWorkshops();
@@ -348,6 +427,7 @@ export default function AdminWorkshopsPage() {
   const handleCreate = () => {
     setEditingWorkshop(null);
     setFormData(defaultFormData);
+    setDateRanges([{ startDate: '', endDate: '' }]);
     setShowModal(true);
     setError('');
   };
@@ -355,6 +435,14 @@ export default function AdminWorkshopsPage() {
   // Open edit modal
   const handleEdit = (workshop: Workshop) => {
     setEditingWorkshop(workshop);
+
+    const sortedDates = workshop.workshopDates && workshop.workshopDates.length > 0
+      ? [...workshop.workshopDates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      : [];
+    const dateStrings = sortedDates.map(d => new Date(d).toISOString().split('T')[0]);
+    const ranges = extractDateRanges(dateStrings);
+    setDateRanges(ranges.length > 0 ? ranges : [{ startDate: '', endDate: '' }]);
+
     setFormData({
       title: workshop.title || '',
       subtitle: workshop.subtitle || '',
@@ -362,7 +450,7 @@ export default function AdminWorkshopsPage() {
       thumbnail: workshop.thumbnail || '',
       price: String(workshop.price || 0),
       originalPrice: String(workshop.originalPrice || 0),
-      priceCaption: workshop.priceCaption || 'Become A Python Using AI Expert Now At',
+      priceCaption: workshop.priceCaption || '',
       bonusDeadlineText: workshop.bonusDeadlineText || '',
       heroPoints: workshop.heroPoints && workshop.heroPoints.length > 0
         ? [...workshop.heroPoints, '', '', '', ''].slice(0, 4)
@@ -417,6 +505,7 @@ export default function AdminWorkshopsPage() {
         learningOutcomes: formData.learningOutcomes.filter(p => p.trim() !== ''),
         whatYouWillLearn: formData.whatYouWillLearn.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
         courseOutcomes: formData.courseOutcomes.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
+        type, // Hardcode the type based on the page manager prop
       };
 
       if (editingWorkshop) {
@@ -467,19 +556,24 @@ export default function AdminWorkshopsPage() {
     });
   };
 
+  const managerTitle = type === 'three-days' ? 'Three Days Workshop Management' : 'One Day Workshop Management';
+  const managerDescription = type === 'three-days' 
+    ? 'Create and manage all 3-day workshops with dynamic detail pages' 
+    : 'Create and manage all 1-day workshops with dynamic detail pages';
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Workshop Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Create and manage all workshops with dynamic detail pages</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{managerTitle}</h1>
+          <p className="text-sm text-gray-500 mt-1">{managerDescription}</p>
         </div>
         {activeTab === 'workshops' && (
           <button
             onClick={handleCreate}
             id="create-workshop-btn"
-            className="flex items-center justify-center gap-2 bg-[#6366f1] hover:bg-[#5558e6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-[#6366f1]/20 hover:shadow-md hover:shadow-[#6366f1]/30 active:scale-[0.98] w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 bg-[#6366f1] hover:bg-[#5558e6] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-[#6366f1]/20 hover:shadow-md hover:shadow-[#6366f1]/30 active:scale-[0.98] w-full sm:w-auto cursor-pointer"
           >
             <Plus size={16} />
             Create Workshop
@@ -491,7 +585,7 @@ export default function AdminWorkshopsPage() {
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
         <button
           onClick={() => setActiveTab('workshops')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
             activeTab === 'workshops' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -499,7 +593,7 @@ export default function AdminWorkshopsPage() {
         </button>
         <button
           onClick={() => setActiveTab('registrations')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'registrations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -522,138 +616,135 @@ export default function AdminWorkshopsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               id="workshop-search-input"
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400 text-black"
             />
           </div>
 
           {/* Workshops Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/60">
-                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workshop</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, idx) => (
-                  <tr key={`skeleton-${idx}`} className="">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0" />
-                        <div className="space-y-2 flex-1">
-                          <div className="h-4 bg-gray-200 rounded w-48" />
-                          <div className="h-3 bg-gray-200 rounded w-16" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="h-4 bg-gray-200 rounded w-36" />
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="h-4 bg-gray-200 rounded w-24" />
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="h-4 bg-gray-200 rounded w-20" />
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="h-4 bg-gray-200 rounded w-16" />
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <div className="w-8 h-8 rounded-lg bg-gray-200" />
-                        <div className="w-8 h-8 rounded-lg bg-gray-200" />
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workshop</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Instructor</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                   </tr>
-                ))
-              ) : filteredWorkshops.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-16 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center">
-                        <Calendar size={24} className="text-gray-400" />
-                      </div>
-                      <p className="text-sm text-gray-500 font-medium">
-                        {searchQuery ? 'No workshops found matching your search' : 'No workshops yet. Create your first one!'}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredWorkshops.map((w) => (
-                  <tr
-                    key={w._id}
-                    className="hover:bg-[#f8f8ff] transition-colors group"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        {w.thumbnail ? (
-                          <img src={w.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shrink-0">
-                            {w.title.charAt(0)}
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, idx) => (
+                      <tr key={`skeleton-${idx}`} className="">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="h-4 bg-gray-200 rounded w-48" />
+                              <div className="h-3 bg-gray-200 rounded w-16" />
+                            </div>
                           </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 leading-tight">{w.title}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-36" />
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-24" />
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="h-4 bg-gray-200 rounded w-20" />
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <div className="w-8 h-8 rounded-lg bg-gray-200" />
+                            <div className="w-8 h-8 rounded-lg bg-gray-200" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : filteredWorkshops.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-16 text-center">
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center">
+                            <Calendar size={24} className="text-gray-400" />
+                          </div>
+                          <p className="text-sm text-gray-500 font-medium">
+                            {searchQuery ? 'No workshops found matching your search' : 'No workshops yet. Create your first one!'}
+                          </p>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-1.5">
-                        <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded font-mono">{w.slug || '—'}</code>
-                        {w.slug && (
-                          <a
-                            href={`/workshops/${w.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-[#6366f1] transition-colors"
-                          >
-                            <ExternalLink size={12} />
-                          </a>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-600">{w.instructor}</td>
-                    <td className="px-5 py-4">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {w.currency === 'INR' ? '₹' : w.currency === 'USD' ? '$' : w.currency === 'EUR' ? '€' : '£'}
-                        {w.price.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEdit(w)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-[#6366f1] hover:bg-[#efeefc] transition-all"
-                          title="Edit"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(w._id)}
-                          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                          title="Delete"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
-  )}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredWorkshops.map((w) => (
+                      <tr
+                        key={w._id}
+                        className="hover:bg-[#f8f8ff] transition-colors group"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            {w.thumbnail ? (
+                              <img src={w.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                {w.title.charAt(0)}
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900 leading-tight">{w.title}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-1.5">
+                            <code className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded font-mono">{w.slug || '—'}</code>
+                            {w.slug && (
+                              <a
+                                href={w.type === 'three-days' ? `/three-days-workshops/${w.slug}` : `/one-day-workshop/${w.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-400 hover:text-[#6366f1] transition-colors"
+                              >
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-600">{w.instructor}</td>
+                        <td className="px-5 py-4">
+                          <span className="text-sm font-semibold text-gray-900">
+                            {w.currency === 'INR' ? '₹' : w.currency === 'USD' ? '$' : w.currency === 'EUR' ? '€' : '£'}
+                            {w.price.toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleEdit(w)}
+                              className="p-2 rounded-lg text-gray-400 hover:text-[#6366f1] hover:bg-[#efeefc] transition-all cursor-pointer"
+                              title="Edit"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(w._id)}
+                              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ─ Registrations Tab Content ─────────────────────── */}
       {activeTab === 'registrations' && (
@@ -666,7 +757,7 @@ export default function AdminWorkshopsPage() {
               placeholder="Search registrations..."
               value={regSearch}
               onChange={(e) => setRegSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400 text-black"
             />
           </div>
 
@@ -771,7 +862,7 @@ export default function AdminWorkshopsPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
           <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full flex flex-col items-center text-center">
             <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
@@ -782,13 +873,13 @@ export default function AdminWorkshopsPage() {
             <div className="flex gap-3 w-full">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors"
+                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
                 Delete
               </button>
@@ -816,7 +907,7 @@ export default function AdminWorkshopsPage() {
             <div className="flex items-center justify-between px-7 py-5 border-b border-gray-200 bg-white shrink-0">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-                  {editingWorkshop ? 'Edit Workshop' : 'Create New Workshop'}
+                  {editingWorkshop ? 'Edit Workshop' : (type === 'three-days' ? 'Create Three Days Workshop' : 'Create One Day Workshop')}
                 </h2>
                 <p className="text-xs text-gray-500 mt-1">
                   {editingWorkshop ? 'Update workshop details and content' : 'Fill in the details to create a new workshop with a dynamic page'}
@@ -825,14 +916,14 @@ export default function AdminWorkshopsPage() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden bg-white">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden bg-white text-black">
               {/* Form Scrollable Area */}
               <div className="flex-1 overflow-y-auto p-7 md:p-10 space-y-6 w-full">
                 {error && (
@@ -843,7 +934,7 @@ export default function AdminWorkshopsPage() {
                 )}
 
                 {/* Basic Information */}
-                <CollapsibleSection title="📋 Basic Information">
+                <CollapsibleSection title="📋 Basic Information" defaultOpen={true}>
                   <div className="space-y-4">
                     <FormInput
                       label="Workshop Title"
@@ -988,46 +1079,128 @@ export default function AdminWorkshopsPage() {
 
                 {/* Workshop Dates */}
                 <CollapsibleSection title="📅 Workshop Dates">
-                  <div className="space-y-4">
-                    <span className="text-xs text-gray-500 font-medium block">
-                      Add the dates when this workshop is held. These will display in the calendar selector on the details page.
-                    </span>
-                    <div className="space-y-3">
-                      {formData.workshopDates.map((dateStr, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <input
-                            type="date"
-                            value={dateStr}
-                            onChange={(e) => {
-                              const updated = [...formData.workshopDates];
-                              updated[idx] = e.target.value;
-                              updateField('workshopDates', updated);
-                            }}
-                            className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = [...formData.workshopDates];
-                              updated.splice(idx, 1);
-                              updateField('workshopDates', updated);
-                            }}
-                            className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
-                          >
-                            Remove
-                          </button>
+                  <div className="space-y-4 text-black">
+                    {type === 'three-days' ? (
+                      <>
+                        <span className="text-xs text-gray-500 font-medium block">
+                          Select the Start Date and End Date. The system will automatically generate consecutive dates for the 3-day workshop.
+                        </span>
+                        <div className="space-y-4">
+                          {dateRanges.map((range, idx) => (
+                            <div key={idx} className="border border-gray-200 rounded-xl p-4 space-y-4 bg-gray-50/30 relative">
+                              {dateRanges.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...dateRanges];
+                                    updated.splice(idx, 1);
+                                    setDateRanges(updated);
+                                  }}
+                                  className="absolute top-2 right-2 text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 px-2.5 py-1.5 rounded-lg border-0 cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block mb-1">Start Date</label>
+                                  <input
+                                    type="date"
+                                    value={range.startDate}
+                                    onChange={(e) => {
+                                      const updated = [...dateRanges];
+                                      updated[idx] = { ...updated[idx], startDate: e.target.value };
+                                      setDateRanges(updated);
+                                    }}
+                                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white text-black"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block mb-1">End Date</label>
+                                  <input
+                                    type="date"
+                                    value={range.endDate}
+                                    onChange={(e) => {
+                                      const updated = [...dateRanges];
+                                      updated[idx] = { ...updated[idx], endDate: e.target.value };
+                                      setDateRanges(updated);
+                                    }}
+                                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white text-black"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        updateField('workshopDates', [...formData.workshopDates, '']);
-                      }}
-                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
-                    >
-                      + Add Date
-                    </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDateRanges([...dateRanges, { startDate: '', endDate: '' }]);
+                          }}
+                          className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer mt-3"
+                        >
+                          + Add Dates Section
+                        </button>
+
+                        {formData.workshopDates.length > 0 && (
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-3">
+                            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">
+                              Generated Dates:
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {formData.workshopDates.map((dateStr, idx) => (
+                                <span key={idx} className="bg-white border border-slate-200 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg">
+                                  📅 {dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xs text-gray-500 font-medium block">
+                          Add the dates when this workshop is held. These will display in the calendar selector on the details page.
+                        </span>
+                        <div className="space-y-3">
+                          {formData.workshopDates.map((dateStr, idx) => (
+                            <div key={idx} className="flex items-center gap-3">
+                              <input
+                                type="date"
+                                value={dateStr}
+                                onChange={(e) => {
+                                  const updated = [...formData.workshopDates];
+                                  updated[idx] = e.target.value;
+                                  updateField('workshopDates', updated);
+                                }}
+                                className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...formData.workshopDates];
+                                  updated.splice(idx, 1);
+                                  updateField('workshopDates', updated);
+                                }}
+                                className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateField('workshopDates', [...formData.workshopDates, '']);
+                          }}
+                          className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
+                        >
+                          + Add Date
+                        </button>
+                      </>
+                    )}
                   </div>
                 </CollapsibleSection>
 
@@ -1090,7 +1263,7 @@ export default function AdminWorkshopsPage() {
                                 updated.splice(idx, 1);
                                 updateField('learningOutcomes', updated);
                               }}
-                              className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                              className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
                             >
                               Remove
                             </button>
@@ -1102,7 +1275,7 @@ export default function AdminWorkshopsPage() {
                         onClick={() => {
                           updateField('learningOutcomes', [...formData.learningOutcomes, '']);
                         }}
-                        className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                        className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
                       >
                         + Add Outcome Point
                       </button>
@@ -1130,7 +1303,7 @@ export default function AdminWorkshopsPage() {
                                 updated.splice(idx, 1);
                                 updateField('whatYouWillLearn', updated);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
                             >
                               Remove Step
                             </button>
@@ -1166,7 +1339,7 @@ export default function AdminWorkshopsPage() {
                       onClick={() => {
                         updateField('whatYouWillLearn', [...formData.whatYouWillLearn, { title: '', description: '' }]);
                       }}
-                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
                     >
                       + Add Step
                     </button>
@@ -1193,7 +1366,7 @@ export default function AdminWorkshopsPage() {
                                 updated.splice(idx, 1);
                                 updateField('courseOutcomes', updated);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98]"
+                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
                             >
                               Remove Outcome
                             </button>
@@ -1238,7 +1411,7 @@ export default function AdminWorkshopsPage() {
                       onClick={() => {
                         updateField('courseOutcomes', [...(formData.courseOutcomes || []), { title: '', description: '', image: '' }]);
                       }}
-                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
                     >
                       + Add Outcome Card
                     </button>
@@ -1251,7 +1424,7 @@ export default function AdminWorkshopsPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all"
+                  className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 active:scale-[0.98] transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1259,7 +1432,7 @@ export default function AdminWorkshopsPage() {
                   type="submit"
                   disabled={submitting}
                   id="workshop-submit-btn"
-                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 px-8 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 active:scale-[0.98] cursor-pointer"
                 >
                   {submitting && <Loader2 size={14} className="animate-spin" />}
                   {editingWorkshop ? 'Update Workshop' : 'Create Workshop'}

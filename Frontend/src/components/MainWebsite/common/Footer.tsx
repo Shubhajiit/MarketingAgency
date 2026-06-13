@@ -11,7 +11,7 @@ export default function Footer() {
     const [subscribed, setSubscribed] = React.useState(false);
 
     // Hide footer on workshop detail pages
-    if (pathname?.startsWith("/workshops/")) {
+    if (pathname?.startsWith("/workshops/") || pathname?.startsWith("/one-day-workshop/") || pathname?.startsWith("/three-days-workshops/")) {
         return null;
     }
 
