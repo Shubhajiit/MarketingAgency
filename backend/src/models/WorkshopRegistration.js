@@ -23,6 +23,8 @@ const workshopRegistrationSchema = new mongoose.Schema(
     email: { type: String, required: true },
     phone: { type: String, required: true },
     whatsappNumber: { type: String, default: '' },
+    age: { type: String, default: '' },
+    profession: { type: String, default: '' },
 
     // Selected workshop date
     selectedDate: { type: Date, required: true },
@@ -33,9 +35,11 @@ const workshopRegistrationSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],
-      default: 'paid',
+      default: 'pending',
     },
-    paymentId: { type: String, default: '' }, // Razorpay payment ID (for future)
+    paymentId: { type: String, default: '' },           // Razorpay payment ID
+    razorpayOrderId: { type: String, default: '' },     // Razorpay order ID
+    razorpaySignature: { type: String, default: '' },   // Razorpay signature for audit
 
     // Extra
     notes: { type: String, default: '' },
@@ -46,5 +50,6 @@ const workshopRegistrationSchema = new mongoose.Schema(
 // Indexes for quick admin lookups
 workshopRegistrationSchema.index({ workshopId: 1, createdAt: -1 });
 workshopRegistrationSchema.index({ userId: 1 });
+workshopRegistrationSchema.index({ razorpayOrderId: 1 });
 
 module.exports = mongoose.model('WorkshopRegistration', workshopRegistrationSchema);

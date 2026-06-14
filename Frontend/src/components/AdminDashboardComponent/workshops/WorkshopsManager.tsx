@@ -821,6 +821,12 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                               {r.whatsappNumber && (
                                 <span className="text-xs text-gray-500">WhatsApp: {r.whatsappNumber}</span>
                               )}
+                              {r.age && (
+                                <span className="text-xs text-gray-500">Age: {r.age}</span>
+                              )}
+                              {r.profession && (
+                                <span className="text-xs text-gray-500">Profession: {r.profession}</span>
+                              )}
                             </div>
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-600 font-medium">

@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
 import { X } from 'lucide-react';
+import Link from 'next/link';
 
 interface FormState {
   firstName: string;
@@ -71,14 +72,14 @@ const formatThreeDaysRange = (dateVal: string | Date | null) => {
 
 const getCohortStartDates = (dates: (string | Date)[]) => {
   if (!dates || dates.length === 0) return [];
-  
+
   // Parse all dates and sort them ascending
   const sortedDates = dates
     .map(d => new Date(d))
     .sort((a, b) => a.getTime() - b.getTime());
-  
+
   const startDates: string[] = [];
-  
+
   for (let i = 0; i < sortedDates.length; i++) {
     const currentDate = sortedDates[i];
     if (startDates.length === 0) {
@@ -87,13 +88,13 @@ const getCohortStartDates = (dates: (string | Date)[]) => {
       const prevStartDate = new Date(startDates[startDates.length - 1]);
       const diffTime = currentDate.getTime() - prevStartDate.getTime();
       const diffDays = diffTime / (1000 * 60 * 60 * 24);
-      
+
       if (diffDays > 2.5) {
         startDates.push(currentDate.toISOString());
       }
     }
   }
-  
+
   return startDates;
 };
 
@@ -330,7 +331,7 @@ function ThreeDaysWorkshopsContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const isCheckout = searchParams ? searchParams.get('checkout') === 'true' : false;
-  const { user, isAuthenticated, login, register } = useAuth();
+  const { user, isAuthenticated, login, register, checkAuth } = useAuth();
 
   const slug = typeof params?.slug === 'string' ? params.slug : '';
 
@@ -338,6 +339,10 @@ function ThreeDaysWorkshopsContent() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  const isRegistered = isAuthenticated && user?.enrolledWorkshops?.some(
+    (w: any) => typeof w === 'string' ? w === workshop?._id : w?._id === workshop?._id
+  );
 
   // ─── Date Selection ──────────────────────────────────────────
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -361,7 +366,9 @@ function ThreeDaysWorkshopsContent() {
   const [bookingEmail, setBookingEmail] = useState('');
   const [bookingPhone, setBookingPhone] = useState('');
   const [bookingWhatsapp, setBookingWhatsapp] = useState('');
-  const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean }>({});
+  const [bookingAge, setBookingAge] = useState('');
+  const [bookingProfession, setBookingProfession] = useState('');
+  const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean }>({});
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'success'>('form');
@@ -542,11 +549,13 @@ function ThreeDaysWorkshopsContent() {
   // Booking form validation & submission
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean } = {};
+    const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean } = {};
     if (!bookingName.trim()) errs.name = true;
     if (!bookingEmail.trim() || !/\S+@\S+\.\S+/.test(bookingEmail)) errs.email = true;
     if (!bookingPhone.trim() || !/^\d{7,15}$/.test(bookingPhone.replace(/[\s\-()]/g, ''))) errs.phone = true;
     if (!bookingWhatsapp.trim() || !/^\d{7,15}$/.test(bookingWhatsapp.replace(/[\s\-()]/g, ''))) errs.whatsapp = true;
+    if (!bookingAge) errs.age = true;
+    if (!bookingProfession) errs.profession = true;
     setBookingErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -562,8 +571,13 @@ function ThreeDaysWorkshopsContent() {
         phone: bookingPhone.trim(),
         whatsappNumber: bookingWhatsapp.trim(),
         selectedDate: selectedDate || new Date().toISOString(),
+        age: bookingAge,
+        profession: bookingProfession,
       });
 
+      if (checkAuth) {
+        await checkAuth();
+      }
       setPaymentStep('success');
     } catch {
       setPaymentStep('form');
@@ -757,8 +771,9 @@ function ThreeDaysWorkshopsContent() {
                   </label>
                   <select
                     required
-                    defaultValue=""
-                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                    value={bookingAge}
+                    onChange={e => { setBookingAge(e.target.value); setBookingErrors(p => ({ ...p, age: false })); }}
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl bg-white focus:outline-none focus:border-black transition-colors ${bookingErrors.age ? 'border-red-400 focus:border-red-500' : 'border-gray-200'}`}
                   >
                     <option value="" disabled className="text-gray-400">Select your age group</option>
                     <option value="Under 18" className="text-black">Under 18</option>
@@ -768,6 +783,7 @@ function ThreeDaysWorkshopsContent() {
                     <option value="45-54" className="text-black">45-54</option>
                     <option value="55+" className="text-black">55+</option>
                   </select>
+                  {bookingErrors.age && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
                 </div>
 
                 <div className="flex flex-col gap-1 text-left">
@@ -776,8 +792,9 @@ function ThreeDaysWorkshopsContent() {
                   </label>
                   <select
                     required
-                    defaultValue=""
-                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                    value={bookingProfession}
+                    onChange={e => { setBookingProfession(e.target.value); setBookingErrors(p => ({ ...p, profession: false })); }}
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl bg-white focus:outline-none focus:border-black transition-colors ${bookingErrors.profession ? 'border-red-400 focus:border-red-500' : 'border-gray-200'}`}
                   >
                     <option value="" disabled className="text-gray-400">Select your profession</option>
                     <option value="Student" className="text-black">Student</option>
@@ -786,6 +803,7 @@ function ThreeDaysWorkshopsContent() {
                     <option value="Business Owner / Entrepreneur" className="text-black">Business Owner / Entrepreneur</option>
                     <option value="Others" className="text-black">Others</option>
                   </select>
+                  {bookingErrors.profession && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
                 </div>
 
                 <button
@@ -953,45 +971,58 @@ function ThreeDaysWorkshopsContent() {
                 })()}
 
                 {/* Yellow Button & Deadline Group */}
-                <div className="flex flex-col items-center w-full">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all hover:brightness-105 flex flex-col items-center justify-center gap-1 cursor-pointer text-center border-0"
-                    style={{ backgroundImage: 'linear-gradient(157deg, #F2E829 0%, #FDBD1A 100%)' }}
-                  >
-                    <span className="font-semibold text-sm md:text-[17px] tracking-tight">
-                      {workshop.priceCaption || "Pay"}
-                    </span>
-                    <span className="flex items-center gap-2 whitespace-nowrap">
-                      <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
-                        ₹{workshop.originalPrice || 1999}
-                      </span>
-                      <span className="text-gray-900 text-lg md:text-xl font-semibold">
-                        ₹{workshop.price || 199}/-
-                      </span>
-                    </span>
-                  </button>
-
-                  {workshop.bonusDeadlineText && (
-                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                      {workshop.bonusDeadlineText}
-                    </p>
-                  )}
-
-                  <div className="mt-7 w-full flex flex-col items-center">
-                    <button
-                      onClick={() => setShowDatePickerModal(true)}
-                      className="w-full max-w-[280px] bg-white hover:bg-gray-50 border-2 border-dashed border-[#0052FF] text-[#0052FF] hover:text-[#0040D9] font-extrabold py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer text-sm tracking-wide"
+                {isRegistered ? (
+                  <div className="flex flex-col items-center justify-center py-6 px-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl shadow-sm text-center w-full">
+                    <img src="/WorkshopHeroTick/check-mark.png" alt="Success" className="w-12 h-12 object-contain mb-3" />
+                    <span className="text-xl font-bold text-gray-900 tracking-tight">Successfully Registered</span>
+                    <Link
+                      href="/dashboard/workshops"
+                      className="text-[#0052FF] hover:text-[#0040D9] font-bold text-sm tracking-wide mt-2 hover:underline inline-block"
                     >
-                      <img src="/Dates/calendar.png" alt="calendar" className="w-5 h-5 object-contain" />
-                      {selectedDate ? (
-                        <span>Date: {formatThreeDaysRange(selectedDate)}</span>
-                      ) : (
-                        <span>Select Date</span>
-                      )}
-                    </button>
+                      View Details
+                    </Link>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center w-full">
+                    <button
+                      onClick={handlePriceButtonClick}
+                      className="w-full active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all hover:brightness-105 flex flex-col items-center justify-center gap-1 cursor-pointer text-center border-0"
+                      style={{ backgroundImage: 'linear-gradient(157deg, #F2E829 0%, #FDBD1A 100%)' }}
+                    >
+                      <span className="font-semibold text-sm md:text-[17px] tracking-tight">
+                        {workshop.priceCaption || "Pay"}
+                      </span>
+                      <span className="flex items-center gap-2 whitespace-nowrap">
+                        <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
+                          ₹{workshop.originalPrice || 1999}
+                        </span>
+                        <span className="text-gray-900 text-lg md:text-xl font-semibold">
+                          ₹{workshop.price || 199}/-
+                        </span>
+                      </span>
+                    </button>
+
+                    {workshop.bonusDeadlineText && (
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
+                        {workshop.bonusDeadlineText}
+                      </p>
+                    )}
+
+                    <div className="mt-7 w-full flex flex-col items-center">
+                      <button
+                        onClick={() => setShowDatePickerModal(true)}
+                        className="w-full max-w-[280px] bg-white hover:bg-gray-50 border-2 border-dashed border-[#0052FF] text-[#0052FF] hover:text-[#0040D9] font-extrabold py-3.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer text-sm tracking-wide"
+                      >
+                        <img src="/Dates/calendar.png" alt="calendar" className="w-5 h-5 object-contain" />
+                        {selectedDate ? (
+                          <span>Date: {formatThreeDaysRange(selectedDate)}</span>
+                        ) : (
+                          <span>Select Date</span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1038,22 +1069,31 @@ function ThreeDaysWorkshopsContent() {
 
             {/* Blue Registration CTA Button */}
             <div className="max-w-2xl w-full mx-auto mt-4 mb-6 z-10 px-4">
-              <button
-                onClick={handlePriceButtonClick}
-                className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
-              >
-                <span className="font-semibold leading-tight">
-                  {workshop.priceCaption || "Pay"}
-                </span>
-                <span className="flex items-center gap-1.5 whitespace-nowrap">
-                  <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
-                    ₹{workshop.originalPrice || 1999}
+              {isRegistered ? (
+                <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                  <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                  <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                    View Details
+                  </Link>
+                </div>
+              ) : (
+                <button
+                  onClick={handlePriceButtonClick}
+                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                >
+                  <span className="font-semibold leading-tight">
+                    {workshop.priceCaption || "Pay"}
                   </span>
-                  <span className="text-white text-base md:text-xl font-black">
-                    ₹{workshop.price || 199}/-
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
+                      ₹{workshop.originalPrice || 1999}
+                    </span>
+                    <span className="text-white text-base md:text-xl font-black">
+                      ₹{workshop.price || 199}/-
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              )}
             </div>
 
             {/* Natural Wavy SVG Separator */}
@@ -1285,20 +1325,31 @@ function ThreeDaysWorkshopsContent() {
 
                 {/* Blue CTA Button */}
                 <div className="max-w-2xl w-full mx-auto z-10 px-4">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
-                  >
-                    <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
-                      <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
-                    </span>
-                  </button>
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handlePriceButtonClick}
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                      >
+                        <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
+                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                        </span>
+                      </button>
 
-                  <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                    {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
-                  </p>
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                        {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -1342,20 +1393,31 @@ function ThreeDaysWorkshopsContent() {
 
                 {/* Blue CTA Button */}
                 <div className="max-w-2xl w-full mx-auto z-10 px-4">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
-                  >
-                    <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
-                      <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
-                    </span>
-                  </button>
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handlePriceButtonClick}
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                      >
+                        <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
+                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                        </span>
+                      </button>
 
-                  <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                    {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
-                  </p>
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                        {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -1364,7 +1426,7 @@ function ThreeDaysWorkshopsContent() {
       </main>
 
       {/* Sticky Bottom Bar */}
-      {showStickyBar && workshop && !isCheckout && (
+      {showStickyBar && workshop && !isCheckout && !isRegistered && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-40 bg-[#eef9ff]/95 backdrop-blur-md border-t border-blue-100 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 ease-in-out transform translate-y-0 opacity-100`}
           style={{

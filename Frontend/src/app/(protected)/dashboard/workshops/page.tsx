@@ -2,8 +2,100 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function WorkshopsPage() {
+  const { user } = useAuth();
+  const enrolledWorkshops = (user?.enrolledWorkshops || []).filter(
+    (w: any) => w && typeof w === 'object' && w.title
+  );
+
+  if (enrolledWorkshops.length > 0) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 font-sans pt-6">
+        {/* Title */}
+        <div className="border-b border-slate-200 pb-4 w-full">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            My Enrolled Workshops
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Access your registered interactive learning sessions
+          </p>
+        </div>
+
+        {/* Workshop Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {enrolledWorkshops.map((workshop: any) => {
+            const isThreeDays = workshop.type === 'three-days';
+            const href = isThreeDays
+              ? `/three-days-workshops/${workshop.slug}`
+              : `/one-day-workshop/${workshop.slug}`;
+
+            return (
+              <div
+                key={workshop._id || workshop.id}
+                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+              >
+                {/* Thumbnail */}
+                <div className="aspect-[16/9] w-full overflow-hidden relative bg-slate-100">
+                  <img
+                    src={workshop.thumbnail || "https://res.cloudinary.com/dppgindsc/image/upload/v1780774475/workshops/lqcuatyi3elxhrqbtkdn.png"}
+                    alt={workshop.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <span className="absolute top-3 right-3 bg-indigo-600 text-white font-bold text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
+                    {isThreeDays ? '3-Day' : '1-Day'}
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3
+                      className="text-base font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors mb-2 line-clamp-2"
+                      dangerouslySetInnerHTML={{ __html: workshop.title }}
+                    />
+                    {workshop.subtitle && (
+                      <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-4 leading-relaxed">
+                        {workshop.subtitle}
+                      </p>
+                    )}
+                    {workshop.instructor && (
+                      <div className="flex items-center gap-2 mb-4">
+                        {workshop.instructorImage ? (
+                          <img
+                            src={workshop.instructorImage}
+                            alt={workshop.instructor}
+                            className="w-6 h-6 rounded-full object-cover border border-slate-200"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                            {workshop.instructor.charAt(0)}
+                          </div>
+                        )}
+                        <span className="text-xs text-slate-700 font-semibold">
+                          {workshop.instructor}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href={href}
+                    className="w-full text-center py-2.5 px-4 bg-[#1b2a60] hover:bg-[#15204a] text-white text-xs font-bold rounded-lg shadow-sm transition-colors mt-auto inline-block"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Existing/Empty state
   return (
     <div className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 select-none">
       {/* Lamp SVG Illustration */}

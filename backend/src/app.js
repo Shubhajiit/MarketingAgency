@@ -6,6 +6,7 @@ const adminRoutes = require('./routes/admin.routes');
 const workshopRoutes = require('./routes/workshop.routes');
 const courseRoutes = require('./routes/course.routes');
 const userRoutes = require('./routes/user.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 const path = require('path');
 
@@ -23,6 +24,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/workshops', workshopRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.json({

@@ -244,7 +244,7 @@ exports.adminListWorkshops = async (req, res) => {
 exports.registerForWorkshop = async (req, res) => {
   try {
     const { id } = req.params; // workshop _id
-    const { name, email, phone, whatsappNumber, selectedDate } = req.body;
+    const { name, email, phone, whatsappNumber, selectedDate, age, profession } = req.body;
 
     // Validate required fields
     if (!name || !email || !phone || !selectedDate) {
@@ -289,6 +289,8 @@ exports.registerForWorkshop = async (req, res) => {
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       whatsappNumber: (whatsappNumber || '').trim(),
+      age: (age || '').trim(),
+      profession: (profession || '').trim(),
       selectedDate: new Date(selectedDate),
       amountPaid: workshop.price || 0,
       currency: workshop.currency || 'INR',

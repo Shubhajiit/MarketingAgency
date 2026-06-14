@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
+import Link from 'next/link';
 
 interface FormState {
   firstName: string;
@@ -187,12 +188,16 @@ export default function DynamicWorkshopPage() {
   const searchParams = useSearchParams();
   const isCheckout = searchParams ? searchParams.get('checkout') === 'true' : false;
   const slug = typeof params.slug === 'string' ? params.slug : '';
-  const { user, isAuthenticated, login, register } = useAuth();
+  const { user, isAuthenticated, login, register, checkAuth } = useAuth();
 
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  const isRegistered = isAuthenticated && user?.enrolledWorkshops?.some(
+    (w: any) => typeof w === 'string' ? w === workshop?._id : w?._id === workshop?._id
+  );
 
   // ─── Date Selection ──────────────────────────────────────────
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -215,10 +220,14 @@ export default function DynamicWorkshopPage() {
   const [bookingEmail, setBookingEmail] = useState('');
   const [bookingPhone, setBookingPhone] = useState('');
   const [bookingWhatsapp, setBookingWhatsapp] = useState('');
-  const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean }>({});
+  const [bookingAge, setBookingAge] = useState('');
+  const [bookingProfession, setBookingProfession] = useState('');
+  const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean }>({});
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'success'>('form');
+  const [paymentStep, setPaymentStep] = useState<'form' | 'confirm' | 'paying' | 'success'>('form');
+  const [registrationId, setRegistrationId] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState('');
 
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
@@ -573,10 +582,10 @@ Email: contact@aiscale.com
     }
   };
 
-  // Booking form validation & submission
+  // Booking form validation & submission — now shows confirmation popup
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean } = {};
+    const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean } = {};
     if (!bookingName.trim()) errs.name = true;
     if (!bookingEmail.trim() || !/\S+@\S+\.\S+/.test(bookingEmail)) errs.email = true;
     if (!bookingPhone.trim() || !/^\d{7,15}$/.test(bookingPhone.replace(/[\s\-()]/g, ''))) errs.phone = true;
@@ -584,26 +593,118 @@ Email: contact@aiscale.com
     setBookingErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
+    // Show confirmation popup
+    setPaymentError('');
+    setPaymentStep('confirm');
+  };
+
+  // Load Razorpay script dynamically
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Called when user confirms in the confirmation popup
+  const handleConfirmPayment = async () => {
     setBookingSubmitting(true);
     setPaymentStep('paying');
+    setPaymentError('');
 
     try {
-      // Simulate payment processing (1.5s), then register
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 1. Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        setPaymentError('Failed to load payment gateway. Please check your internet connection.');
+        setPaymentStep('form');
+        setBookingSubmitting(false);
+        return;
+      }
 
-      await workshopApi.registerForWorkshop(workshop!._id, {
+      // 2. Create order on backend
+      const orderRes = await workshopApi.createPaymentOrder({
+        workshopId: workshop!._id,
         name: bookingName.trim(),
         email: bookingEmail.trim(),
         phone: bookingPhone.trim(),
         whatsappNumber: bookingWhatsapp.trim(),
         selectedDate: selectedDate || new Date().toISOString(),
+        age: bookingAge || undefined,
+        profession: bookingProfession || undefined,
       });
 
-      setPaymentStep('success');
+      const { orderId, amount, currency, registrationId: regId, keyId } = orderRes.data;
+      setRegistrationId(regId);
+
+      // 3. Open Razorpay checkout
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: 'AI Scale',
+        description: workshop!.title,
+        order_id: orderId,
+        prefill: {
+          name: bookingName.trim(),
+          email: bookingEmail.trim(),
+          contact: bookingPhone.trim(),
+        },
+        theme: {
+          color: '#0052FF',
+        },
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          try {
+            // 4. Verify payment on backend
+            await workshopApi.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              registrationId: regId,
+            });
+            if (checkAuth) {
+              await checkAuth();
+            }
+            setPaymentStep('success');
+          } catch {
+            setPaymentError('Payment verification failed. Please contact support.');
+            setPaymentStep('form');
+          } finally {
+            setBookingSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            // User closed Razorpay without paying
+            try {
+              await workshopApi.markPaymentFailed(regId);
+            } catch { /* silent */ }
+            setPaymentStep('form');
+            setBookingSubmitting(false);
+          },
+        },
+      };
+
+      const razorpayInstance = new (window as any).Razorpay(options);
+      razorpayInstance.on('payment.failed', async () => {
+        try {
+          await workshopApi.markPaymentFailed(regId);
+        } catch { /* silent */ }
+        setPaymentError('Payment failed. Please try again.');
+        setPaymentStep('form');
+        setBookingSubmitting(false);
+      });
+      razorpayInstance.open();
     } catch (err: any) {
+      setPaymentError(err?.response?.data?.message || 'Failed to initiate payment. Please try again.');
       setPaymentStep('form');
-      setAuthError('Registration failed. Please try again.');
-    } finally {
       setBookingSubmitting(false);
     }
   };
@@ -700,15 +801,61 @@ Email: contact@aiscale.com
                 <div className="w-20 h-20 rounded-full bg-blue-50 border-4 border-blue-100 flex items-center justify-center mb-6">
                   <svg className="animate-spin w-10 h-10 text-[#0052FF]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Processing Payment...</h3>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Opening Payment Gateway...</h3>
                 <p className="text-gray-400 text-sm font-medium">Please wait, do not close this window</p>
                 <div className="mt-6 w-full bg-gray-50 rounded-xl p-4 text-left">
                   <div className="flex justify-between text-sm font-semibold text-gray-700 mb-1"><span>{workshop.title}</span><span>₹{workshop.price?.toLocaleString('en-IN')}</span></div>
                   <div className="flex justify-between text-xs text-gray-400"><span>Selected Date</span><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span></div>
                 </div>
               </div>
+            ) : paymentStep === 'confirm' ? (
+              <div className="p-6 md:p-8 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-50 border-4 border-amber-100 flex items-center justify-center mb-5">
+                  <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Confirm Your Booking</h3>
+                <p className="text-gray-400 text-sm font-medium mb-5">Please review your details before proceeding to payment</p>
+                <div className="w-full bg-gray-50 rounded-xl p-4 text-left mb-4 space-y-2">
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Name</span><span className="font-semibold text-gray-900">{bookingName}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Email</span><span className="font-semibold text-gray-900">{bookingEmail}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Phone</span><span className="font-semibold text-gray-900">{bookingPhone}</span></div>
+                  {bookingAge && <div className="flex justify-between text-sm"><span className="text-gray-500">Age</span><span className="font-semibold text-gray-900">{bookingAge}</span></div>}
+                  {bookingProfession && <div className="flex justify-between text-sm"><span className="text-gray-500">Profession</span><span className="font-semibold text-gray-900">{bookingProfession}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Workshop</span><span className="font-semibold text-gray-900 text-right max-w-[60%]">{workshop.title}</span></div>
+                  {selectedDate && <div className="flex justify-between text-sm"><span className="text-gray-500">Date</span><span className="font-semibold text-gray-900">{new Date(selectedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Workshop Fee</span><span className="font-semibold text-gray-900">₹{workshop.price?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">GST (18%)</span><span className="font-semibold text-gray-900">₹{Math.round((workshop.price || 0) * 0.18).toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm font-bold pt-1 border-t border-gray-200"><span className="text-gray-900">Total</span><span className="text-green-600">₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}</span></div>
+                </div>
+                <div className="flex gap-3 w-full">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStep('form')}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    ← Go Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmPayment}
+                    disabled={bookingSubmitting}
+                    className="flex-[2] py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    Confirm & Pay ₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}
+                  </button>
+                </div>
+              </div>
             ) : (
               <form onSubmit={handleBookingSubmit} className="p-5 md:p-6 flex flex-col gap-3">
+                {paymentError && (
+                  <div className="w-full bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 font-medium flex items-center gap-2">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                    {paymentError}
+                  </div>
+                )}
                 <div className="flex flex-col gap-1 text-left">
                   <label className="text-[11px] font-bold text-gray-800 tracking-wide">
                     Full Name <span className="text-red-500">*</span>
@@ -796,8 +943,9 @@ Email: contact@aiscale.com
                   </label>
                   <select
                     required
-                    defaultValue=""
-                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                    value={bookingAge}
+                    onChange={e => { setBookingAge(e.target.value); setBookingErrors(p => ({ ...p, age: false })); }}
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl bg-white focus:outline-none focus:border-black transition-colors ${bookingErrors.age ? 'border-red-400 focus:border-red-500' : 'border-gray-200'}`}
                   >
                     <option value="" disabled className="text-gray-400">Select your age group</option>
                     <option value="Under 18" className="text-black">Under 18</option>
@@ -807,6 +955,7 @@ Email: contact@aiscale.com
                     <option value="45-54" className="text-black">45-54</option>
                     <option value="55+" className="text-black">55+</option>
                   </select>
+                  {bookingErrors.age && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
                 </div>
 
                 <div className="flex flex-col gap-1 text-left">
@@ -815,8 +964,9 @@ Email: contact@aiscale.com
                   </label>
                   <select
                     required
-                    defaultValue=""
-                    className="w-full text-sm text-black px-4 py-2.5 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-black transition-colors"
+                    value={bookingProfession}
+                    onChange={e => { setBookingProfession(e.target.value); setBookingErrors(p => ({ ...p, profession: false })); }}
+                    className={`w-full text-sm text-black px-4 py-2.5 border rounded-xl bg-white focus:outline-none focus:border-black transition-colors ${bookingErrors.profession ? 'border-red-400 focus:border-red-500' : 'border-gray-200'}`}
                   >
                     <option value="" disabled className="text-gray-400">Select your profession</option>
                     <option value="Student" className="text-black">Student</option>
@@ -825,6 +975,7 @@ Email: contact@aiscale.com
                     <option value="Business Owner / Entrepreneur" className="text-black">Business Owner / Entrepreneur</option>
                     <option value="Others" className="text-black">Others</option>
                   </select>
+                  {bookingErrors.profession && <p className="text-[10px] text-red-500 font-semibold">⚠️ Required</p>}
                 </div>
 
                 <button
@@ -992,84 +1143,97 @@ Email: contact@aiscale.com
                 })()}
 
                 {/* Yellow Button & Deadline Group */}
-                <div className="flex flex-col items-center w-full">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all hover:brightness-105 flex flex-col items-center justify-center gap-1 cursor-pointer text-center border-0"
-                    style={{ backgroundImage: 'linear-gradient(157deg, #F2E829 0%, #FDBD1A 100%)' }}
-                  >
-                    <span className="font-semibold text-sm md:text-[17px] tracking-tight">
-                      {(workshop as any).priceCaption || "Pay"}
-                    </span>
-                    <span className="flex items-center gap-2 whitespace-nowrap">
-                      <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
-                        ₹{(workshop as any).originalPrice || 1999}
-                      </span>
-                      <span className="text-gray-900 text-lg md:text-xl font-semibold">
-                        ₹{workshop.price || 199}/-
-                      </span>
-                    </span>
-                  </button>
-
-                  {(workshop as any).bonusDeadlineText && (
-                    <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                      {(workshop as any).bonusDeadlineText}
-                    </p>
-                  )}
-
-                  <div className="mt-7 w-full flex flex-col items-center">
-                    <h4 className="text-sm md:text-base font-extrabold text-gray-900 tracking-wide uppercase mb-3 border-b-2 border-[#0052FF] pb-1">
-                      Held On
-                    </h4>
-                    {(() => {
-                      const datesList = (workshop as any).workshopDates && (workshop as any).workshopDates.length > 0
-                        ? (workshop as any).workshopDates
-                        : [
-                          new Date('2026-06-03T10:00:00Z'),
-                          new Date('2026-06-04T10:00:00Z'),
-                          new Date('2026-06-05T10:00:00Z')
-                        ];
-                      const gridColsClass = datesList.length === 1
-                        ? 'grid-cols-1 max-w-[150px]'
-                        : datesList.length === 2
-                          ? 'grid-cols-2 max-w-[320px]'
-                          : 'grid-cols-3 max-w-[490px]';
-
-                      return (
-                        <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
-                          {datesList.map((dateVal: string | Date, idx: number) => {
-                            const dateObj = new Date(dateVal);
-                            const isoStr = dateObj.toISOString();
-                            const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                            const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-                            const isSelected = selectedDate === isoStr;
-
-                            return (
-                              <div
-                                key={idx}
-                                onClick={() => setSelectedDate(isoStr)}
-                                className={`w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-4 py-3 flex flex-row items-center justify-center gap-3 cursor-pointer transition-[transform,colors,shadow] duration-200 ease-out group ${isSelected
-                                  ? 'border-[#0052FF] bg-[#0052FF] shadow-[0_2px_12px_rgba(0,82,255,0.3)] scale-[1.03]'
-                                  : 'bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02]'
-                                }`}
-                              >
-                                <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
-                                <div className="flex flex-col items-start text-left leading-none">
-                                  <span className={`text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500 group-hover:text-[#0052FF]'}`}>
-                                    {weekday}
-                                  </span>
-                                  <span className={`text-xs md:text-sm font-semibold leading-none ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                                    {dayMonth}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
+                {isRegistered ? (
+                  <div className="flex flex-col items-center justify-center py-6 px-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl shadow-sm text-center w-full">
+                    <img src="/WorkshopHeroTick/check-mark.png" alt="Success" className="w-12 h-12 object-contain mb-3" />
+                    <span className="text-xl font-bold text-gray-900 tracking-tight">Successfully Registered</span>
+                    <Link
+                      href="/dashboard/workshops"
+                      className="text-[#0052FF] hover:text-[#0040D9] font-bold text-sm tracking-wide mt-2 hover:underline inline-block"
+                    >
+                      View Details
+                    </Link>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center w-full">
+                    <button
+                      onClick={handlePriceButtonClick}
+                      className="w-full active:scale-[0.99] text-gray-900 font-extrabold py-3 px-6 rounded-xl shadow-[0_4px_14px_rgba(252,209,42,0.35)] transition-all hover:brightness-105 flex flex-col items-center justify-center gap-1 cursor-pointer text-center border-0"
+                      style={{ backgroundImage: 'linear-gradient(157deg, #F2E829 0%, #FDBD1A 100%)' }}
+                    >
+                      <span className="font-semibold text-sm md:text-[17px] tracking-tight">
+                        {(workshop as any).priceCaption || "Pay"}
+                      </span>
+                      <span className="flex items-center gap-2 whitespace-nowrap">
+                        <span className="line-through text-gray-700 text-sm md:text-base font-semibold">
+                          ₹{(workshop as any).originalPrice || 1999}
+                        </span>
+                        <span className="text-gray-900 text-lg md:text-xl font-semibold">
+                          ₹{workshop.price || 199}/-
+                        </span>
+                      </span>
+                    </button>
+
+                    {(workshop as any).bonusDeadlineText && (
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
+                        {(workshop as any).bonusDeadlineText}
+                      </p>
+                    )}
+
+                    <div className="mt-7 w-full flex flex-col items-center">
+                      <h4 className="text-sm md:text-base font-extrabold text-gray-900 tracking-wide uppercase mb-3 border-b-2 border-[#0052FF] pb-1">
+                        Held On
+                      </h4>
+                      {(() => {
+                        const datesList = (workshop as any).workshopDates && (workshop as any).workshopDates.length > 0
+                          ? (workshop as any).workshopDates
+                          : [
+                            new Date('2026-06-03T10:00:00Z'),
+                            new Date('2026-06-04T10:00:00Z'),
+                            new Date('2026-06-05T10:00:00Z')
+                          ];
+                        const gridColsClass = datesList.length === 1
+                          ? 'grid-cols-1 max-w-[150px]'
+                          : datesList.length === 2
+                            ? 'grid-cols-2 max-w-[320px]'
+                            : 'grid-cols-3 max-w-[490px]';
+
+                        return (
+                          <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
+                            {datesList.map((dateVal: string | Date, idx: number) => {
+                              const dateObj = new Date(dateVal);
+                              const isoStr = dateObj.toISOString();
+                              const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                              const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                              const isSelected = selectedDate === isoStr;
+
+                              return (
+                                <div
+                                  key={idx}
+                                  onClick={() => setSelectedDate(isoStr)}
+                                  className={`w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-4 py-3 flex flex-row items-center justify-center gap-3 cursor-pointer transition-[transform,colors,shadow] duration-200 ease-out group ${isSelected
+                                    ? 'border-[#0052FF] bg-[#0052FF] shadow-[0_2px_12px_rgba(0,82,255,0.3)] scale-[1.03]'
+                                    : 'bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02]'
+                                  }`}
+                                >
+                                  <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
+                                  <div className="flex flex-col items-start text-left leading-none">
+                                    <span className={`text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500 group-hover:text-[#0052FF]'}`}>
+                                      {weekday}
+                                    </span>
+                                    <span className={`text-xs md:text-sm font-semibold leading-none ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                      {dayMonth}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1116,22 +1280,31 @@ Email: contact@aiscale.com
 
             {/* Blue Registration CTA Button */}
             <div className="max-w-2xl w-full mx-auto mt-4 mb-6 z-10 px-4">
-              <button
-                onClick={handlePriceButtonClick}
-                className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
-              >
-                <span className="font-semibold leading-tight">
-                  {(workshop as any).priceCaption || "Pay"}
-                </span>
-                <span className="flex items-center gap-1.5 whitespace-nowrap">
-                  <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
-                    ₹{(workshop as any).originalPrice || 1999}
+              {isRegistered ? (
+                <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                  <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                  <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                    View Details
+                  </Link>
+                </div>
+              ) : (
+                <button
+                  onClick={handlePriceButtonClick}
+                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                >
+                  <span className="font-semibold leading-tight">
+                    {(workshop as any).priceCaption || "Pay"}
                   </span>
-                  <span className="text-white text-base md:text-xl font-black">
-                    ₹{workshop.price || 199}/-
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
+                      ₹{(workshop as any).originalPrice || 1999}
+                    </span>
+                    <span className="text-white text-base md:text-xl font-black">
+                      ₹{workshop.price || 199}/-
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              )}
             </div>
 
             {/* Natural Wavy SVG Separator */}
@@ -1368,20 +1541,31 @@ Email: contact@aiscale.com
 
                 {/* Blue CTA Button */}
                 <div className="max-w-2xl w-full mx-auto z-10 px-4">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
-                  >
-                    <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
-                      <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
-                    </span>
-                  </button>
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handlePriceButtonClick}
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
+                      >
+                        <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
+                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                        </span>
+                      </button>
 
-                  <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                    {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
-                  </p>
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                        {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -1425,20 +1609,31 @@ Email: contact@aiscale.com
 
                 {/* Blue CTA Button */}
                 <div className="max-w-2xl w-full mx-auto z-10 px-4">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
-                  >
-                    <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
-                      <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
-                    </span>
-                  </button>
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handlePriceButtonClick}
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
+                      >
+                        <span className="font-semibold leading-tight">{(workshop as any).priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{(workshop as any).originalPrice || 1999}</span>
+                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                        </span>
+                      </button>
 
-                  <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                    {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
-                  </p>
+                      <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
+                        {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </section>
@@ -1606,16 +1801,25 @@ Email: contact@aiscale.com
 
                 {/* Blue CTA Button */}
                 <div className="max-w-2xl w-full mx-auto z-10 px-4 mb-10">
-                  <button
-                    onClick={handlePriceButtonClick}
-                    className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
-                  >
-                    <span className="font-semibold leading-tight">Become A Python Using AI Expert Now At</span>
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹1999</span>
-                      <span className="text-white text-base md:text-xl font-semibold">₹199/-</span>
-                    </span>
-                  </button>
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handlePriceButtonClick}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide"
+                    >
+                      <span className="font-semibold leading-tight">Become A Python Using AI Expert Now At</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹1999</span>
+                        <span className="text-white text-base md:text-xl font-semibold">₹199/-</span>
+                      </span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Accordion Questions List */}
@@ -1841,7 +2045,7 @@ Email: contact@aiscale.com
       )}
 
       {/* Sticky Bottom Bar */}
-      {!loading && workshop && (
+      {!loading && workshop && !isRegistered && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-40 bg-[#eef9ff]/95 backdrop-blur-md border-t border-blue-100 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 ease-in-out transform ${showStickyBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
           style={{

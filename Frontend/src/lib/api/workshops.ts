@@ -56,11 +56,14 @@ export interface WorkshopRegistration {
   email: string;
   phone: string;
   whatsappNumber: string;
+  age?: string;
+  profession?: string;
   selectedDate: string;
   amountPaid: number;
   currency: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
   paymentId?: string;
+  razorpayOrderId?: string;
   createdAt: string;
 }
 
@@ -123,6 +126,21 @@ interface WorkshopDetailResponse {
   success: boolean;
   data: {
     workshop: Workshop;
+  };
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  data: {
+    orderId: string;
+    amount: number;
+    currency: string;
+    registrationId: string;
+    keyId: string;
+    workshopTitle: string;
+    basePrice: number;
+    gstAmount: number;
+    totalAmount: number;
   };
 }
 
@@ -200,7 +218,7 @@ export const workshopApi = {
   },
 
   /**
-   * Register a logged-in user for a workshop.
+   * Register a logged-in user for a workshop (LEGACY — kept for backward compat).
    */
   registerForWorkshop: async (
     workshopId: string,
@@ -210,6 +228,8 @@ export const workshopApi = {
       phone: string;
       whatsappNumber?: string;
       selectedDate: string;
+      age?: string;
+      profession?: string;
     }
   ) => {
     const res = await apiClient.post<{ success: boolean; data: { registration: WorkshopRegistration }; message: string }>(
@@ -225,6 +245,53 @@ export const workshopApi = {
   getWorkshopRegistrations: async () => {
     const res = await apiClient.get<{ success: boolean; data: { registrations: WorkshopRegistration[] } }>(
       '/admin/workshop-registrations'
+    );
+    return res.data;
+  },
+
+  // ─── Razorpay Payment Flow ─────────────────────────────────
+
+  /**
+   * Create a Razorpay order for workshop registration.
+   * Returns order details needed to open Razorpay checkout.
+   */
+  createPaymentOrder: async (data: {
+    workshopId: string;
+    name: string;
+    email: string;
+    phone: string;
+    whatsappNumber?: string;
+    selectedDate: string;
+    age?: string;
+    profession?: string;
+  }) => {
+    const res = await apiClient.post<CreateOrderResponse>('/payments/create-order', data);
+    return res.data;
+  },
+
+  /**
+   * Verify Razorpay payment after checkout completes.
+   */
+  verifyPayment: async (data: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    registrationId: string;
+  }) => {
+    const res = await apiClient.post<{ success: boolean; data: { registration: WorkshopRegistration }; message: string }>(
+      '/payments/verify',
+      data
+    );
+    return res.data;
+  },
+
+  /**
+   * Mark a payment as failed (when user dismisses Razorpay checkout).
+   */
+  markPaymentFailed: async (registrationId: string) => {
+    const res = await apiClient.post<{ success: boolean; message: string }>(
+      '/payments/failed',
+      { registrationId }
     );
     return res.data;
   },
