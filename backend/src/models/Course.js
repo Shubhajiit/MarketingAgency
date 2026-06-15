@@ -8,7 +8,6 @@ const courseSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['popular', 'pro-specialist', 'short', 'advanced'],
     default: 'popular'
   },
   instructorName: {
@@ -93,7 +92,19 @@ const courseSchema = new mongoose.Schema({
       duration: { type: String, default: '' },  // e.g. "12:34"
       description: { type: String, default: '' },
     }
-  ]
+  ],
+  whatYouWillLearn: {
+    type: [String],
+    default: []
+  },
+  skillsYouWillPractice: {
+    type: [String],
+    default: []
+  },
+  toolsYouWillUse: {
+    type: [String],
+    default: []
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Course', courseSchema);
