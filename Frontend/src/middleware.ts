@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   const hasRefreshToken = request.cookies.has('refreshToken');
 
   // Protected routes
-  const protectedPaths = ['/dashboard', '/bookings', '/videos'];
+  const protectedPaths = ['/dashboard', '/videos'];
   
   const isAdmin = pathname.startsWith('/admin');
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
@@ -44,7 +44,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/bookings/:path*',
     '/videos/:path*',
     '/admin/:path*',
     '/login',

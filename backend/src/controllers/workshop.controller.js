@@ -2,12 +2,42 @@ const Workshop = require('../models/Workshop');
 const WorkshopRegistration = require('../models/WorkshopRegistration');
 const User = require('../models/User');
 const { sendWorkshopConfirmationEmail } = require('../utils/emailService');
-const { getCache, setCache, delCache } = require('../utils/redis');
+const { getCache, setCache, delCache, delCachePattern } = require('../utils/redis');
+const { getPresignedUrl } = require('../utils/s3');
 
 // ─── Public: List all active workshops ───────────────────────
 exports.listWorkshops = async (req, res) => {
   try {
     const { page = 1, limit = 20, tag, type } = req.query;
+    const cacheKey = `workshops:list:page:${page}:limit:${limit}:tag:${tag || 'all'}:type:${type || 'all'}`;
+
+    // Try to get from Redis cache
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      console.log(`[Redis] Cache HIT for key: ${cacheKey}`);
+      // Sign brochureUrl in cached list on the fly
+      const processedWorkshops = await Promise.all((cachedData.workshops || []).map(async (w) => {
+        const wObj = { ...w };
+        if (wObj.brochureUrl && !wObj.brochureUrl.startsWith('http')) {
+          try {
+            wObj.brochureUrl = await getPresignedUrl(wObj.brochureUrl, 3600);
+          } catch (e) {
+            console.error('Failed to sign brochureUrl in cached list:', e);
+          }
+        }
+        return wObj;
+      }));
+      return res.status(200).json({
+        success: true,
+        data: {
+          ...cachedData,
+          workshops: processedWorkshops
+        }
+      });
+    }
+
+    console.log(`[Redis] Cache MISS for key: ${cacheKey}`);
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const filter = { isActive: true };
@@ -23,16 +53,36 @@ exports.listWorkshops = async (req, res) => {
       Workshop.countDocuments(filter),
     ]);
 
+    const responseData = {
+      workshops,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+    };
+
+    // Cache the list (TTL: 1 hour)
+    await setCache(cacheKey, responseData, 3600);
+
+    const processedWorkshops = await Promise.all(workshops.map(async (w) => {
+      const wObj = w.toObject();
+      if (wObj.brochureUrl && !wObj.brochureUrl.startsWith('http')) {
+        try {
+          wObj.brochureUrl = await getPresignedUrl(wObj.brochureUrl, 3600);
+        } catch (e) {
+          console.error('Failed to sign brochureUrl in fetched list:', e);
+        }
+      }
+      return wObj;
+    }));
+
     res.status(200).json({
       success: true,
       data: {
-        workshops,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          pages: Math.ceil(total / parseInt(limit)),
-        },
+        ...responseData,
+        workshops: processedWorkshops
       },
     });
   } catch (error) {
@@ -51,7 +101,15 @@ exports.getWorkshopBySlug = async (req, res) => {
     const cachedWorkshop = await getCache(cacheKey);
     if (cachedWorkshop) {
       console.log(`[Redis] Cache HIT for key: ${cacheKey}`);
-      return res.status(200).json({ success: true, data: { workshop: cachedWorkshop } });
+      const workshopObj = { ...cachedWorkshop };
+      if (workshopObj.brochureUrl && !workshopObj.brochureUrl.startsWith('http')) {
+        try {
+          workshopObj.brochureUrl = await getPresignedUrl(workshopObj.brochureUrl, 3600);
+        } catch (e) {
+          console.error('[Redis Cache] Failed to generate presigned URL:', e);
+        }
+      }
+      return res.status(200).json({ success: true, data: { workshop: workshopObj } });
     }
 
     console.log(`[Redis] Cache MISS for key: ${cacheKey}`);
@@ -68,7 +126,16 @@ exports.getWorkshopBySlug = async (req, res) => {
     // Cache the retrieved workshop (TTL: 1 hour)
     await setCache(cacheKey, workshop, 3600);
 
-    res.status(200).json({ success: true, data: { workshop } });
+    const workshopObj = workshop.toObject();
+    if (workshopObj.brochureUrl && !workshopObj.brochureUrl.startsWith('http')) {
+      try {
+        workshopObj.brochureUrl = await getPresignedUrl(workshopObj.brochureUrl, 3600);
+      } catch (e) {
+        console.error('[DB Fetch] Failed to generate presigned URL:', e);
+      }
+    }
+
+    res.status(200).json({ success: true, data: { workshop: workshopObj } });
   } catch (error) {
     console.error('Get Workshop By Slug Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -101,7 +168,7 @@ exports.createWorkshop = async (req, res) => {
       experts, heroPoints, workshopDates, slug,
       rating1Value, rating1Count, rating1Platform,
       rating2Value, rating2Count, rating2Platform,
-      type,
+      type, deadline, brochureUrl,
     } = req.body;
 
     if (!title) {
@@ -139,6 +206,8 @@ exports.createWorkshop = async (req, res) => {
       rating2Count: rating2Count || '(88)',
       rating2Platform: rating2Platform || 'Rating Facts',
       type: type || 'one-day',
+      deadline: deadline || null,
+      brochureUrl: brochureUrl || '',
     };
 
     // Allow manual slug override
@@ -148,6 +217,9 @@ exports.createWorkshop = async (req, res) => {
 
     const workshop = new Workshop(workshopData);
     await workshop.save();
+
+    // Invalidate Redis list cache
+    await delCachePattern('workshops:list:*');
 
     res.status(201).json({ success: true, data: { workshop } });
   } catch (error) {
@@ -178,7 +250,7 @@ exports.updateWorkshop = async (req, res) => {
       'experts', 'heroPoints', 'workshopDates', 'slug',
       'rating1Value', 'rating1Count', 'rating1Platform',
       'rating2Value', 'rating2Count', 'rating2Platform',
-      'type',
+      'type', 'deadline', 'brochureUrl',
     ];
 
     for (const field of allowedFields) {
@@ -201,6 +273,7 @@ exports.updateWorkshop = async (req, res) => {
     if (workshop.slug && workshop.slug !== oldSlug) {
       await delCache(`workshop:slug:${workshop.slug}`);
     }
+    await delCachePattern('workshops:list:*');
 
     res.status(200).json({ success: true, data: { workshop } });
   } catch (error) {
@@ -229,6 +302,7 @@ exports.deleteWorkshop = async (req, res) => {
     if (workshop.slug) {
       await delCache(`workshop:slug:${workshop.slug}`);
     }
+    await delCachePattern('workshops:list:*');
 
     res.status(200).json({ success: true, message: 'Workshop deactivated successfully' });
   } catch (error) {
@@ -259,6 +333,7 @@ exports.cancelWorkshop = async (req, res) => {
     if (workshop.slug) {
       await delCache(`workshop:slug:${workshop.slug}`);
     }
+    await delCachePattern('workshops:list:*');
 
     // Mark registrations as cancelled in bulk
     // Find count of registrations to report back

@@ -28,6 +28,7 @@ interface WorkshopFormData {
   originalPrice: string;
   priceCaption: string;
   bonusDeadlineText: string;
+  deadline: string;
   heroPoints: string[];
   workshopDates: { date: string; place: string }[];
   rating1Value: string;
@@ -43,6 +44,7 @@ interface WorkshopFormData {
   modules: { title: string; content: string[] }[];
   courseOutcomes: WorkshopCourseOutcome[];
   highlights: string[];
+  brochureUrl?: string;
 }
 
 const defaultFormData: WorkshopFormData = {
@@ -54,6 +56,7 @@ const defaultFormData: WorkshopFormData = {
   originalPrice: '0',
   priceCaption: '',
   bonusDeadlineText: '',
+  deadline: '',
   heroPoints: ['', '', '', ''],
   workshopDates: [],
   rating1Value: '4.5/5',
@@ -69,6 +72,7 @@ const defaultFormData: WorkshopFormData = {
   modules: [],
   courseOutcomes: [],
   highlights: [],
+  brochureUrl: '',
 };
 
 // ─── Collapsible Section Component ──────────────────────────
@@ -127,7 +131,7 @@ function FormInput({
       </label>
       <input
         type={type}
-        value={value}
+        value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
@@ -159,7 +163,7 @@ function FormTextArea({
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <textarea
-        value={value}
+        value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
@@ -257,6 +261,96 @@ function ImageUploadInput({
             </label>
           </div>
           {error && <span className="text-[10px] text-red-500 font-semibold">{error}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrochureUploadInput({
+  label,
+  value,
+  onChange,
+  placeholder = '',
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File is too large (max 10MB)');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const data = await workshopApi.uploadBrochure(file);
+      if (data.success && data.s3Key) {
+        onChange(data.s3Key);
+      } else {
+        setError('Upload failed');
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full bg-slate-50 p-4 rounded-xl border border-gray-200 mt-2 text-black">
+      <label className="text-xs font-bold text-gray-750 uppercase tracking-wider block">
+        {label}
+      </label>
+      <div className="flex items-center gap-3 mt-1">
+        <div className="w-12 h-12 rounded-lg border border-dashed border-gray-300 flex items-center justify-center shrink-0 bg-white text-gray-400">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+
+        <div className="flex-1 flex flex-col gap-1">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder={placeholder || 'Upload the PDF'}
+              className="flex-1 px-3.5 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white placeholder-gray-405 text-black font-semibold"
+              readOnly
+            />
+            <label className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg cursor-pointer flex items-center justify-center transition-colors shadow-sm select-none border border-transparent whitespace-nowrap active:scale-[0.98]">
+              {uploading ? 'Uploading...' : 'Upload PDF'}
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange('')}
+                className="px-3 py-2 bg-red-55 hover:bg-red-100 text-red-500 text-xs font-bold rounded-lg cursor-pointer transition-colors active:scale-[0.98] border-0"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {error && <span className="text-[10px] text-red-500 font-semibold">{error}</span>}
+          {value && <span className="text-[10px] text-green-600 font-semibold">✓ Brochure uploaded successfully to Amazon S3.</span>}
         </div>
       </div>
     </div>
@@ -460,6 +554,18 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
     const ranges = extractDateRanges(workshop.workshopDates || []);
     setDateRanges(ranges.length > 0 ? ranges : [{ startDate: '', endDate: '', place: '' }]);
 
+    const formatDateTimeLocal = (dateStr?: string) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     setFormData({
       title: workshop.title || '',
       subtitle: workshop.subtitle || '',
@@ -469,6 +575,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
       originalPrice: String(workshop.originalPrice || 0),
       priceCaption: workshop.priceCaption || '',
       bonusDeadlineText: workshop.bonusDeadlineText || '',
+      deadline: workshop.deadline ? formatDateTimeLocal(workshop.deadline) : '',
       heroPoints: workshop.heroPoints && workshop.heroPoints.length > 0
         ? [...workshop.heroPoints, '', '', '', ''].slice(0, 4)
         : ['', '', '', ''],
@@ -497,6 +604,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
       modules: workshop.modules || [],
       courseOutcomes: workshop.courseOutcomes || [],
       highlights: (workshop.highlights || []).map(h => typeof h === 'string' ? h : h.title || ''),
+      brochureUrl: workshop.brochureUrl || '',
     });
     setShowModal(true);
     setError('');
@@ -518,6 +626,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         originalPrice: Number(formData.originalPrice) || 0,
         priceCaption: formData.priceCaption,
         bonusDeadlineText: formData.bonusDeadlineText,
+        deadline: formData.deadline || null,
         heroPoints: (formData.heroPoints || []).filter(p => p && typeof p === 'string' && p.trim() !== ''),
         workshopDates: (formData.workshopDates || []).filter(Boolean),
         rating1Value: formData.rating1Value,
@@ -539,6 +648,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         courseOutcomes: (formData.courseOutcomes || []).filter(step => step && typeof step.title === 'string' && (step.title.trim() !== '' || (typeof step.description === 'string' && step.description.trim() !== ''))),
         highlights: (formData.highlights || []).filter(p => p && typeof p === 'string' && p.trim() !== '').map(p => ({ title: p, description: '' })),
         type, // Hardcode the type based on the page manager prop
+        brochureUrl: formData.brochureUrl || '',
       };
 
       if (editingWorkshop) {
@@ -1100,7 +1210,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FormInput
                         label="Price Caption"
                         value={formData.priceCaption}
@@ -1112,6 +1222,13 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                         value={formData.bonusDeadlineText}
                         onChange={(v) => updateField('bonusDeadlineText', v)}
                         placeholder="e.g. Register Before June 07, 2026..."
+                      />
+                      <FormInput
+                        label="Application Deadline (Calendar)"
+                        type="datetime-local"
+                        value={formData.deadline}
+                        onChange={(v) => updateField('deadline', v)}
+                        placeholder="Select date and time"
                       />
                     </div>
 
@@ -1583,6 +1700,21 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                 {/* Course Outcomes */}
                 <CollapsibleSection title="🎓 Course Outcomes (Image, Heading, Description)">
                   <div className="space-y-4">
+                    {/* Brochure Section */}
+                    <div className="border-b border-gray-150 pb-4 mb-4">
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-1">
+                        Download Workshop Details Brochure
+                      </span>
+                      <span className="text-xs text-gray-500 font-medium block mb-2">
+                        Upload a brochure PDF that users can download. If you do not want to add a brochure, simply leave this section empty.
+                      </span>
+                      <BrochureUploadInput
+                        label="Brochure Document (PDF/Word)"
+                        value={formData.brochureUrl || ''}
+                        onChange={(v) => updateField('brochureUrl', v)}
+                      />
+                    </div>
+
                     <span className="text-xs text-gray-500 font-medium block">
                       Add outcomes with an image, heading, and description to show in the outcomes carousel section.
                     </span>

@@ -65,4 +65,45 @@ router.post('/upload', protect, upload.single('image'), async (req, res) => {
   }
 });
 
+// Brochure file upload (10MB limit, PDF/Word files)
+const multer = require('multer');
+const brochureUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /pdf|doc|docx/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = /pdf|msword|officedocument/.test(file.mimetype);
+    if (ext || mime) return cb(null, true);
+    cb(new Error('Only PDF or Word documents are allowed'));
+  }
+});
+const { uploadToS3, getPresignedUrl } = require('../utils/s3');
+
+// POST /api/v1/workshops/upload-brochure — admin: upload brochure to S3
+router.post('/upload-brochure', protect, brochureUpload.single('brochure'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No brochure file uploaded' });
+    }
+
+    const ext = path.extname(req.file.originalname).toLowerCase() || '.pdf';
+    const s3Key = `workshops/brochures/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+
+    await uploadToS3(req.file.buffer, s3Key, req.file.mimetype || 'application/pdf');
+
+    const url = await getPresignedUrl(s3Key, 3600); // 1 hour expiration
+
+    res.status(200).json({
+      success: true,
+      s3Key,
+      url,
+      message: 'Brochure uploaded to S3 successfully',
+    });
+  } catch (error) {
+    console.error('Workshop Brochure Upload Error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Brochure upload failed' });
+  }
+});
+
 module.exports = router;

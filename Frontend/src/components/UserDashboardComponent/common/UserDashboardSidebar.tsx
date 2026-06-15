@@ -7,8 +7,6 @@ import { useAuthStore } from '@/store/auth.store';
 import {
 	BookOpen,
 	Video,
-	Bookmark,
-	Users2,
 	ChevronDown,
 	ChevronUp,
 	Store,
@@ -17,18 +15,18 @@ import {
 	RefreshCw,
 	Wallet,
 	History,
-	Bell
+	Bell,
+	Calendar
 } from 'lucide-react';
 
 const libraryItems = [
 	{ label: 'My Courses', href: '/dashboard/activecourse' },
-	{ label: 'Browse Courses', href: '/all-course' },
 	{ label: 'Workshops', href: '/dashboard/workshops' }
 ];
 
 const standaloneItems = [
-	{ label: 'Bookmarks', href: '/dashboard/bookings', icon: Bookmark, hasDropdown: true },
-	{ label: 'Community', href: '/dashboard/community', icon: Users2 }
+	{ label: 'Upcoming Workshops', href: '/dashboard/upcoming-workshops', icon: Calendar },
+	{ label: 'Browse Courses', href: '/all-course', icon: BookOpen }
 ];
 
 export default function UserDashboardSidebar() {

@@ -442,13 +442,22 @@ export default function Navbar() {
                                             <Link
                                                 key={w._id}
                                                 href={`/one-day-workshop/${w.slug}`}
-                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
+                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-2.5 py-1 w-full"
                                                 onClick={() => setIsMenuOpen(false)}
                                             >
-                                                {w.title}
-                                                {(w as any).batchNumber && (
-                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{(w as any).batchNumber}</span>
+                                                {w.thumbnail ? (
+                                                    <img src={w.thumbnail} alt="" className="w-9 h-9 rounded-md object-cover border border-gray-100 shrink-0" />
+                                                ) : (
+                                                    <div className="w-9 h-9 rounded-md bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                        {w.title.charAt(0)}
+                                                    </div>
                                                 )}
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="font-semibold text-gray-800 block leading-snug mb-0.5">{w.title}</span>
+                                                    {(w as any).batchNumber && (
+                                                        <span className="bg-[#6366f1] text-white text-[7px] font-bold px-1 rounded-sm uppercase tracking-wider inline-block">{(w as any).batchNumber}</span>
+                                                    )}
+                                                </div>
                                             </Link>
                                         ))
                                     ) : workshopsLoaded ? (
@@ -487,13 +496,22 @@ export default function Navbar() {
                                             <Link
                                                 key={w._id}
                                                 href={`/three-days-workshops/${w.slug}`}
-                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-1.5"
+                                                className="text-xs text-gray-600 hover:text-[#009ee3] flex items-center gap-2.5 py-1 w-full"
                                                 onClick={() => setIsMenuOpen(false)}
                                             >
-                                                {w.title}
-                                                {(w as any).batchNumber && (
-                                                    <span className="bg-[#6366f1] text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-wider">{(w as any).batchNumber}</span>
+                                                {w.thumbnail ? (
+                                                    <img src={w.thumbnail} alt="" className="w-9 h-9 rounded-md object-cover border border-gray-100 shrink-0" />
+                                                ) : (
+                                                    <div className="w-9 h-9 rounded-md bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                        {w.title.charAt(0)}
+                                                    </div>
                                                 )}
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="font-semibold text-gray-800 block leading-snug mb-0.5">{w.title}</span>
+                                                    {(w as any).batchNumber && (
+                                                        <span className="bg-[#6366f1] text-white text-[7px] font-bold px-1 rounded-sm uppercase tracking-wider inline-block">{(w as any).batchNumber}</span>
+                                                    )}
+                                                </div>
                                             </Link>
                                         ))
                                     ) : workshopsLoaded ? (

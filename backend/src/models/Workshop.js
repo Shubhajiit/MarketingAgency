@@ -95,6 +95,10 @@ const workshopSchema = new mongoose.Schema(
 
     // Type of Workshop
     type: { type: String, enum: ['one-day', 'three-days'], default: 'one-day' },
+    deadline: { type: Date, default: null },
+
+    // Brochure
+    brochureUrl: { type: String, default: '' },
   },
   { timestamps: true }
 );

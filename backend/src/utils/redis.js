@@ -94,10 +94,35 @@ async function delCache(key) {
   }
 }
 
+/**
+ * Delete items matching a pattern
+ * @param {string} pattern 
+ */
+async function delCachePattern(pattern) {
+  if (!isConnected()) {
+    return false;
+  }
+  try {
+    let cursor = 0;
+    do {
+      const reply = await client.scan(cursor, { MATCH: pattern, COUNT: 100 });
+      cursor = reply.cursor;
+      if (reply.keys.length > 0) {
+        await client.del(reply.keys);
+      }
+    } while (cursor !== 0);
+    return true;
+  } catch (err) {
+    console.error(`[Redis] delCachePattern error for pattern ${pattern}:`, err.message);
+    return false;
+  }
+}
+
 module.exports = {
   client,
   getCache,
   setCache,
   delCache,
+  delCachePattern,
   isConnected
 };

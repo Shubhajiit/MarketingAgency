@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
-import { Plus, Minus, FileText, CheckSquare, CheckCircle2, Radio, ClipboardList, ClipboardCheck } from 'lucide-react';
+import { Plus, Minus, FileText, CheckSquare, CheckCircle2, Radio, ClipboardList, ClipboardCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 // Import logos from WorkshopsAILogos
@@ -89,7 +89,7 @@ function WorkshopSkeleton() {
     <div className="flex-1 flex flex-col bg-white animate-pulse">
       <main className="flex-1 flex flex-col">
         {/* Centered Top Content Skeleton */}
-        <section className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden">
+        <section className="relative bg-white pt-6 md:pt-16 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden">
           <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-3 px-1 sm:px-4 w-full">
             <div className="h-10 bg-slate-200/60 rounded w-72 md:w-96" />
             <div className="h-5 bg-slate-200/60 rounded w-64 md:w-80 mt-1" />
@@ -211,6 +211,29 @@ export default function DynamicWorkshopPage() {
   const isCheckout = searchParams ? searchParams.get('checkout') === 'true' : false;
   const slug = typeof params.slug === 'string' ? params.slug : '';
   const { user, isAuthenticated, login, register, checkAuth } = useAuth();
+
+  const formatDeadlineDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const day = d.getDate();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const formatDeadlineTime = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes} ${ampm}`;
+  };
 
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [loading, setLoading] = useState(true);
@@ -761,7 +784,7 @@ Email: contact@aiscale.com
   if (isCheckout) {
     const selectedCountry = countryCodes.find(c => c.code === formData.phoneCode) || countryCodes[0];
     return (
-      <div className="flex-1 flex flex-col bg-white min-h-screen">
+      <div className="flex-1 flex flex-col bg-white">
         <div className="w-full bg-[#000000] text-center py-3 px-4 flex items-center justify-center min-h-[50px] shadow-sm">
           <p className="text-[#FCD12A] font-extrabold text-xs md:text-sm tracking-wide leading-snug uppercase">
             CONGRATS! YOU ARE JUST ONE STEP AWAY FROM MASTERING AI TOOLS FOR {cleanedName.toUpperCase()} USING AI
@@ -1032,7 +1055,7 @@ Email: contact@aiscale.com
         {/* Hero Section — White Card UI (dynamic from DB) */}
         {!loading && workshop && (
           <section
-            className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
+            className="relative bg-white pt-6 md:pt-16 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
             id="workshop-hero-section"
             style={{
               backgroundImage: 'radial-gradient(#cbd5e1 1.5px, transparent 1.5px)',
@@ -1046,7 +1069,7 @@ Email: contact@aiscale.com
                 dangerouslySetInnerHTML={{ __html: workshop.title }}
               />
               {workshop.subtitle && (
-                <p className="text-base md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
+                <p className="text-xs sm:text-sm md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
                   {workshop.subtitle}
                 </p>
               )}
@@ -1202,9 +1225,11 @@ Email: contact@aiscale.com
                       </span>
                     </button>
 
-                    {(workshop as any).bonusDeadlineText && (
+                    {(workshop.deadline || (workshop as any).bonusDeadlineText) && (
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                        {(workshop as any).bonusDeadlineText}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : (workshop as any).bonusDeadlineText}
                       </p>
                     )}
 
@@ -1575,6 +1600,24 @@ Email: contact@aiscale.com
               </section>
             )}
 
+            {/* Application Deadline Section */}
+            {workshop.deadline && (
+              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
+                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
+                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
+                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
+                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+                        Application <span className="text-blue-600">Deadline</span>
+                      </h2>
+                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
+                        Apply by <span className="text-blue-600 font-extrabold">{formatDeadlineDate(workshop.deadline)}</span> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Tools You'll Master Section */}
             <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-tools-mastered">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
@@ -1590,73 +1633,18 @@ Email: contact@aiscale.com
                   Work with the most in-demand platforms every day with AI Scale&apos;s AI-led digital marketing programs.
                 </p>
 
-                <div className="flex flex-wrap gap-4 items-center justify-start w-full">
-                  {/* Google Analytics 4 */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Google_Analytics_4_logo.svg" alt="GA4" className="h-10 w-10 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[14px] font-bold text-gray-500">Google</span>
-                      <span className="text-[12px] font-semibold text-gray-400 mt-0.5">Analytics 4</span>
-                    </div>
-                  </div>
-
-                  {/* Google Search Console */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Google_Search_Console_logo.svg" alt="GSC" className="h-10 w-10 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[14px] font-bold text-blue-600">Google</span>
-                      <span className="text-[10px] font-semibold text-gray-500 mt-0.5">Search Console</span>
-                    </div>
-                  </div>
+                <div className="flex flex-wrap gap-8 md:gap-12 items-center justify-start w-full py-4">
+                  {/* Google Analytics */}
+                  <img src="/WorkshopsAILogos/Tool/GoogleAnalytics.jpg" alt="Google Analytics" className="h-16 md:h-20 w-auto object-contain shrink-0 rounded-xl hover:scale-105 transition-transform duration-200" />
 
                   {/* Google Ads */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Ads_logo.svg" alt="Google Ads" className="h-10 w-10 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[14px] font-bold text-gray-700">Google Ads</span>
-                    </div>
-                  </div>
+                  <img src="/WorkshopsAILogos/Tool/Google-Ads.webp" alt="Google Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
 
-                  {/* Meta Business Suite */}
-                  <div className="bg-gradient-to-tr from-[#E0F2FE] via-[#EEF2FF] to-[#ECFDF5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[180px] sm:w-[200px] shrink-0 border border-[#CBD5E1] shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="h-8 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-tight">
-                      <span className="text-[14px] font-bold text-blue-900">Meta</span>
-                      <span className="text-[11px] font-extrabold text-gray-800 leading-none">Business Suite</span>
-                    </div>
-                  </div>
+                  {/* Meta Ads */}
+                  <img src="/WorkshopsAILogos/Tool/Meta-Ads.webp" alt="Meta Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
 
-                  {/* WordPress */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Wordpress_Blue_Logo.svg" alt="WordPress" className="h-10 w-10 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[14px] font-bold text-gray-800">WORDPRESS</span>
-                    </div>
-                  </div>
-
-                  {/* Canva */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center justify-center h-20 w-[150px] sm:w-[170px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_icon_2021.svg" alt="Canva" className="h-12 w-12 object-contain" />
-                  </div>
-
-                  {/* Google Tag Manager */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_Tag_Manager_Logo.svg" alt="GTM" className="h-10 w-10 object-contain shrink-0" />
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[10px] font-semibold text-gray-500">Google Tag Manager</span>
-                    </div>
-                  </div>
-
-                  {/* Google Business Profile */}
-                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-2.5 h-20 w-[180px] sm:w-[200px] shrink-0 border border-gray-200/50 shadow-xs">
-                    <div className="relative h-10 w-10 shrink-0">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Google_My_Business_logo.svg" alt="GMB" className="h-full w-full object-contain" />
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[14px] font-bold text-blue-600">Google</span>
-                      <span className="text-[10px] font-semibold text-gray-500 mt-0.5">Business Profile</span>
-                    </div>
-                  </div>
+                  {/* WhatsApp */}
+                  <img src="/WorkshopsAILogos/Tool/WhatsApp.webp" alt="WhatsApp" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
                 </div>
               </div>
             </section>
@@ -1732,21 +1720,7 @@ Email: contact@aiscale.com
               </div>
             </section>
 
-            {/* Application Deadline */}
-            {(workshop as any).applicationDeadline && (
-              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-                <div className="w-full max-w-4xl p-[3px] rounded-2xl bg-gradient-to-r from-[#FF007A] via-[#7F00FF] via-[#001AFF] to-[#00E080] shadow-[0_0_30px_rgba(255,0,122,0.18),0_0_30px_rgba(0,26,255,0.18),0_0_30px_rgba(0,224,128,0.18)]">
-                  <div className="w-full bg-[#f5f5f5] py-6 md:py-8 px-6 text-center rounded-[13px]">
-                    <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application <span className="text-[#0052FF]">Deadline</span></h2>
-                    <p className="text-gray-600 text-sm md:text-base font-normal">
-                      Apply by <span className="font-bold text-[#0052FF]">
-                        {formatDisplayDate((workshop as any).applicationDeadline)}
-                      </span> at 11:59 PM
-                    </p>
-                  </div>
-                </div>
-              </section>
-            )}
+
 
             {/* What you'll learn in this Cohort Section */}
             {workshop.courseOutcomes && workshop.courseOutcomes.length > 0 && (
@@ -1767,22 +1741,20 @@ Email: contact@aiscale.com
                 </div>
 
                 <div className="max-w-6xl w-full mx-auto flex flex-col px-4 md:px-8 mt-6 md:mt-10">
-                  <div className="flex flex-row justify-between items-center mb-10 w-full">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 w-full">
                     <h2 className="text-[26px] md:text-[36px] font-bold text-gray-900 tracking-tight text-left">
                       All the details of Course Outcomes
                     </h2>
 
                     {/* Navigation Buttons (similar to testimonials) */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pr-1">
                       <button
                         type="button"
                         onClick={() => scrollOutcomes("left")}
                         className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
                         aria-label="Scroll outcomes left"
                       >
-                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clipRule="evenodd" />
-                        </svg>
+                        <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
                       </button>
                       <button
                         type="button"
@@ -1790,9 +1762,7 @@ Email: contact@aiscale.com
                         className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
                         aria-label="Scroll outcomes right"
                       >
-                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M7.22 15.78a.75.75 0 010-1.06L11.94 10 7.22 5.28a.75.75 0 111.06-1.06l5.25-5.25a.75.75 0 010 1.06l-5.25-5.25a.75.75 0 01-1.06 0z" clipRule="evenodd" />
-                        </svg>
+                        <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
                       </button>
                     </div>
                   </div>
@@ -1821,24 +1791,28 @@ Email: contact@aiscale.com
                   </div>
 
                   {/* Download Brochure Button */}
-                  <div className="flex justify-center mt-6 mb-0">
-                    <button
-                      onClick={() => alert("Brochure download starting shortly...")}
-                      className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-white border-2 border-black rounded-full font-bold text-gray-900 text-xs sm:text-sm md:text-base flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-[0px_0px_0px_0px_#000000] hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                    >
-                      Download Workshop Details Brochure
-                      <svg
-                        className="w-4 h-4 md:w-5 md:h-5 text-black shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                  {workshop.brochureUrl && (
+                    <div className="flex justify-center mt-6 mb-0">
+                      <a
+                        href={workshop.brochureUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-white border-2 border-black rounded-full font-bold text-gray-900 text-xs sm:text-sm md:text-base flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-[0px_0px_0px_0px_#000000] hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-150 active:scale-[0.98] cursor-pointer"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
-                  </div>
+                        Download Workshop Details Brochure
+                        <svg
+                          className="w-4 h-4 md:w-5 md:h-5 text-black shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -1912,7 +1886,9 @@ Email: contact@aiscale.com
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
                   )}
@@ -1980,7 +1956,9 @@ Email: contact@aiscale.com
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
                   )}
@@ -2413,7 +2391,9 @@ Email: contact@aiscale.com
               </div>
               <div className="flex flex-col items-start leading-tight text-left">
                 <span className="text-[11px] md:text-sm font-bold text-red-600 tracking-tight">
-                  {(workshop as any).bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                  {workshop.deadline 
+                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                    : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                 </span>
                 {selectedDate && (
                   <span className="text-[10px] md:text-xs font-semibold text-gray-500 mt-0.5">

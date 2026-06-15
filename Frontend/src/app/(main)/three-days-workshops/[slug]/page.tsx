@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
-import { X, Plus, Minus, FileText, CheckSquare, CheckCircle2, Radio, ClipboardList, ClipboardCheck } from 'lucide-react';
+import { X, Plus, Minus, FileText, CheckSquare, CheckCircle2, Radio, ClipboardList, ClipboardCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 // Import logos from WorkshopsAILogos
@@ -237,7 +237,7 @@ function WorkshopSkeleton() {
     <div className="flex-1 flex flex-col bg-white animate-pulse">
       <main className="flex-1 flex flex-col">
         {/* Centered Top Content Skeleton */}
-        <section className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden">
+        <section className="relative bg-white pt-10 md:pt-16 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden">
           <div className="max-w-7xl mx-auto text-center mb-6 md:mb-8 flex flex-col items-center gap-3 px-1 sm:px-4 w-full">
             <div className="h-10 bg-slate-200/60 rounded w-72 md:w-96" />
             <div className="h-5 bg-slate-200/60 rounded w-64 md:w-80 mt-1" />
@@ -357,6 +357,29 @@ function ThreeDaysWorkshopsContent() {
   const searchParams = useSearchParams();
   const isCheckout = searchParams ? searchParams.get('checkout') === 'true' : false;
   const { user, isAuthenticated, login, register, checkAuth } = useAuth();
+
+  const formatDeadlineDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const day = d.getDate();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const formatDeadlineTime = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes} ${ampm}`;
+  };
 
   const slug = typeof params?.slug === 'string' ? params.slug : '';
 
@@ -729,7 +752,7 @@ function ThreeDaysWorkshopsContent() {
 
   if (isCheckout) {
     return (
-      <div className="flex-1 flex flex-col bg-white min-h-screen">
+      <div className="flex-1 flex flex-col bg-white">
         <div className="w-full bg-[#000000] text-center py-3 px-4 flex items-center justify-center min-h-[50px] shadow-sm">
           <p className="text-[#FCD12A] font-extrabold text-xs md:text-sm tracking-wide leading-snug uppercase">
             CONGRATS! YOU ARE JUST ONE STEP AWAY FROM MASTERING AI TOOLS FOR {cleanedName.toUpperCase()} USING AI
@@ -1000,7 +1023,7 @@ function ThreeDaysWorkshopsContent() {
         {/* Hero Section — White Card UI (dynamic from DB) */}
         {!loading && workshop && (
           <section
-            className="relative bg-white pt-4 md:pt-12 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
+            className="relative bg-white pt-6 md:pt-16 pb-16 md:pb-36 px-2 sm:px-4 md:px-8 w-full flex flex-col items-center justify-center font-sans overflow-hidden"
             id="workshop-hero-section"
             style={{
               backgroundImage: 'radial-gradient(#cbd5e1 1.5px, transparent 1.5px)',
@@ -1014,7 +1037,7 @@ function ThreeDaysWorkshopsContent() {
                 dangerouslySetInnerHTML={{ __html: workshop.title }}
               />
               {workshop.subtitle && (
-                <p className="text-base md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
+                <p className="text-xs sm:text-sm md:text-lg font-bold text-gray-800 leading-relaxed max-w-3xl">
                   {workshop.subtitle}
                 </p>
               )}
@@ -1170,9 +1193,11 @@ function ThreeDaysWorkshopsContent() {
                       </span>
                     </button>
 
-                    {workshop.bonusDeadlineText && (
+                    {(workshop.deadline || workshop.bonusDeadlineText) && (
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                        {workshop.bonusDeadlineText}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : workshop.bonusDeadlineText}
                       </p>
                     )}
 
@@ -1482,6 +1507,24 @@ function ThreeDaysWorkshopsContent() {
               </section>
             )}
 
+            {/* Application Deadline Section */}
+            {workshop.deadline && (
+              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
+                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
+                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
+                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
+                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+                        Application <span className="text-blue-600">Deadline</span>
+                      </h2>
+                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
+                        Apply by <span className="text-blue-600 font-extrabold">{formatDeadlineDate(workshop.deadline)}</span> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Tools You'll Master Section */}
             <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-tools-mastered">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
@@ -1588,22 +1631,6 @@ function ThreeDaysWorkshopsContent() {
               </div>
             </section>
 
-            {/* Application Deadline */}
-            {(workshop as any).applicationDeadline && (
-              <section className="bg-white py-4 md:py-12 px-4 md:px-16 w-full flex justify-center z-10" id="workshop-application-deadline">
-                <div className="w-full max-w-4xl p-[3px] rounded-2xl bg-gradient-to-r from-[#FF007A] via-[#7F00FF] via-[#001AFF] to-[#00E080] shadow-[0_0_30px_rgba(255,0,122,0.18),0_0_30px_rgba(0,26,255,0.18),0_0_30px_rgba(0,224,128,0.18)]">
-                  <div className="w-full bg-[#f5f5f5] py-6 md:py-8 px-6 text-center rounded-[13px]">
-                    <h2 className="text-[#444444] text-[32px] font-bold tracking-tight mb-3">Application <span className="text-[#0052FF]">Deadline</span></h2>
-                    <p className="text-gray-600 text-sm md:text-base font-normal">
-                      Apply by <span className="font-bold text-[#0052FF]">
-                        {new Date((workshop as any).applicationDeadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </span> at 11:59 PM
-                    </p>
-                  </div>
-                </div>
-              </section>
-            )}
-
             {/* What you'll learn in this Cohort Section */}
             {workshop.courseOutcomes && workshop.courseOutcomes.length > 0 && (
               <section className="w-full bg-[#EBF5FF] pb-8 md:pb-10 relative font-sans" id="workshop-what-you-learn">
@@ -1623,22 +1650,20 @@ function ThreeDaysWorkshopsContent() {
                 </div>
 
                 <div className="max-w-6xl w-full mx-auto flex flex-col px-4 md:px-8 mt-6 md:mt-10">
-                  <div className="flex flex-row justify-between items-center mb-10 w-full">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 w-full">
                     <h2 className="text-[26px] md:text-[36px] font-bold text-gray-950 tracking-tight text-left">
                       All the details of Course Outcomes
                     </h2>
 
                     {/* Navigation Buttons (similar to testimonials) */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pr-1">
                       <button
                         type="button"
                         onClick={() => scrollOutcomes("left")}
                         className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
                         aria-label="Scroll outcomes left"
                       >
-                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M12.78 4.22a.75.75 0 010 1.06L8.06 10l4.72 4.72a.75.75 0 11-1.06 1.06l-5.25-5.25a.75.75 0 010-1.06l5.25-5.25a.75.75 0 011.06 0z" clipRule="evenodd" />
-                        </svg>
+                        <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
                       </button>
                       <button
                         type="button"
@@ -1646,9 +1671,7 @@ function ThreeDaysWorkshopsContent() {
                         className="w-9 h-9 rounded-full border border-[#0052FF] text-[#0052FF] bg-white hover:bg-[#0052FF] hover:text-white transition-colors flex items-center justify-center cursor-pointer shadow-sm active:scale-[0.95]"
                         aria-label="Scroll outcomes right"
                       >
-                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M7.22 15.78a.75.75 0 010-1.06L11.94 10 7.22 5.28a.75.75 0 111.06-1.06l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 01-1.06 0z" clipRule="evenodd" />
-                        </svg>
+                        <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
                       </button>
                     </div>
                   </div>
@@ -1677,24 +1700,28 @@ function ThreeDaysWorkshopsContent() {
                   </div>
 
                   {/* Download Brochure Button */}
-                  <div className="flex justify-center mt-6 mb-0">
-                    <button
-                      onClick={() => alert("Brochure download starting shortly...")}
-                      className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-white border-2 border-black rounded-full font-bold text-gray-900 text-xs sm:text-sm md:text-base flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-[0px_0px_0px_0px_#000000] hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-150 active:scale-[0.98] cursor-pointer"
-                    >
-                      Download Workshop Details Brochure
-                      <svg
-                        className="w-4 h-4 md:w-5 md:h-5 text-black shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                  {workshop.brochureUrl && (
+                    <div className="flex justify-center mt-6 mb-0">
+                      <a
+                        href={workshop.brochureUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-white border-2 border-black rounded-full font-bold text-gray-900 text-xs sm:text-sm md:text-base flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-[0px_0px_0px_0px_#000000] hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-150 active:scale-[0.98] cursor-pointer"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
-                  </div>
+                        Download Workshop Details Brochure
+                        <svg
+                          className="w-4 h-4 md:w-5 md:h-5 text-black shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
@@ -1768,7 +1795,9 @@ function ThreeDaysWorkshopsContent() {
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
                   )}
@@ -1836,11 +1865,246 @@ function ThreeDaysWorkshopsContent() {
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                        {workshop.deadline 
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                          : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
                   )}
                 </div>
+              </div>
+            </section>
+
+            {/* Meet your Mentors Section */}
+            <section className="bg-white py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-meet-mentors">
+              <div className="max-w-6xl w-full mx-auto flex flex-col items-center">
+                <h2 className="text-[26px] md:text-[36px] font-semibold text-gray-900 tracking-tight text-center mb-12">
+                  Meet your Mentors
+                </h2>
+
+                <div className="flex flex-col gap-16 md:gap-24 w-full">
+                  {/* Mentor 1: Founder */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                    {/* Left Column: Image and Name */}
+                    <div className="md:col-span-5 flex flex-col items-center">
+                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                        <img
+                          src="/LandingPage/aman_saurav.png"
+                          alt="Aman Saurav"
+                          className="w-full h-full object-cover rounded-[10px]"
+                        />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                        Aman Saurav
+                      </h3>
+                    </div>
+
+                    {/* Right Column: Details */}
+                    <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
+                      {/* Founder Heading */}
+                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                        Founder
+                      </h4>
+                      {/* Checkmarks list */}
+                      <div className="flex flex-col gap-3 mb-6">
+                        {[
+                          "IIT Delhi Alumni",
+                          "Director of AI for Techies",
+                          "Senior Data Analyst"
+                        ].map((text, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Paragraphs */}
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                        Hello, I'm a graduate of{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          IIT Delhi
+                        </span>{" "}
+                        and currently work as a{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          Senior Data Analyst
+                        </span>{" "}
+                        and Program{" "}
+                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                          Director at AI for Techies
+                        </span>
+                        . With over a decade of experience in the field, I've been teaching and mentoring learners in AI/ML, data analysis, Python, Excel, SQL, and related technologies.
+                      </p>
+
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        I've had the privilege of guiding{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          over 20,000 students
+                        </span>{" "}
+                        and{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          professionals
+                        </span>{" "}
+                        through their data and AI journeys. Passionate about simplifying complex concepts and building real-world skills, I aim to empower individuals to confidently step into the world of data and technology.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mentor 2: Co-Founder */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                    {/* Left Column (Details) - Shows first on mobile, but second on desktop */}
+                    <div className="md:col-span-7 order-2 md:order-1 flex flex-col items-start text-left font-sans text-gray-800">
+                      {/* Co-Founder Heading */}
+                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                        Co-Founder
+                      </h4>
+                      {/* Checkmarks list */}
+                      <div className="flex flex-col gap-3 mb-6">
+                        {[
+                          "IIT Kharagpur Alumni",
+                          "Co-Founder of AI for Techies",
+                          "Senior AI & Tech Mentor"
+                        ].map((text, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Paragraphs */}
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                        Hello, I'm a graduate of{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          IIT Kharagpur
+                        </span>{" "}
+                        and Co-Founder at{" "}
+                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                          AI for Techies
+                        </span>
+                        . With a deep passion for technology and artificial intelligence, I have spent years building scalable AI systems and designing educational programs that bridge the gap between academic theory and industry application.
+                      </p>
+
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        Over my career, I've mentored{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          thousands of developers
+                        </span>{" "}
+                        and{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          professionals
+                        </span>{" "}
+                        in prompt engineering, generative AI, Python programming, and advanced automation. My goal is to equip every learner with the practical tools and logic required to excel in today's fast-paced tech landscape.
+                      </p>
+                    </div>
+
+                    {/* Right Column (Image) - Shows second on mobile, but first on desktop relative to its side */}
+                    <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
+                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                        <img
+                          src="/LandingPage/co_founder.png"
+                          alt="Aditya Kachave"
+                          className="w-full h-full object-cover rounded-[10px]"
+                        />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                        Aditya Kachave
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Frequently Asked Questions (FAQs) Section */}
+            <section className="bg-[#EBF5FF]/30 py-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-blue-50" id="workshop-faqs">
+              <div className="max-w-5xl w-full mx-auto flex flex-col items-center text-center">
+                <h2 className="text-[26px] md:text-[36px] font-black text-gray-900 tracking-tight mb-2">
+                  Frequently Asked Questions (FAQs)
+                </h2>
+                <p className="text-gray-700 text-sm md:text-base font-semibold leading-relaxed px-2">
+                  We&apos;ve tried our best to answer all common queries that you might have.
+                </p>
+                <p className="text-gray-700 text-sm md:text-base font-semibold leading-relaxed mb-6 px-2">
+                  For further queries, please email us at{" "}
+                  <a href="mailto:shubhajitbasak45@gmail.com" className="text-blue-600 underline font-bold hover:text-blue-800 transition-colors">
+                    shubhajitbasak45@gmail.com
+                  </a>
+                </p>
+
+                <h3 className="text-lg md:text-xl font-extrabold text-gray-900 tracking-tight mb-6 flex items-center gap-1.5 uppercase">
+                  SEE YOU INSIDE THE COHORT <span>😛</span>
+                </h3>
+
+                {/* Blue CTA Button */}
+                <div className="max-w-2xl w-full mx-auto z-10 px-4 mb-10">
+                  {isRegistered ? (
+                    <div className="flex flex-col items-center justify-center py-4 px-4 bg-emerald-50 border border-emerald-400 rounded-xl text-center max-w-md mx-auto">
+                      <span className="text-base font-bold text-gray-900">Successfully Registered</span>
+                      <Link href="/dashboard/workshops" className="text-blue-600 hover:text-blue-700 font-bold text-xs tracking-wide mt-1 hover:underline">
+                        View Details
+                      </Link>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handlePriceButtonClick}
+                      className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-sm sm:text-base md:text-lg tracking-wide border-0"
+                    >
+                      <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="line-through text-blue-200 text-sm md:text-base font-semibold">₹{workshop.originalPrice || 1999}</span>
+                        <span className="text-white text-lg md:text-xl font-semibold md:font-black">₹{workshop.price || 199}/-</span>
+                      </span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Accordion Questions List */}
+                <div className="w-full flex flex-col gap-3.5 max-w-5xl text-left mt-4">
+                  {[
+                    {
+                      q: "When will the cohort start?",
+                      a: "The cohort starts on June 14, 2026. All live session timings and links will be shared via email and WhatsApp groups after registration."
+                    },
+                    {
+                      q: "Is there any prerequisite required?",
+                      a: "No prior coding or programming experience is required. We start completely from scratch (0 to Hero level) and guide you step-by-step."
+                    },
+                    {
+                      q: "Is it a certified cohort?",
+                      a: "Yes, you will receive a verified Certificate of Completion upon successfully finishing all modules and projects."
+                    },
+                    {
+                      q: "Do you get notes & assignments to practice?",
+                      a: "Yes, all lessons are accompanied by detailed notes, AI prompts, practice code notebooks, and hands-on assignments."
+                    },
+                    {
+                      q: "Is there any age limit for the cohort?",
+                      a: "There is no age limit. Whether you are a school student, college student, working professional, or career switcher, this program is designed for everyone."
+                    }
+                  ].map((item, idx) => {
+                    const isOpen = openFaq === idx;
+                    return (
+                      <div key={idx} className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs transition-all duration-300">
+                        <button
+                          onClick={() => setOpenFaq(isOpen ? null : idx)}
+                          className="w-full flex items-center justify-between p-5 text-left transition-colors font-bold text-gray-900 text-sm md:text-base cursor-pointer bg-white hover:bg-slate-50/50"
+                        >
+                          <span>{item.q}</span>
+                          <svg className={`w-4 h-4 text-gray-800 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-90' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                          </svg>
+                        </button>
+                        {isOpen && (
+                          <div className="px-5 pb-5 pt-1 text-gray-600 text-sm md:text-[15px] font-medium border-t border-slate-100 bg-white leading-relaxed">
+                            {item.a}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
               </div>
             </section>
           </>
@@ -1866,7 +2130,9 @@ function ThreeDaysWorkshopsContent() {
               </div>
               <div className="flex flex-col items-start leading-tight text-left">
                 <span className="text-[11px] md:text-sm font-bold text-red-600 tracking-tight">
-                  {workshop.bonusDeadlineText || "Register Before June 07, 2026 To Unlock All Bonuses Worth Rs. 12300"}
+                  {workshop.deadline 
+                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                    : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                 </span>
                 {selectedDate && (
                   <span className="text-[10px] md:text-xs font-semibold text-gray-500 mt-0.5">

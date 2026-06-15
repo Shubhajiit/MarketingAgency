@@ -90,6 +90,7 @@ export interface Workshop {
   bonusDeadlineText: string;
   heroPoints: string[];
   workshopDates: any[];
+  deadline?: string;
 
   // Rich content
   highlights: WorkshopHighlight[];
@@ -108,6 +109,7 @@ export interface Workshop {
   rating2Count?: string;
   rating2Platform?: string;
   type?: 'one-day' | 'three-days';
+  brochureUrl?: string;
 }
 
 interface WorkshopListResponse {
@@ -164,11 +166,10 @@ export const workshopApi = {
     return res.data;
   },
 
-  /**
-   * Get a single workshop by its MongoDB _id (admin use).
-   */
   get: async (id: string) => {
-    const res = await apiClient.get<WorkshopDetailResponse>(`/workshops/${id}`);
+    const res = await apiClient.get<WorkshopDetailResponse>(`/workshops/${id}`, {
+      params: { _t: Date.now() }
+    });
     return res.data;
   },
 
@@ -176,7 +177,9 @@ export const workshopApi = {
    * Get a single workshop by URL slug (public, used on the detail page).
    */
   getBySlug: async (slug: string) => {
-    const res = await apiClient.get<WorkshopDetailResponse>(`/workshops/${slug}`);
+    const res = await apiClient.get<WorkshopDetailResponse>(`/workshops/${slug}`, {
+      params: { _t: Date.now() }
+    });
     return res.data;
   },
 
@@ -219,6 +222,20 @@ export const workshopApi = {
     const formData = new FormData();
     formData.append('image', file);
     const res = await apiClient.post<{ success: boolean; url: string; filename: string }>('/workshops/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+
+  /**
+   * Upload a brochure PDF/Word file (admin only).
+   */
+  uploadBrochure: async (file: File) => {
+    const formData = new FormData();
+    formData.append('brochure', file);
+    const res = await apiClient.post<{ success: boolean; url: string; s3Key: string }>('/workshops/upload-brochure', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

@@ -44,7 +44,7 @@ export default function MobileBottomNav() {
 	const tabs = [
 		{ label: 'Courses', href: '/dashboard/activecourse', icon: Book },
 		{ label: 'Explore', href: '/all-course', icon: Compass },
-		{ label: 'Upcoming', href: '/', icon: Calendar },
+		{ label: 'Upcoming', href: '/dashboard/upcoming-workshops', icon: Calendar },
 		{ label: 'Workshops', href: '/dashboard/workshops', icon: Video }
 	];
 

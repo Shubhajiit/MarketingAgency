@@ -17,8 +17,6 @@ export default function UserDashboardHeader({ className }: UserDashboardHeaderPr
 		if (path.includes('/all-course')) return 'Explore Courses';
 		if (path.includes('/workshops')) return 'Workshops';
 		if (path.includes('/videos')) return 'AI Avatar';
-		if (path.includes('/bookings')) return 'Bookmarks';
-		if (path.includes('/community')) return 'Community';
 		if (path.includes('/settings')) return 'Account Settings';
 		return 'Dashboard';
 	};
