@@ -23,7 +23,12 @@ const paymentLimiter = rateLimit({
 });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://scaleai-ashy.vercel.app', process.env.CLIENT_URL].filter(Boolean),
+  origin: [
+    'http://localhost:3000',
+    'https://scaleai-ashy.vercel.app',
+    'https://aiscallex.vercel.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());
