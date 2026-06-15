@@ -41,6 +41,15 @@ const workshopRegistrationSchema = new mongoose.Schema(
     razorpayOrderId: { type: String, default: '' },     // Razorpay order ID
     razorpaySignature: { type: String, default: '' },   // Razorpay signature for audit
 
+    // Cancellation & Refund
+    isCancelled: { type: Boolean, default: false },
+    cancellationEmailSent: { type: Boolean, default: false },
+    refundStatus: {
+      type: String,
+      enum: ['none', 'pending', 'refunded'],
+      default: 'none',
+    },
+
     // Extra
     notes: { type: String, default: '' },
   },

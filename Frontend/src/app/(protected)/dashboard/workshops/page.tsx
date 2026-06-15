@@ -1,11 +1,39 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { userApi } from '@/lib/api/user';
+import { useAuthStore } from '@/store/auth.store';
 
 export default function WorkshopsPage() {
-  const { user } = useAuth();
+  const { user, checkAuth } = useAuth();
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (checkAuth) {
+      checkAuth(true);
+    }
+  }, [checkAuth]);
+
+  const handleRemoveWorkshop = async (workshopId: string) => {
+    if (!window.confirm("Are you sure you want to remove this cancelled workshop from your dashboard?")) {
+      return;
+    }
+    setIsRemoving(workshopId);
+    try {
+      const res = await userApi.removeWorkshop(workshopId);
+      if (res.success && res.data?.user) {
+        useAuthStore.getState().setAuth(res.data.user);
+      }
+    } catch (error) {
+      console.error("Error removing workshop:", error);
+      alert("Failed to remove workshop. Please try again.");
+    } finally {
+      setIsRemoving(null);
+    }
+  };
+
   const enrolledWorkshops = (user?.enrolledWorkshops || []).filter(
     (w: any) => w && typeof w === 'object' && w.title
   );
@@ -34,8 +62,22 @@ export default function WorkshopsPage() {
             return (
               <div
                 key={workshop._id || workshop.id}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative"
               >
+                {/* Cross Button to Remove Workshop if Cancelled */}
+                {workshop.isCancelled && (
+                  <button
+                    onClick={() => handleRemoveWorkshop(workshop._id || workshop.id)}
+                    disabled={isRemoving === (workshop._id || workshop.id)}
+                    className="absolute top-2.5 right-2.5 z-20 bg-slate-900/85 hover:bg-rose-600 disabled:bg-slate-400 text-white p-1.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center cursor-pointer border border-white/20"
+                    title="Remove from Dashboard"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+
                 {/* Thumbnail */}
                 <div className="aspect-[16/9] w-full overflow-hidden relative bg-slate-100">
                   <img
@@ -43,9 +85,15 @@ export default function WorkshopsPage() {
                     alt={workshop.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="absolute top-3 right-3 bg-indigo-600 text-white font-bold text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
-                    {isThreeDays ? '3-Day' : '1-Day'}
-                  </span>
+                  {workshop.isCancelled ? (
+                    <span className="absolute top-3 left-3 bg-rose-600 text-white font-bold text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
+                      Cancelled
+                    </span>
+                  ) : (
+                    <span className="absolute top-3 right-3 bg-indigo-600 text-white font-bold text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-full shadow-sm">
+                      {isThreeDays ? '3-Day' : '1-Day'}
+                    </span>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -55,37 +103,58 @@ export default function WorkshopsPage() {
                       className="text-base font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors mb-2 line-clamp-2"
                       dangerouslySetInnerHTML={{ __html: workshop.title }}
                     />
-                    {workshop.subtitle && (
-                      <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-4 leading-relaxed">
-                        {workshop.subtitle}
-                      </p>
-                    )}
-                    {workshop.instructor && (
-                      <div className="flex items-center gap-2 mb-4">
-                        {workshop.instructorImage ? (
-                          <img
-                            src={workshop.instructorImage}
-                            alt={workshop.instructor}
-                            className="w-6 h-6 rounded-full object-cover border border-slate-200"
-                          />
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
-                            {workshop.instructor.charAt(0)}
+                    
+                    {workshop.isCancelled ? (
+                      <div className="mt-2 mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-[11px] text-rose-700 leading-relaxed font-medium">
+                        <div className="flex items-center gap-1.5 font-bold text-rose-800 mb-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          Workshop Cancelled
+                        </div>
+                        A full refund has been automatically initiated. The refund amount will be credited back to your original payment method within the next 7 days.
+                      </div>
+                    ) : (
+                      <>
+                        {workshop.subtitle && (
+                          <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-4 leading-relaxed">
+                            {workshop.subtitle}
+                          </p>
+                        )}
+                        {workshop.instructor && (
+                          <div className="flex items-center gap-2 mb-4">
+                            {workshop.instructorImage ? (
+                              <img
+                                src={workshop.instructorImage}
+                                alt={workshop.instructor}
+                                className="w-6 h-6 rounded-full object-cover border border-slate-200"
+                              />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                                {workshop.instructor.charAt(0)}
+                              </div>
+                            )}
+                            <span className="text-xs text-slate-700 font-semibold">
+                              {workshop.instructor}
+                            </span>
                           </div>
                         )}
-                        <span className="text-xs text-slate-700 font-semibold">
-                          {workshop.instructor}
-                        </span>
-                      </div>
+                      </>
                     )}
                   </div>
 
-                  <Link
-                    href={href}
-                    className="w-full text-center py-2.5 px-4 bg-[#1b2a60] hover:bg-[#15204a] text-white text-xs font-bold rounded-lg shadow-sm transition-colors mt-auto inline-block"
-                  >
-                    View Details
-                  </Link>
+                  {workshop.isCancelled ? (
+                    <div className="w-full text-center py-2.5 px-4 bg-slate-100 text-slate-400 text-xs font-bold rounded-lg border border-slate-200 mt-auto">
+                      Session Cancelled
+                    </div>
+                  ) : (
+                    <Link
+                      href={href}
+                      className="w-full text-center py-2.5 px-4 bg-[#1b2a60] hover:bg-[#15204a] text-white text-xs font-bold rounded-lg shadow-sm transition-colors mt-auto inline-block"
+                    >
+                      View Details
+                    </Link>
+                  )}
                 </div>
               </div>
             );
@@ -94,6 +163,7 @@ export default function WorkshopsPage() {
       </div>
     );
   }
+
 
   // Existing/Empty state
   return (

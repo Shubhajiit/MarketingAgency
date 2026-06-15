@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import UserDashboardHeader from '@/components/UserDashboardComponent/common/UserDashboardHeader';
 import UserDashboardSidebar from '@/components/UserDashboardComponent/common/UserDashboardSidebar';
@@ -17,6 +17,9 @@ export default function ProtectedLayout({
   const { isAuthenticated, isLoading } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isPlayerPage = pathname?.startsWith('/dashboard/courses/');
 
   useEffect(() => {
     setMounted(true);
@@ -44,10 +47,27 @@ export default function ProtectedLayout({
 
   const renderContent = () => {
     if (!mounted || isLoading) {
+      if (isPlayerPage) {
+        return (
+          <div className="flex h-screen items-center justify-center bg-black text-white font-sans">
+            <div className="flex flex-col items-center gap-4">
+              <svg className="animate-spin w-10 h-10 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <p className="text-slate-400 text-sm font-medium">Loading...</p>
+            </div>
+          </div>
+        );
+      }
       return <DashboardSkeleton />;
     }
     return children;
   };
+
+  if (mounted && isPlayerPage) {
+    return renderContent();
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex font-sans relative overflow-x-hidden">

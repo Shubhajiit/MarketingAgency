@@ -72,7 +72,10 @@ exports.login = async (req, res) => {
 
     // Check for user email
     // Since password has select: false in schema, we need to explicitly select it
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email })
+      .select('+password')
+      .populate('enrolledWorkshops')
+      .populate('enrolledCourses');
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -157,7 +160,9 @@ exports.googleLogin = async (req, res) => {
     const payload = await response.json();
     const { sub: googleId, email, name, picture } = payload;
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email })
+      .populate('enrolledWorkshops')
+      .populate('enrolledCourses');
 
     if (!user) {
       user = await User.create({

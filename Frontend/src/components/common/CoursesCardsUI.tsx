@@ -41,6 +41,7 @@ export interface Course {
   metaDurationSubtitle?: string;
   metaHandsOn?: string;
   metaHandsOnSubtitle?: string;
+  videos?: any[];
 }
 
 interface CourseCardProps {

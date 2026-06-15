@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 
 const libraryItems = [
-	{ label: 'Courses', href: '/dashboard/activecourse' },
+	{ label: 'My Courses', href: '/dashboard/activecourse' },
+	{ label: 'Browse Courses', href: '/all-course' },
 	{ label: 'Workshops', href: '/dashboard/workshops' }
 ];
 

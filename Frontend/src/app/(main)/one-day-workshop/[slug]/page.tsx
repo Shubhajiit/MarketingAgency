@@ -316,6 +316,13 @@ export default function DynamicWorkshopPage() {
     fetchWorkshop();
   }, [slug]);
 
+  // Sync auth state to fetch latest enrolled workshops after login or page load
+  useEffect(() => {
+    if (isAuthenticated && checkAuth) {
+      checkAuth(true);
+    }
+  }, [isAuthenticated, checkAuth]);
+
   // Scroll handler for sticky bar
   useEffect(() => {
     const handleScroll = () => {
@@ -670,7 +677,7 @@ Email: contact@aiscale.com
               registrationId: regId,
             });
             if (checkAuth) {
-              await checkAuth();
+              await checkAuth(true);
             }
             setPaymentStep('success');
           } catch {
@@ -1042,48 +1049,46 @@ Email: contact@aiscale.com
                   </div>
 
                   {/* Logos marquee: continuously scrolls right-to-left */}
-                  <div className="pt-3 mt-3 md:pt-6 md:mt-6 px-2">
+                  <div className="mt-3 md:mt-4 px-2">
                     <div className="relative overflow-hidden">
-                      <div className="marquee flex items-center gap-6" aria-hidden>
-                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
-                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                            </svg>
-                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                          </div>
+                      <div className="flex w-max select-none">
+                        <div className="marquee flex shrink-0 items-center gap-8 pr-8">
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/PictoryAI.webp" alt="Pictory AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/copyAI.png" alt="Copy AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/invideoAI.png" alt="InVideo AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/jasperAI.png" alt="Jasper AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/DescriptAI.webp" alt="Descript AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ZapierLogo.png" alt="Zapier" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/notionLOGO.png" alt="Notion" className="h-7 object-contain shrink-0" />
                         </div>
 
                         {/* duplicate for seamless loop */}
-                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
-                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                            </svg>
-                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                          </div>
+                        <div className="marquee flex shrink-0 items-center gap-8 pr-8" aria-hidden="true">
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/PictoryAI.webp" alt="Pictory AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/copyAI.png" alt="Copy AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/invideoAI.png" alt="InVideo AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/jasperAI.png" alt="Jasper AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/DescriptAI.webp" alt="Descript AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ZapierLogo.png" alt="Zapier" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/notionLOGO.png" alt="Notion" className="h-7 object-contain shrink-0" />
                         </div>
                       </div>
 
                       <style jsx>{`
                         @keyframes marquee {
-                          0% { transform: translateX(0); }
-                          100% { transform: translateX(-50%); }
+                          0% { transform: translateX(0%); }
+                          100% { transform: translateX(-100%); }
                         }
                         .marquee {
-                          display: flex;
-                          gap: 8rem;
-                          align-items: center;
-                          min-width: 200%;
-                          animation: marquee 16s linear infinite;
+                          animation: marquee 25s linear infinite;
                         }
                       `}</style>
                     </div>
@@ -1200,8 +1205,15 @@ Email: contact@aiscale.com
 
                         return (
                           <div className={`grid ${gridColsClass} gap-3 md:gap-4 w-full justify-center justify-items-center`}>
-                            {datesList.map((dateVal: string | Date, idx: number) => {
-                              const dateObj = new Date(dateVal);
+                            {datesList.map((dateVal: any, idx: number) => {
+                              const dateStr = typeof dateVal === 'string' || dateVal instanceof Date
+                                ? dateVal
+                                : dateVal?.date || '';
+                              const place = typeof dateVal === 'string' || dateVal instanceof Date
+                                ? ''
+                                : dateVal?.place || '';
+
+                              const dateObj = new Date(dateStr);
                               const isoStr = dateObj.toISOString();
                               const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                               const dayMonth = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
@@ -1216,7 +1228,7 @@ Email: contact@aiscale.com
                                     : 'bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02]'
                                   }`}
                                 >
-                                  <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain" />
+                                  <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain shrink-0" />
                                   <div className="flex flex-col items-start text-left leading-none">
                                     <span className={`text-[10px] md:text-[11px] font-semibold uppercase tracking-wider mb-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500 group-hover:text-[#0052FF]'}`}>
                                       {weekday}
@@ -1224,6 +1236,11 @@ Email: contact@aiscale.com
                                     <span className={`text-xs md:text-sm font-semibold leading-none ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                                       {dayMonth}
                                     </span>
+                                    {place && (
+                                      <span className={`text-[9px] md:text-[10px] mt-1 font-medium leading-none ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}>
+                                        📍 {place}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               );

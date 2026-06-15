@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/lib/api/auth';
 import Cookies from 'js-cookie';
@@ -13,6 +14,7 @@ const TOKEN_EXPIRY_DAYS = 5;
 let authCheckInFlight = false;
 
 export function useAuth() {
+  const router = useRouter();
   const { user, isAuthenticated, isLoading, setAuth, clearAuth, setLoading, token } = useAuthStore();
 
   const login = useCallback(
@@ -60,14 +62,15 @@ export function useAuth() {
   const logout = useCallback(async () => {
     Cookies.remove('refreshToken');
     clearAuth();
-  }, [clearAuth]);
+    router.push('/');
+  }, [clearAuth, router]);
 
   /**
    * Verifies the stored token with the backend.
    * Protected by a module-level in-flight flag so it only runs once at a time,
    * even if multiple components call it on mount simultaneously.
    */
-  const checkAuth = useCallback(async () => {
+  const checkAuth = useCallback(async (background = false) => {
     // Get latest token directly from store (not the stale closure value)
     const currentToken = useAuthStore.getState().token;
 
@@ -80,7 +83,9 @@ export function useAuth() {
     if (authCheckInFlight) return;
     authCheckInFlight = true;
 
-    setLoading(true);
+    if (!background) {
+      setLoading(true);
+    }
 
     try {
       const { data } = await authApi.getMe();
@@ -96,7 +101,9 @@ export function useAuth() {
       Cookies.remove('refreshToken');
       useAuthStore.getState().clearAuth();
     } finally {
-      setLoading(false);
+      if (!background) {
+        setLoading(false);
+      }
       authCheckInFlight = false;
     }
   }, [setLoading]);

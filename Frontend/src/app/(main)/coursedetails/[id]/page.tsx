@@ -16,7 +16,25 @@ const countryCodes = [
   { code: "+65", country: "Singapore", flag: "🇸🇬" },
 ];
 
-const getCourseDetailMeta = (course: Course) => {
+const getCourseDetailMeta = (course: Course | null) => {
+  const defaultMeta = {
+    instructorName: "Loading...",
+    instructorBio: "Loading...",
+    enrolledCount: "Loading...",
+    rating: "0.0",
+    reviewsCount: "0",
+    level: "Loading...",
+    type: "Loading...",
+    typeSubtitle: "Loading...",
+    whatYoullLearn: ["Loading...", "Loading...", "Loading..."],
+    skills: ["Loading...", "Loading...", "Loading..."],
+    tools: ["Loading...", "Loading...", "Loading..."]
+  };
+
+  if (!course) {
+    return defaultMeta;
+  }
+
   const metaMap: Record<string, {
     instructorName: string;
     instructorBio: string;
@@ -168,24 +186,6 @@ const getCourseDetailMeta = (course: Course) => {
     }
   };
 
-  const defaultMeta = {
-    instructorName: course.instructorName || course.authorName || "Paula Del Rey",
-    instructorBio: "Industry Certified Expert with years of hands-on strategy and execution experience.",
-    enrolledCount: "210,000",
-    rating: "4.8",
-    reviewsCount: "3,150",
-    level: course.category === "advanced" ? "Advanced level" : course.category === "short" ? "Beginner level" : "Intermediate level",
-    type: "Professional Certification",
-    typeSubtitle: "Learn, practice, and apply job-ready skills with expert guidance",
-    whatYoullLearn: [
-      "Explain the fundamental theories and acquisition tools mapped to this certification.",
-      "Execute hands-on laboratory exercises mirroring real-world organizational challenges.",
-      "Construct a deployment-ready case study project to display on your professional resume."
-    ],
-    skills: ["Practical Analytics", "Industry Workflows", "Campaign Systems", "Critical Strategy", "Execution Details"],
-    tools: ["Google Workspace", "Figma", "Trello"]
-  };
-
   const cid = (course as any)._id || course.id;
   const mapped = metaMap[cid] || defaultMeta;
   return {
@@ -286,21 +286,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] bg-white text-gray-900">
-        <div className="flex flex-col items-center gap-3">
-          <svg className="animate-spin w-8 h-8 text-[#0056d2]" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-sm text-slate-500 font-medium">Loading course details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!course) {
+  if (!loading && !course) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] bg-white text-gray-900 px-4">
         <h2 className="text-2xl font-bold mb-2">Course Not Found</h2>
@@ -318,7 +304,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   }
 
   const detailMeta = getCourseDetailMeta(course);
-  const modules = getSyllabusModules(course.title);
+  const modules = getSyllabusModules(course ? course.title : "");
 
   const handleEnrollInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -403,7 +389,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
               {/* Course Title */}
               <span className="font-bold text-slate-800 text-base md:text-[18px] line-clamp-1 max-w-[150px] sm:max-w-[320px] md:max-w-xl lg:max-w-3xl">
-                {course.title}
+                {course ? course.title : <span className="inline-block h-5 w-48 bg-slate-200 rounded animate-pulse align-middle"></span>}
               </span>
             </div>
 
@@ -535,42 +521,56 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
           {/* Course Name */}
           <h1 className="text-2xl sm:text-3xl md:text-[42px] font-bold text-[#0c102a] tracking-tight leading-tight max-w-3xl mb-5">
-            {course.title}
+            {course ? course.title : <div className="h-10 bg-slate-200 rounded animate-pulse w-3/4"></div>}
           </h1>
 
           {/* Instructor Block */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200 shrink-0">
-              <img
-                src={course.mentorPicture || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
-                alt={detailMeta.instructorName}
-                className="w-full h-full object-cover"
-              />
+            <div className={`w-9 h-9 rounded-full overflow-hidden border border-slate-200 shrink-0 ${!course ? 'animate-pulse bg-slate-200' : ''}`}>
+              {course && (
+                <img
+                  src={course.mentorPicture || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
+                  alt={detailMeta.instructorName}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
             <span className="text-[13px] font-medium text-slate-700">
-              Instructor: <span className="text-[#0056d2] underline hover:text-[#00419e] cursor-pointer font-bold">{detailMeta.instructorName}</span>
+              Instructor: {course ? (
+                <span className="text-[#0056d2] underline hover:text-[#00419e] cursor-pointer font-bold">{detailMeta.instructorName}</span>
+              ) : (
+                <span className="inline-block h-3.5 bg-slate-200 rounded animate-pulse w-24 align-middle"></span>
+              )}
             </span>
           </div>
 
           {/* Price Block */}
-          <div className="flex items-baseline gap-2.5 mb-5 select-none">
-            <span className="text-3xl font-extrabold text-[#0056d2]">₹{course.price}</span>
-            {course.originalPrice > 0 && (
-              <span className="text-xs text-slate-400 line-through">₹{course.originalPrice}</span>
-            )}
-            {course.discount && (
-              <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs ml-1">
-                {course.discount} OFF
-              </span>
-            )}
-          </div>
+          {course ? (
+            <div className="flex items-baseline gap-2.5 mb-5 select-none">
+              <span className="text-3xl font-extrabold text-[#0056d2]">₹{course.price}</span>
+              {course.originalPrice > 0 && (
+                <span className="text-xs text-slate-400 line-through">₹{course.originalPrice}</span>
+              )}
+              {course.discount && (
+                <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs ml-1">
+                  {course.discount} OFF
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-2.5 mb-5 h-9 animate-pulse">
+              <span className="h-8 bg-slate-200 rounded w-28 block"></span>
+              <span className="h-4 bg-slate-200 rounded w-16 block"></span>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-row flex-wrap items-center gap-3">
               <button
                 onClick={handleBuyNow}
-                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0"
+                disabled={!course}
+                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
               >
                 Buy NOW
               </button>
@@ -581,21 +581,29 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     formEl.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 active:scale-[0.99] text-sm font-semibold py-3 px-8 rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide cursor-pointer shrink-0"
+                disabled={!course}
+                className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 active:scale-[0.99] text-sm font-semibold py-3 px-8 rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
               >
                 Contact Sales
               </button>
             </div>
 
             {/* Enrollment subtext */}
-            <div className="flex flex-col gap-1.5 text-[13px] text-slate-500 font-medium">
-              <span className="text-slate-800 font-bold">
-                {detailMeta.enrolledCount} already enrolled
-              </span>
-              <span className="flex items-center gap-1 whitespace-nowrap">
-                Included with <span className="text-[#0056d2] font-normal tracking-tight">all strategies</span> <span className="mx-1.5 text-slate-300">•</span> <span className="text-[#0056d2] underline hover:text-[#00419e] cursor-pointer">Learn more</span>
-              </span>
-            </div>
+            {course ? (
+              <div className="flex flex-col gap-1.5 text-[13px] text-slate-500 font-medium">
+                <span className="text-slate-800 font-bold">
+                  {detailMeta.enrolledCount} already enrolled
+                </span>
+                <span className="flex items-center gap-1 whitespace-nowrap">
+                  Included with <span className="text-[#0056d2] font-normal tracking-tight">all strategies</span> <span className="mx-1.5 text-slate-300">•</span> <span className="text-[#0056d2] underline hover:text-[#00419e] cursor-pointer">Learn more</span>
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5 text-[13px] text-slate-500 font-medium animate-pulse">
+                <div className="h-4 bg-slate-200 rounded w-40"></div>
+                <div className="h-4 bg-slate-200 rounded w-52"></div>
+              </div>
+            )}
           </div>
 
         </div>
@@ -608,63 +616,109 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
             {/* 1. Guided Project Type */}
             <div className="flex flex-col pr-2">
-              <span className="font-bold text-slate-800 text-[18px] underline hover:underline cursor-pointer">
-                {detailMeta.type}
-              </span>
-              <span className="text-[14px] text-slate-500 font-medium mt-1 leading-relaxed">
-                {detailMeta.typeSubtitle}
-              </span>
+              {course ? (
+                <>
+                  <span className="font-bold text-slate-800 text-[18px] underline hover:underline cursor-pointer">
+                    {detailMeta.type}
+                  </span>
+                  <span className="text-[14px] text-slate-500 font-medium mt-1 leading-relaxed">
+                    {detailMeta.typeSubtitle}
+                  </span>
+                </>
+              ) : (
+                <div className="animate-pulse space-y-2">
+                  <div className="h-5 bg-slate-200 rounded w-28"></div>
+                  <div className="h-4 bg-slate-200 rounded w-40"></div>
+                </div>
+              )}
             </div>
 
             {/* 2. Rating */}
             <div
               onClick={() => {
+                if (!course) return;
                 const reviewsEl = document.getElementById("reviews-section");
                 if (reviewsEl) {
                   reviewsEl.scrollIntoView({ behavior: "smooth", block: "start" });
                 }
               }}
-              className="flex flex-row md:flex-col items-baseline md:items-start gap-1.5 md:gap-0 md:pl-5 cursor-pointer group shrink-0"
+              className={`flex flex-row md:flex-col items-baseline md:items-start gap-1.5 md:gap-0 md:pl-5 cursor-pointer group shrink-0 ${!course ? 'pointer-events-none' : ''}`}
             >
-              <span className="font-bold text-slate-800 text-[18px] flex items-center gap-1 group-hover:text-[#0056d2] transition-colors">
-                {detailMeta.rating} <span className="text-[#0056d2] text-sm">★</span>
-              </span>
-              <span className="text-[14px] text-slate-500 font-medium md:mt-1 group-hover:underline">
-                ({detailMeta.reviewsCount} reviews)
-              </span>
+              {course ? (
+                <>
+                  <span className="font-bold text-slate-800 text-[18px] flex items-center gap-1 group-hover:text-[#0056d2] transition-colors">
+                    {detailMeta.rating} <span className="text-[#0056d2] text-sm">★</span>
+                  </span>
+                  <span className="text-[14px] text-slate-500 font-medium md:mt-1 group-hover:underline">
+                    ({detailMeta.reviewsCount} reviews)
+                  </span>
+                </>
+              ) : (
+                <div className="animate-pulse space-y-2">
+                  <div className="h-5 bg-slate-200 rounded w-16"></div>
+                  <div className="h-4 bg-slate-200 rounded w-20"></div>
+                </div>
+              )}
             </div>
 
             {/* 3. Level */}
             <div className="flex flex-col md:pl-5">
-              <span className="font-bold text-slate-800 text-[18px]">
-                {detailMeta.level}
-              </span>
-              <span className="text-[14px] text-slate-500 font-medium mt-1 flex items-center gap-1 cursor-pointer group">
-                {course.metaLevelSubtitle || "Recommended experience"}
-                <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </span>
+              {course ? (
+                <>
+                  <span className="font-bold text-slate-800 text-[18px]">
+                    {detailMeta.level}
+                  </span>
+                  <span className="text-[14px] text-slate-500 font-medium mt-1 flex items-center gap-1 cursor-pointer group">
+                    {course.metaLevelSubtitle || "Recommended experience"}
+                    <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
+                </>
+              ) : (
+                <div className="animate-pulse space-y-2">
+                  <div className="h-5 bg-slate-200 rounded w-24"></div>
+                  <div className="h-4 bg-slate-200 rounded w-32"></div>
+                </div>
+              )}
             </div>
 
             {/* 4. Duration */}
             <div className="flex flex-col md:pl-5">
-              <span className="font-bold text-slate-800 text-[18px]">
-                {course.metaDuration || (course.hours && course.hours.split("•")[0].trim()) || "30 Hours"}
-              </span>
-              <span className="text-[14px] text-slate-500 font-medium mt-1">
-                {course.metaDurationSubtitle || "Learn at your own pace"}
-              </span>
+              {course ? (
+                <>
+                  <span className="font-bold text-slate-800 text-[18px]">
+                    {course.metaDuration || (course.hours && course.hours.split("•")[0].trim()) || "30 Hours"}
+                  </span>
+                  <span className="text-[14px] text-slate-500 font-medium mt-1">
+                    {course.metaDurationSubtitle || "Learn at your own pace"}
+                  </span>
+                </>
+              ) : (
+                <div className="animate-pulse space-y-2">
+                  <div className="h-5 bg-slate-200 rounded w-20"></div>
+                  <div className="h-4 bg-slate-200 rounded w-28"></div>
+                </div>
+              )}
             </div>
 
             {/* 5. Hands-on Learning */}
             <div className="flex flex-col md:pl-5">
-              <span className="font-bold text-slate-800 text-[18px]">
-                {course.metaHandsOn || "Hands-on learning"}
-              </span>
-              <span className="text-[14px] text-[#0056d2] underline hover:text-[#00419e] mt-1 font-semibold cursor-pointer">
-                {course.metaHandsOnSubtitle || "Learn more"}
-              </span>
+              {course ? (
+                <>
+                  <span className="font-bold text-slate-800 text-[18px]">
+                    {course.metaHandsOn || "Hands-on learning"}
+                  </span>
+                  <span className="text-[14px] text-[#0056d2] underline hover:text-[#00419e] mt-1 font-semibold cursor-pointer">
+                    {course.metaHandsOnSubtitle || "Learn more"}
+                  </span>
+                </>
+              ) : (
+                <div className="animate-pulse space-y-2">
+                  <div className="h-5 bg-slate-200 rounded w-28"></div>
+                  <div className="h-4 bg-slate-200 rounded w-16"></div>
+                </div>
+              )}
             </div>
 
           </div>
@@ -737,14 +791,28 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   What you'll learn
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                  {detailMeta.whatYoullLearn.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <span className="text-slate-800 text-[14px] mt-0.5 shrink-0 font-bold">✓</span>
-                      <span className="text-[14px] text-slate-700 leading-relaxed font-medium">{item}</span>
-                    </div>
-                  ))}
-                </div>
+                {course ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    {detailMeta.whatYoullLearn.map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <span className="text-slate-800 text-[14px] mt-0.5 shrink-0 font-bold">✓</span>
+                        <span className="text-[14px] text-slate-700 leading-relaxed font-medium">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <span className="text-slate-200 text-[14px] mt-0.5 shrink-0 font-bold">✓</span>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3.5 bg-slate-200 rounded w-full"></div>
+                          <div className="h-3.5 bg-slate-200 rounded w-11/12"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               {/* Skills you'll practice section */}
@@ -752,16 +820,24 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   Skills you'll practice
                 </h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {detailMeta.skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="px-4.5 py-2 bg-[#ebf3fc]/80 text-[#0056d2] text-[13.5px] font-bold rounded-full hover:bg-[#ebf3fc] transition-colors cursor-pointer select-none"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+                {course ? (
+                  <div className="flex flex-wrap gap-2.5">
+                    {detailMeta.skills.map((skill, idx) => (
+                      <span
+                        key={idx}
+                        className="px-4.5 py-2 bg-[#ebf3fc]/80 text-[#0056d2] text-[13.5px] font-bold rounded-full hover:bg-[#ebf3fc] transition-colors cursor-pointer select-none"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2.5 animate-pulse">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="h-9 bg-slate-200 rounded-full w-24"></div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               {/* Tools you'll use section */}
@@ -769,16 +845,24 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   Tools you'll use
                 </h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {detailMeta.tools.map((tool, idx) => (
-                    <span
-                      key={idx}
-                      className="px-4.5 py-2 bg-[#f2f4f8] text-slate-700 text-[13.5px] font-bold rounded-full hover:bg-slate-200 transition-colors cursor-pointer select-none"
-                    >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
+                {course ? (
+                  <div className="flex flex-wrap gap-2.5">
+                    {detailMeta.tools.map((tool, idx) => (
+                      <span
+                        key={idx}
+                        className="px-4.5 py-2 bg-[#f2f4f8] text-slate-700 text-[13.5px] font-bold rounded-full hover:bg-slate-200 transition-colors cursor-pointer select-none"
+                      >
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2.5 animate-pulse">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-9 bg-slate-200 rounded-full w-24"></div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               {/* Details to know grid */}
@@ -826,61 +910,96 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
               {/* About this Guided Project Section */}
               <section id="about-guided-project" className="flex flex-col gap-6 w-full mt-12 border-t border-slate-100 pt-10 text-left">
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-[21px] font-bold text-slate-900 tracking-tight">
-                    About this Guided Project
-                  </h3>
-                  <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                    In this project, you will learn the foundation of data analysis with Microsoft Excel using sales data from a sample company. You will learn how to use sorting and filtering tools to reorganize your data and access specific information about your data. You will also learn about the use of functions like IF and VLOOKUP functions to create new data and relate data from different tables. Finally, you...
-                  </p>
-                  <button className="text-[13.5px] text-[#0056d2] font-bold hover:underline self-start">
-                    Read more
-                  </button>
-                </div>
+                {course ? (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-[21px] font-bold text-slate-900 tracking-tight">
+                      About this Guided Project
+                    </h3>
+                    <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
+                      In this project, you will learn the foundation of data analysis with Microsoft Excel using sales data from a sample company. You will learn how to use sorting and filtering tools to reorganize your data and access specific information about your data. You will also learn about the use of functions like IF and VLOOKUP functions to create new data and relate data from different tables. Finally, you...
+                    </p>
+                    <button className="text-[13.5px] text-[#0056d2] font-bold hover:underline self-start">
+                      Read more
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3 animate-pulse">
+                    <h3 className="h-6 bg-slate-200 rounded w-48"></h3>
+                    <div className="space-y-2 mt-2">
+                      <div className="h-4 bg-slate-200 rounded w-full"></div>
+                      <div className="h-4 bg-slate-200 rounded w-full"></div>
+                      <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                    </div>
+                    <div className="h-4 bg-slate-200 rounded w-20 self-start mt-2"></div>
+                  </div>
+                )}
 
                 {/* Learn step-by-step (Full width of left column) */}
-                <div className="w-full mt-4 border border-slate-200 rounded-xl p-6 bg-white flex flex-col gap-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                  <div className="flex flex-col gap-2">
-                    <h4 className="text-[17px] font-bold text-slate-900">
-                      Learn step-by-step
-                    </h4>
-                    <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
-                      In a video that plays in a split-screen with your work area, your instructor will walk you through these steps:
-                    </p>
-                  </div>
+                {course ? (
+                  <div className="w-full mt-4 border border-slate-200 rounded-xl p-6 bg-white flex flex-col gap-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                    <div className="flex flex-col gap-2">
+                      <h4 className="text-[17px] font-bold text-slate-900">
+                        Learn step-by-step
+                      </h4>
+                      <p className="text-[13px] text-slate-500 font-medium leading-relaxed">
+                        In a video that plays in a split-screen with your work area, your instructor will walk you through these steps:
+                      </p>
+                    </div>
 
-                  <ol className="flex flex-col gap-3.5 text-[13.5px] text-slate-700 font-medium">
-                    <li className="flex items-start gap-2.5">
-                      <span className="text-[#0056d2] font-bold shrink-0">1 .</span>
-                      <span>Upload a document using the free online version of Microsoft Office 365.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="text-[#0056d2] font-bold shrink-0">2 .</span>
-                      <span>Perform data analysis using sorting and filtering tools.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="text-[#0056d2] font-bold shrink-0">3 .</span>
-                      <span>Perform data mining using the IF function.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="text-[#0056d2] font-bold shrink-0">4 .</span>
-                      <span>Create references between tables and search for information with VLOOKUP.</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="text-[#0056d2] font-bold shrink-0">5 .</span>
-                      <span>Perform data analysis using PivotTables.</span>
-                    </li>
-                  </ol>
+                    <ol className="flex flex-col gap-3.5 text-[13.5px] text-slate-700 font-medium">
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-[#0056d2] font-bold shrink-0">1 .</span>
+                        <span>Upload a document using the free online version of Microsoft Office 365.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-[#0056d2] font-bold shrink-0">2 .</span>
+                        <span>Perform data analysis using sorting and filtering tools.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-[#0056d2] font-bold shrink-0">3 .</span>
+                        <span>Perform data mining using the IF function.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-[#0056d2] font-bold shrink-0">4 .</span>
+                        <span>Create references between tables and search for information with VLOOKUP.</span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-[#0056d2] font-bold shrink-0">5 .</span>
+                        <span>Perform data analysis using PivotTables.</span>
+                      </li>
+                    </ol>
 
-                  <div className="border-t border-slate-100 pt-5 flex flex-col gap-1.5">
-                    <h5 className="text-[13.5px] font-bold text-slate-900">
-                      Recommended experience
-                    </h5>
-                    <p className="text-[13px] text-slate-600 font-medium">
-                      Basic knowledge of spreadsheets and data analysis
-                    </p>
+                    <div className="border-t border-slate-100 pt-5 flex flex-col gap-1.5">
+                      <h5 className="text-[13.5px] font-bold text-slate-900">
+                        Recommended experience
+                      </h5>
+                      <p className="text-[13px] text-slate-600 font-medium">
+                        Basic knowledge of spreadsheets and data analysis
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="w-full mt-4 border border-slate-200 rounded-xl p-6 bg-white flex flex-col gap-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] animate-pulse">
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 bg-slate-200 rounded w-36 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-80 mt-1 animate-pulse"></div>
+                    </div>
+
+                    <div className="flex flex-col gap-3.5 animate-pulse">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          <div className="h-4 bg-slate-200 rounded w-4 animate-pulse"></div>
+                          <div className="h-4 bg-slate-200 rounded flex-1 animate-pulse"></div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-5 flex flex-col gap-1.5 animate-pulse">
+                      <div className="h-4 bg-slate-200 rounded w-40 animate-pulse"></div>
+                      <div className="h-4 bg-slate-200 rounded w-64 mt-1 animate-pulse"></div>
+                    </div>
+                  </div>
+                )}
               </section>
 
             </div>
@@ -913,17 +1032,28 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               <span className="text-[10px] font-extrabold text-[#0056d2] tracking-widest uppercase block mb-1">
                 Course Tuition Fee
               </span>
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-3xl font-bold text-[#0c102a]">
-                  ₹{course.price}
-                </span>
-                <span className="text-slate-400 text-base line-through font-semibold">
-                  ₹{course.originalPrice}
-                </span>
-                <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs">
-                  {course.discount} OFF
-                </span>
-              </div>
+              {course ? (
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-3xl font-bold text-[#0c102a]">
+                    ₹{course.price}
+                  </span>
+                  {course.originalPrice > 0 && (
+                    <span className="text-slate-400 text-base line-through font-semibold">
+                      ₹{course.originalPrice}
+                    </span>
+                  )}
+                  {course.discount && (
+                    <span className="bg-[#a3ff12] text-[#0c102a] text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-xs">
+                      {course.discount} OFF
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-baseline gap-2.5 h-9 animate-pulse">
+                  <span className="h-8 bg-slate-200 rounded w-28 block"></span>
+                  <span className="h-4 bg-slate-200 rounded w-16 block"></span>
+                </div>
+              )}
             </div>
 
             <hr className="border-slate-100" />
@@ -938,7 +1068,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                   Enquiry Received!
                 </h4>
                 <p className="text-xs text-emerald-800 leading-relaxed font-medium">
-                  Thank you, <strong className="text-emerald-950 font-bold">{enrollForm.name}</strong>. Your enquiry for <strong className="text-emerald-950 font-bold">{course.title}</strong> has been submitted. A study advisor will contact you within 24 hours at <strong className="text-emerald-950 font-bold">{enrollForm.email}</strong> to assist with enrolment details.
+                  Thank you, <strong className="text-emerald-950 font-bold">{enrollForm.name}</strong>. Your enquiry for <strong className="text-emerald-950 font-bold">{course ? course.title : ""}</strong> has been submitted. A study advisor will contact you within 24 hours at <strong className="text-emerald-950 font-bold">{enrollForm.email}</strong> to assist with enrolment details.
                 </p>
                 <button
                   onClick={() => setEnrollSuccess(false)}
@@ -1513,7 +1643,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Recommended Courses Section */}
-      {recommendedCourses.length > 0 && (
+      {(loading || recommendedCourses.length > 0) && (
         <section id="recommendations-section" className="w-full bg-slate-50 py-10 md:py-16 border-t border-slate-100 scroll-mt-28">
           <div className="max-w-7xl mx-auto px-4 md:px-8 text-left">
             <h3 className="text-2xl md:text-3.5xl font-extrabold text-slate-900 tracking-tight mb-2">
@@ -1524,49 +1654,75 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recommendedCourses.map((c) => {
-                const cid = (c as any)._id || c.id;
-                return (
-                  <Link
-                    key={cid}
-                    href={`/coursedetails/${cid}`}
-                    className="bg-white rounded-xl border border-slate-150 shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-md hover:border-slate-300 transition-all overflow-hidden flex flex-col cursor-pointer group"
+              {loading ? (
+                [1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white rounded-xl border border-slate-150 shadow-[0_2px_10px_rgba(0,0,0,0.01)] transition-all overflow-hidden flex flex-col animate-pulse"
                   >
-                    {/* Thumbnail / Image */}
-                    <div className="relative aspect-[16/9] w-full bg-slate-100 overflow-hidden">
-                      <img
-                        src={c.mentorPicture || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
-                        alt={c.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {c.tag && (
-                        <div className="absolute top-3 left-3 bg-[#0056d2] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-                          {c.tag}
-                        </div>
-                      )}
-                    </div>
+                    {/* Thumbnail Skeleton */}
+                    <div className="relative aspect-[16/9] w-full bg-slate-200"></div>
 
-                    {/* Card Content */}
+                    {/* Card Content Skeleton */}
                     <div className="p-5 flex-1 flex flex-col gap-3 justify-between">
                       <div className="flex flex-col gap-2">
-                        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                          {c.category ? c.category.replace("-", " ") : "Course"}
-                        </span>
-                        <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0056d2] transition-colors line-clamp-2">
-                          {c.title}
-                        </h4>
+                        <div className="h-3.5 bg-slate-200 rounded w-20"></div>
+                        <div className="h-5 bg-slate-200 rounded w-full mt-1"></div>
+                        <div className="h-5 bg-slate-200 rounded w-2/3"></div>
                       </div>
 
-                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2 text-xs font-bold text-slate-650">
-                        <span>{c.hours || "Flexible Hours"}</span>
-                        <span className="text-[#0056d2] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                          Explore Page <span>→</span>
-                        </span>
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
+                        <div className="h-4 bg-slate-200 rounded w-24"></div>
+                        <div className="h-4 bg-slate-200 rounded w-16"></div>
                       </div>
                     </div>
-                  </Link>
-                );
-              })}
+                  </div>
+                ))
+              ) : (
+                recommendedCourses.map((c) => {
+                  const cid = (c as any)._id || c.id;
+                  return (
+                    <Link
+                      key={cid}
+                      href={`/coursedetails/${cid}`}
+                      className="bg-white rounded-xl border border-slate-150 shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-md hover:border-slate-300 transition-all overflow-hidden flex flex-col cursor-pointer group"
+                    >
+                      {/* Thumbnail / Image */}
+                      <div className="relative aspect-[16/9] w-full bg-slate-100 overflow-hidden">
+                        <img
+                          src={c.mentorPicture || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
+                          alt={c.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {c.tag && (
+                          <div className="absolute top-3 left-3 bg-[#0056d2] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                            {c.tag}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Content */}
+                      <div className="p-5 flex-1 flex flex-col gap-3 justify-between">
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                            {c.category ? c.category.replace("-", " ") : "Course"}
+                          </span>
+                          <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0056d2] transition-colors line-clamp-2">
+                            {c.title}
+                          </h4>
+                        </div>
+
+                        <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2 text-xs font-bold text-slate-650">
+                          <span>{c.hours || "Flexible Hours"}</span>
+                          <span className="text-[#0056d2] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                            Explore Page <span>→</span>
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </div>
         </section>

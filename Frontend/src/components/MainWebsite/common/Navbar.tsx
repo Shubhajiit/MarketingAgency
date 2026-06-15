@@ -170,8 +170,8 @@ export default function Navbar() {
                             </svg>
                         </Link>
                     </div>
-                    <a href="#" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</a>
-                    <a href="#" className="hover:text-[#009ee3]">CONTACT US</a>
+                    <Link href="/about" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</Link>
+                    <Link href="/contact" className="hover:text-[#009ee3]">CONTACT US</Link>
 
                     {/* Cart Button */}
                     <button

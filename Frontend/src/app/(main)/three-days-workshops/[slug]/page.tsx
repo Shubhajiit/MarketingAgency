@@ -70,12 +70,16 @@ const formatThreeDaysRange = (dateVal: string | Date | null) => {
   }
 };
 
-const getCohortStartDates = (dates: (string | Date)[]) => {
+const getCohortStartDates = (dates: any[]) => {
   if (!dates || dates.length === 0) return [];
 
-  // Parse all dates and sort them ascending
+  // Parse all dates, filter out invalid ones, and sort them ascending
   const sortedDates = dates
-    .map(d => new Date(d))
+    .map(d => {
+      const dateVal = typeof d === 'string' || d instanceof Date ? d : d?.date || '';
+      return new Date(dateVal);
+    })
+    .filter(d => !isNaN(d.getTime()))
     .sort((a, b) => a.getTime() - b.getTime());
 
   const startDates: string[] = [];
@@ -371,7 +375,9 @@ function ThreeDaysWorkshopsContent() {
   const [bookingErrors, setBookingErrors] = useState<{ name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean }>({});
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'success'>('form');
+  const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'success' | 'confirm'>('form');
+  const [paymentError, setPaymentError] = useState('');
+  const [registrationId, setRegistrationId] = useState<string | null>(null);
 
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
@@ -433,6 +439,13 @@ function ThreeDaysWorkshopsContent() {
     };
     fetchWorkshop();
   }, [slug]);
+
+  // Sync auth state to fetch latest enrolled workshops after login or page load
+  useEffect(() => {
+    if (isAuthenticated && checkAuth) {
+      checkAuth(true);
+    }
+  }, [isAuthenticated, checkAuth]);
 
   // Scroll handler for sticky bar
   useEffect(() => {
@@ -546,7 +559,7 @@ function ThreeDaysWorkshopsContent() {
     }
   }, [isCheckout, user]);
 
-  // Booking form validation & submission
+  // Booking form validation & submission — now shows confirmation popup
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs: { name?: boolean; email?: boolean; phone?: boolean; whatsapp?: boolean; age?: boolean; profession?: boolean } = {};
@@ -559,29 +572,118 @@ function ThreeDaysWorkshopsContent() {
     setBookingErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
+    // Show confirmation popup
+    setPaymentError('');
+    setPaymentStep('confirm');
+  };
+
+  // Load Razorpay script dynamically
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Called when user confirms in the confirmation popup
+  const handleConfirmPayment = async () => {
     setBookingSubmitting(true);
     setPaymentStep('paying');
+    setPaymentError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 1. Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        setPaymentError('Failed to load payment gateway. Please check your internet connection.');
+        setPaymentStep('form');
+        setBookingSubmitting(false);
+        return;
+      }
 
-      await workshopApi.registerForWorkshop(workshop!._id, {
+      // 2. Create order on backend
+      const orderRes = await workshopApi.createPaymentOrder({
+        workshopId: workshop!._id,
         name: bookingName.trim(),
         email: bookingEmail.trim(),
         phone: bookingPhone.trim(),
         whatsappNumber: bookingWhatsapp.trim(),
         selectedDate: selectedDate || new Date().toISOString(),
-        age: bookingAge,
-        profession: bookingProfession,
+        age: bookingAge || undefined,
+        profession: bookingProfession || undefined,
       });
 
-      if (checkAuth) {
-        await checkAuth();
-      }
-      setPaymentStep('success');
-    } catch {
+      const { orderId, amount, currency, registrationId: regId, keyId } = orderRes.data;
+      setRegistrationId(regId);
+
+      // 3. Open Razorpay checkout
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: 'AI Scale',
+        description: workshop!.title,
+        order_id: orderId,
+        prefill: {
+          name: bookingName.trim(),
+          email: bookingEmail.trim(),
+          contact: bookingPhone.trim(),
+        },
+        theme: {
+          color: '#0052FF',
+        },
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          try {
+            // 4. Verify payment on backend
+            await workshopApi.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              registrationId: regId,
+            });
+            if (checkAuth) {
+              await checkAuth(true);
+            }
+            setPaymentStep('success');
+          } catch {
+            setPaymentError('Payment verification failed. Please contact support.');
+            setPaymentStep('form');
+          } finally {
+            setBookingSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            // User closed Razorpay without paying
+            try {
+              await workshopApi.markPaymentFailed(regId);
+            } catch { /* silent */ }
+            setPaymentStep('form');
+            setBookingSubmitting(false);
+          },
+        },
+      };
+
+      const razorpayInstance = new (window as any).Razorpay(options);
+      razorpayInstance.on('payment.failed', async () => {
+        try {
+          await workshopApi.markPaymentFailed(regId);
+        } catch { /* silent */ }
+        setPaymentError('Payment failed. Please try again.');
+        setPaymentStep('form');
+        setBookingSubmitting(false);
+      });
+      razorpayInstance.open();
+    } catch (err: any) {
+      setPaymentError(err?.response?.data?.message || 'Failed to initiate payment. Please try again.');
       setPaymentStep('form');
-    } finally {
       setBookingSubmitting(false);
     }
   };
@@ -675,15 +777,61 @@ function ThreeDaysWorkshopsContent() {
                 <div className="w-20 h-20 rounded-full bg-blue-50 border-4 border-blue-100 flex items-center justify-center mb-6">
                   <svg className="animate-spin w-10 h-10 text-[#0052FF]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Processing Payment...</h3>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Opening Payment Gateway...</h3>
                 <p className="text-gray-400 text-sm font-medium">Please wait, do not close this window</p>
                 <div className="mt-6 w-full bg-gray-50 rounded-xl p-4 text-left">
                   <div className="flex justify-between text-sm font-semibold text-gray-700 mb-1"><span>{workshop.title}</span><span>₹{workshop.price?.toLocaleString('en-IN')}</span></div>
                   <div className="flex justify-between text-xs text-gray-400"><span>Selected Date</span><span>{selectedDate ? formatThreeDaysRange(selectedDate) : 'N/A'}</span></div>
                 </div>
               </div>
+            ) : paymentStep === 'confirm' ? (
+              <div className="p-6 md:p-8 flex flex-col items-center text-center text-black">
+                <div className="w-16 h-16 rounded-full bg-amber-50 border-4 border-amber-100 flex items-center justify-center mb-5">
+                  <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Confirm Your Booking</h3>
+                <p className="text-gray-400 text-sm font-medium mb-5">Please review your details before proceeding to payment</p>
+                <div className="w-full bg-gray-50 rounded-xl p-4 text-left mb-4 space-y-2">
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Name</span><span className="font-bold text-gray-900">{bookingName}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Email</span><span className="font-bold text-gray-900">{bookingEmail}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Phone</span><span className="font-bold text-gray-900">{bookingPhone}</span></div>
+                  {bookingAge && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Age</span><span className="font-bold text-gray-900">{bookingAge}</span></div>}
+                  {bookingProfession && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Profession</span><span className="font-bold text-gray-900">{bookingProfession}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Workshop</span><span className="font-bold text-gray-900 text-right max-w-[60%] leading-tight">{workshop.title}</span></div>
+                  {selectedDate && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Date</span><span className="font-bold text-gray-900">{formatThreeDaysRange(selectedDate)}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Workshop Fee</span><span className="font-bold text-gray-900">₹{workshop.price?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">GST (18%)</span><span className="font-bold text-gray-900">₹{Math.round((workshop.price || 0) * 0.18).toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm font-bold pt-1 border-t border-gray-200"><span className="text-gray-900">Total</span><span className="text-green-600 font-extrabold">₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}</span></div>
+                </div>
+                <div className="flex gap-3 w-full">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStep('form')}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    ← Go Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmPayment}
+                    disabled={bookingSubmitting}
+                    className="flex-[2] py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 border-0"
+                  >
+                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    Confirm & Pay ₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}
+                  </button>
+                </div>
+              </div>
             ) : (
-              <form onSubmit={handleBookingSubmit} className="p-5 md:p-6 flex flex-col gap-3">
+              <form onSubmit={handleBookingSubmit} className="p-5 md:p-6 flex flex-col gap-3 text-black">
+                {paymentError && (
+                  <div className="w-full bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 font-semibold flex items-start gap-2">
+                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                    <span>{paymentError}</span>
+                  </div>
+                )}
                 <div className="flex flex-col gap-1 text-left">
                   <label className="text-[11px] font-bold text-gray-800 tracking-wide uppercase">
                     Full Name <span className="text-red-500">*</span>
@@ -809,7 +957,7 @@ function ThreeDaysWorkshopsContent() {
                 <button
                   type="submit"
                   disabled={bookingSubmitting}
-                  className="w-full bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-sm md:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-[0_4px_12px_rgba(0,0,0,0.15)] mt-2"
+                  className="w-full bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-extrabold py-3.5 rounded-xl text-sm md:text-base tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-[0_4px_12px_rgba(0,0,0,0.15)] mt-2 border-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -870,48 +1018,46 @@ function ThreeDaysWorkshopsContent() {
                   </div>
 
                   {/* Logos marquee: continuously scrolls right-to-left */}
-                  <div className="pt-3 mt-3 md:pt-6 md:mt-6 px-2">
+                  <div className="mt-3 md:mt-4 px-2">
                     <div className="relative overflow-hidden">
-                      <div className="marquee flex items-center gap-6" aria-hidden="true">
-                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
-                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                            </svg>
-                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                          </div>
+                      <div className="flex w-max select-none">
+                        <div className="marquee flex shrink-0 items-center gap-8 pr-8">
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/PictoryAI.webp" alt="Pictory AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/copyAI.png" alt="Copy AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/invideoAI.png" alt="InVideo AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/jasperAI.png" alt="Jasper AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/DescriptAI.webp" alt="Descript AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ZapierLogo.png" alt="Zapier" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/notionLOGO.png" alt="Notion" className="h-7 object-contain shrink-0" />
                         </div>
 
                         {/* duplicate for seamless loop */}
-                        <div className="flex items-center gap-6 shrink-0 whitespace-nowrap">
-                          <span className="text-gray-400 font-bold text-sm tracking-wider">igravity</span>
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-6 object-contain shrink-0" />
-                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-6 object-contain shrink-0" />
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none">
-                              <path d="M17.5 7.5C15.3 7.5 13.5 9 12 10.5C10.5 9 8.7 7.5 6.5 7.5C3.5 7.5 1 10 1 13C1 16 3.5 18.5 6.5 18.5C8.7 18.5 10.5 17 12 15.5C13.5 17 15.3 18.5 17.5 18.5C20.5 18.5 23 16 23 13C23 10 20.5 7.5 17.5 7.5ZM6.5 16C4.8 16 3.5 14.7 3.5 13C3.5 11.3 4.8 10 6.5 10C7.7 10 8.9 10.9 9.8 11.8C9.2 12.6 8.2 13.7 7.5 14.5C7.2 14.9 6.8 15.3 6.5 16ZM17.5 16C16.8 16 16.4 15.6 16.1 15.2C15.5 14.5 14.5 13.4 13.8 12.6C14.8 11.5 16 10 17.5 10C19.2 10 20.5 11.3 20.5 13C20.5 14.7 19.2 16 17.5 16Z" fill="#F97316" />
-                            </svg>
-                            <span className="text-[#F97316] font-bold text-sm tracking-wider">colab</span>
-                          </div>
+                        <div className="marquee flex shrink-0 items-center gap-8 pr-8" aria-hidden="true">
+                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/PictoryAI.webp" alt="Pictory AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/copyAI.png" alt="Copy AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/invideoAI.png" alt="InVideo AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/jasperAI.png" alt="Jasper AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/DescriptAI.webp" alt="Descript AI" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ZapierLogo.png" alt="Zapier" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/notionLOGO.png" alt="Notion" className="h-7 object-contain shrink-0" />
                         </div>
                       </div>
 
                       <style jsx>{`
                         @keyframes marquee {
-                          0% { transform: translateX(0); }
-                          100% { transform: translateX(-50%); }
+                          0% { transform: translateX(0%); }
+                          100% { transform: translateX(-100%); }
                         }
                         .marquee {
-                          display: flex;
-                          gap: 8rem;
-                          align-items: center;
-                          min-width: 200%;
-                          animation: marquee 16s linear infinite;
+                          animation: marquee 25s linear infinite;
                         }
                       `}</style>
                     </div>
@@ -1488,10 +1634,10 @@ function ThreeDaysWorkshopsContent() {
                   <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Date</p>
                   <p className="text-sm font-bold text-gray-900 mb-2">{selectedDate ? formatThreeDaysRange(selectedDate) : 'N/A'}</p>
                   <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Amount Paid</p>
-                  <p className="text-sm font-black text-green-600">₹{workshop.price?.toLocaleString('en-IN') || 0}/-</p>
+                  <p className="text-sm font-black text-green-600">₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}/-</p>
                 </div>
                 <p className="text-xs text-gray-400 font-medium mb-5">Confirmation details sent to <strong className="text-gray-600">{bookingEmail}</strong> & on WhatsApp</p>
-                <button onClick={() => setShowBookingModal(false)} className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-sm transition-colors cursor-pointer">
+                <button onClick={() => setShowBookingModal(false)} className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-sm transition-colors cursor-pointer border-0">
                   Close
                 </button>
               </div>
@@ -1501,11 +1647,52 @@ function ThreeDaysWorkshopsContent() {
                 <div className="w-20 h-20 rounded-full bg-blue-50 border-4 border-blue-100 flex items-center justify-center mb-6">
                   <svg className="animate-spin w-10 h-10 text-[#0052FF]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Processing Payment...</h3>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Opening Payment Gateway...</h3>
                 <p className="text-gray-400 text-sm font-medium">Please wait, do not close this window</p>
                 <div className="mt-6 w-full bg-gray-50 rounded-xl p-4 text-left">
                   <div className="flex justify-between text-sm font-semibold text-gray-700 mb-1"><span>{workshop.title}</span><span>₹{workshop.price?.toLocaleString('en-IN')}</span></div>
                   <div className="flex justify-between text-xs text-gray-400"><span>Selected Date</span><span>{selectedDate ? formatThreeDaysRange(selectedDate) : 'N/A'}</span></div>
+                </div>
+              </div>
+            ) : paymentStep === 'confirm' ? (
+              /* ─ Confirm Screen ─ */
+              <div className="p-6 md:p-8 flex flex-col items-center text-center text-black">
+                <div className="w-16 h-16 rounded-full bg-amber-50 border-4 border-amber-100 flex items-center justify-center mb-5">
+                  <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Confirm Your Booking</h3>
+                <p className="text-gray-400 text-sm font-medium mb-5">Please review your details before proceeding to payment</p>
+                <div className="w-full bg-gray-50 rounded-xl p-4 text-left mb-4 space-y-2">
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Name</span><span className="font-bold text-gray-900">{bookingName}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Email</span><span className="font-bold text-gray-900">{bookingEmail}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Phone</span><span className="font-bold text-gray-900">{bookingPhone}</span></div>
+                  {bookingAge && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Age</span><span className="font-bold text-gray-900">{bookingAge}</span></div>}
+                  {bookingProfession && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Profession</span><span className="font-bold text-gray-900">{bookingProfession}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Workshop</span><span className="font-bold text-gray-900 text-right max-w-[60%] leading-tight">{workshop.title}</span></div>
+                  {selectedDate && <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Date</span><span className="font-bold text-gray-900">{formatThreeDaysRange(selectedDate)}</span></div>}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">Workshop Fee</span><span className="font-bold text-gray-900">₹{workshop.price?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500 font-medium">GST (18%)</span><span className="font-bold text-gray-900">₹{Math.round((workshop.price || 0) * 0.18).toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between text-sm font-bold pt-1 border-t border-gray-200"><span className="text-gray-900">Total</span><span className="text-green-600 font-extrabold">₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}</span></div>
+                </div>
+                <div className="flex gap-3 w-full">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentStep('form')}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    ← Go Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmPayment}
+                    disabled={bookingSubmitting}
+                    className="flex-[2] py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-extrabold text-sm transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 border-0"
+                  >
+                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    Confirm & Pay ₹{((workshop.price || 0) + Math.round((workshop.price || 0) * 0.18)).toLocaleString('en-IN')}
+                  </button>
                 </div>
               </div>
             ) : (
@@ -1546,6 +1733,12 @@ function ThreeDaysWorkshopsContent() {
 
                 {/* Form */}
                 <form onSubmit={handleBookingSubmit} className="px-6 py-5 flex flex-col gap-3 text-black">
+                  {paymentError && (
+                    <div className="w-full bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700 font-semibold flex items-start gap-2">
+                      <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                      <span>{paymentError}</span>
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 font-semibold -mb-1">All fields are mandatory</p>
 
                   {/* Name */}
@@ -1639,14 +1832,17 @@ function ThreeDaysWorkshopsContent() {
             </h4>
 
             {(() => {
-              const rawDates = workshop.workshopDates && workshop.workshopDates.length > 0
+              const rawDates: any[] = workshop.workshopDates && workshop.workshopDates.length > 0
                 ? workshop.workshopDates
                 : [
                   '2026-06-03T10:00:00Z',
                   '2026-06-04T10:00:00Z',
                   '2026-06-05T10:00:00Z'
                 ];
-              const datesList = getCohortStartDates(rawDates);
+              const dateStringsOnly = rawDates.map((d: any) => {
+                return typeof d === 'string' || d instanceof Date ? d : d?.date || '';
+              }).filter(Boolean);
+              const datesList = getCohortStartDates(dateStringsOnly);
 
               return (
                 <div className="flex flex-col gap-3 w-full items-center mb-6">
@@ -1660,6 +1856,18 @@ function ThreeDaysWorkshopsContent() {
                     const displayWeekdays = `${w1} - ${w3}`;
 
                     const isSelected = selectedDate === isoStr;
+
+                    const matchedDateObj = rawDates.find((d: any) => {
+                      const dStr = typeof d === 'string' || d instanceof Date ? d : d?.date || '';
+                      try {
+                        return new Date(dStr).toISOString() === isoStr;
+                      } catch {
+                        return false;
+                      }
+                    });
+                    const place = typeof matchedDateObj === 'string' || matchedDateObj instanceof Date || !matchedDateObj
+                      ? ''
+                      : matchedDateObj?.place || '';
 
                     return (
                       <div
@@ -1681,6 +1889,11 @@ function ThreeDaysWorkshopsContent() {
                           <span className={`text-xs md:text-sm font-semibold leading-none ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                             {displayRange}
                           </span>
+                          {place && (
+                            <span className={`text-[9px] md:text-[10px] mt-1 font-medium leading-none ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}>
+                              📍 {place}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );

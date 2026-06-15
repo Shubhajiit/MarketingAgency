@@ -74,3 +74,44 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+exports.removeWorkshop = async (req, res) => {
+  try {
+    const { workshopId } = req.params;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.enrolledWorkshops = user.enrolledWorkshops.filter(
+      (id) => id && id.toString() !== workshopId
+    );
+    await user.save();
+
+    const updatedUser = await User.findById(req.user.id)
+      .populate('enrolledWorkshops')
+      .populate('enrolledCourses');
+
+    res.status(200).json({
+      success: true,
+      message: 'Workshop removed successfully',
+      data: {
+        user: {
+          id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          avatar: updatedUser.avatar,
+          phoneNumber: updatedUser.phoneNumber || '',
+          whatsappNumber: updatedUser.whatsappNumber || '',
+          enrolledCourses: updatedUser.enrolledCourses || [],
+          enrolledWorkshops: updatedUser.enrolledWorkshops || []
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Remove workshop error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+

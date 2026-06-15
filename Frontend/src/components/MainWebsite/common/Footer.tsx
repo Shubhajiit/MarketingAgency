@@ -28,7 +28,7 @@ export default function Footer() {
         {
             title: "Learning",
             links: [
-                { label: "Courses", href: "#" },
+                { label: "Courses", href: "/courses" },
                 { label: "Programs for Kids", href: "#" },
                 { label: "Skill Tracks", href: "#" },
                 { label: "Certifications", href: "#" },
@@ -38,17 +38,17 @@ export default function Footer() {
         {
             title: "Company",
             links: [
-                { label: "About Us", href: "#" },
+                { label: "About Us", href: "/about" },
                 { label: "Careers", href: "#" },
                 { label: "Press", href: "#" },
                 { label: "Blog", href: "#" },
-                { label: "Contact", href: "#" },
+                { label: "Contact", href: "/contact" },
             ],
         },
         {
             title: "Support",
             links: [
-                { label: "Contact Us", href: "#" },
+                { label: "Contact Us", href: "/contact" },
                 { label: "Help Center", href: "#" },
                 { label: "Privacy Policy", href: "#" },
                 { label: "Conditions", href: "#" },

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { coursesApi } from '@/lib/api/courses';
+import { coursesApi, CourseVideo } from '@/lib/api/courses';
 import { Course } from '@/components/common/CoursesCardsUI';
 import {
   Plus,
@@ -92,6 +92,16 @@ export default function AdminCoursesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
 
+  // Course videos states
+  const [videos, setVideos] = useState<CourseVideo[]>([]);
+  const [videoTitle, setVideoTitle] = useState('');
+  const [videoDuration, setVideoDuration] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState('');
+
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -144,6 +154,13 @@ export default function AdminCoursesPage() {
   const handleCreate = () => {
     setEditingCourse(null);
     setFormData(defaultFormData);
+    setVideos([]);
+    setVideoTitle('');
+    setVideoDuration('');
+    setVideoDescription('');
+    setVideoFile(null);
+    setUploadProgress(0);
+    setUploadError('');
     setShowModal(true);
     setError('');
   };
@@ -172,8 +189,98 @@ export default function AdminCoursesPage() {
     }
   };
 
+  const handleUploadVideo = async () => {
+    if (!editingCourse || !videoFile || !videoTitle.trim()) return;
+
+    const courseId = (editingCourse as any)._id || editingCourse.id;
+    setVideoUploading(true);
+    setUploadError('');
+    setUploadProgress(0);
+
+    try {
+      const res = await coursesApi.uploadVideo(courseId, videoFile, (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgress(percentCompleted);
+      });
+
+      if (res.success && res.s3Key) {
+        const newVideo: CourseVideo = {
+          _id: Math.random().toString(36).substring(7), // temporary local id
+          title: videoTitle.trim(),
+          s3Key: res.s3Key,
+          duration: videoDuration.trim(),
+          description: videoDescription.trim(),
+          order: videos.length,
+          url: ''
+        };
+
+        const updatedVideos = [...videos, newVideo];
+        
+        // Strip temporary _id from new video before saving to DB
+        const videosPayload = updatedVideos.map((v) => {
+          if (v._id && v._id.length !== 24) {
+            const { _id, ...rest } = v;
+            return rest;
+          }
+          return v;
+        });
+
+        // Persist immediately in DB
+        const saveRes = await coursesApi.update(courseId, { videos: videosPayload });
+        if (saveRes.success) {
+          setVideos((saveRes.data.course as any).videos || []);
+          // Clear upload fields
+          setVideoTitle('');
+          setVideoDuration('');
+          setVideoDescription('');
+          setVideoFile(null);
+          setUploadProgress(0);
+          // Refresh list
+          fetchCourses();
+        } else {
+          setUploadError('Video uploaded, but failed to save metadata to course.');
+        }
+      } else {
+        setUploadError('Failed to upload video to S3.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setUploadError(err.response?.data?.message || 'Failed to upload video');
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  const handleRemoveVideo = async (index: number) => {
+    if (!editingCourse) return;
+    if (!confirm('Are you sure you want to remove this video?')) return;
+
+    const courseId = (editingCourse as any)._id || editingCourse.id;
+    const updatedVideos = videos.filter((_, idx) => idx !== index);
+
+    try {
+      const res = await coursesApi.update(courseId, { videos: updatedVideos });
+      if (res.success) {
+        setVideos((res.data.course as any).videos || []);
+        fetchCourses();
+      } else {
+        setError('Failed to update course videos');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to remove video');
+    }
+  };
+
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
+    setVideos((course as any).videos || []);
+    setVideoTitle('');
+    setVideoDuration('');
+    setVideoDescription('');
+    setVideoFile(null);
+    setUploadProgress(0);
+    setUploadError('');
     setFormData({
       title: course.title || '',
       instructorName: course.instructorName || '',
@@ -478,6 +585,177 @@ export default function AdminCoursesPage() {
                     {error}
                   </div>
                 )}
+
+                {/* Course Videos (AWS S3) Section */}
+                <div className="pb-2 border-b border-gray-100 mb-2">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Upload Course Video</h3>
+                </div>
+
+                {!editingCourse ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-800">Video Upload is Unavailable for New Courses</h4>
+                      <p className="text-xs text-amber-700 mt-1">
+                        Please save and create the course first. Once the course is created, you can edit it to upload and stream videos.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* List of existing videos */}
+                    {videos.length > 0 ? (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                        <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Uploaded Videos ({videos.length})</h4>
+                        <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto pr-2">
+                          {videos.map((vid, idx) => (
+                            <div key={vid._id || idx} className="py-2.5 flex items-center justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-slate-800 truncate">
+                                  {idx + 1}. {vid.title}
+                                </p>
+                                <p className="text-[10px] text-slate-400 font-mono truncate">{vid.s3Key}</p>
+                                {vid.duration && (
+                                  <span className="text-[10px] bg-slate-200/60 text-slate-600 px-1.5 py-0.5 rounded font-medium mt-1 inline-block">
+                                    Duration: {vid.duration}
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveVideo(idx)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                title="Remove Video"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-slate-400">
+                        <BookOpen size={24} className="mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No videos uploaded yet</p>
+                      </div>
+                    )}
+
+                    {/* Upload new video form */}
+                    <div className="border border-slate-200 rounded-xl p-5 space-y-4 bg-white shadow-xs">
+                      <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Upload New Video</h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Video Title *</label>
+                          <input
+                            type="text"
+                            value={videoTitle}
+                            onChange={(e) => setVideoTitle(e.target.value)}
+                            placeholder="e.g. Lesson 1: Introduction"
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Duration (Optional)</label>
+                          <input
+                            type="text"
+                            value={videoDuration}
+                            onChange={(e) => setVideoDuration(e.target.value)}
+                            placeholder="e.g. 12:34"
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Description (Optional)</label>
+                        <textarea
+                          value={videoDescription}
+                          onChange={(e) => setVideoDescription(e.target.value)}
+                          placeholder="Brief description of the lesson content..."
+                          rows={2}
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white resize-none"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Video File *</label>
+                        <div className="flex flex-col sm:flex-row gap-4 items-center p-3.5 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div className="flex-1 w-full">
+                            <div className="flex items-center gap-3">
+                              <label className="relative flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 hover:border-gray-300 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 cursor-pointer shadow-xs active:scale-[0.98] transition-all">
+                                <Upload size={12} className="text-gray-500" />
+                                <span>{videoFile ? 'Change Video' : 'Select Video File'}</span>
+                                <input
+                                  type="file"
+                                  accept="video/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      setVideoFile(file);
+                                      // If title is empty, prefill with filename without extension
+                                      if (!videoTitle) {
+                                        const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                                        setVideoTitle(nameWithoutExt);
+                                      }
+                                    }
+                                  }}
+                                  className="hidden"
+                                />
+                              </label>
+                              <span className="text-xs text-gray-500 font-medium truncate max-w-[200px]">
+                                {videoFile ? videoFile.name : 'No file selected (MP4, WebM, etc. up to 500MB)'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {videoUploading && (
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold text-slate-600">
+                            <span>Uploading to AWS S3...</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {uploadError && (
+                        <div className="text-xs text-red-600 font-semibold bg-red-50 border border-red-100 rounded-lg p-2 flex items-center gap-1.5">
+                          <AlertTriangle size={12} />
+                          {uploadError}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleUploadVideo}
+                        disabled={videoUploading || !videoFile || !videoTitle.trim()}
+                        className="w-full py-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                      >
+                        {videoUploading ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            <span>Uploading video...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={12} />
+                            <span>Upload & Add Video to Course</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="h-6" />
 
                 <div className="pb-2 border-b border-gray-100 mb-2">
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Details</h3>

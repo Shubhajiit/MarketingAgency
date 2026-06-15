@@ -81,6 +81,7 @@ export interface Workshop {
   thumbnail: string;
   tags: string[];
   isActive: boolean;
+  isCancelled?: boolean;
   createdAt: string;
 
   // Detail page fields
@@ -88,7 +89,7 @@ export interface Workshop {
   priceCaption: string;
   bonusDeadlineText: string;
   heroPoints: string[];
-  workshopDates: string[];
+  workshopDates: any[];
 
   // Rich content
   highlights: WorkshopHighlight[];
@@ -200,6 +201,14 @@ export const workshopApi = {
    */
   delete: async (id: string) => {
     const res = await apiClient.delete(`/workshops/${id}`);
+    return res.data;
+  },
+
+  /**
+   * Cancel a workshop by ID (admin only).
+   */
+  cancel: async (id: string) => {
+    const res = await apiClient.post(`/workshops/${id}/cancel`);
     return res.data;
   },
 

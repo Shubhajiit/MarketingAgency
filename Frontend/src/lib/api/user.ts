@@ -10,4 +10,9 @@ export const userApi = {
     const res = await apiClient.patch('/users/me', data);
     return res.data;
   },
+
+  removeWorkshop: async (workshopId: string) => {
+    const res = await apiClient.delete(`/users/me/workshops/${workshopId}`);
+    return res.data;
+  },
 };

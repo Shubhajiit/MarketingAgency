@@ -15,7 +15,10 @@ import {
   Check,
   Trash2,
   ArrowUpDown,
-  ChevronDown
+  ChevronDown,
+  Phone,
+  MessageSquare,
+  Mail
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -53,11 +56,20 @@ interface AdminStats {
 
 interface RecentBooking {
   _id: string;
-  user: { name: string; email: string; _id?: string };
+  user: {
+    name: string;
+    email: string;
+    _id?: string;
+    avatar?: string;
+    phone?: string;
+    whatsappNumber?: string;
+  };
   workshop: { title: string };
   paymentStatus: string;
   amount: number;
   createdAt: string;
+  paymentId?: string;
+  currency?: string;
 }
 
 export default function AdminStatsPage() {
@@ -98,22 +110,22 @@ export default function AdminStatsPage() {
     );
   }
 
-  const displayBookings = recentBookings.map((b, idx) => ({
+  const displayBookings = recentBookings.map((b) => ({
     _id: b._id,
     user: {
       name: b.user?.name || 'Customer Name',
       email: b.user?.email || '',
-      _id: b.user?._id?.substring(18) || '54124'
+      _id: b.user?._id?.substring(18) || '54124',
+      avatar: b.user?.avatar,
+      phone: b.user?.phone || '',
+      whatsappNumber: b.user?.whatsappNumber || ''
     },
     workshop: { title: b.workshop?.title || 'Workshop Title' },
     paymentStatus: b.paymentStatus,
     amount: b.amount,
     createdAt: b.createdAt,
-    cardType: idx % 3 === 0 ? 'mastercard' : idx % 3 === 1 ? 'visa' : 'amex',
-    cardDigits: (Math.floor(1000 + Math.random() * 9000)).toString(),
-    avatar: idx % 2 === 0 
-      ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' 
-      : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'
+    paymentId: b.paymentId,
+    currency: b.currency || 'INR'
   }));
 
   // --- CHART.JS CONFIGURATIONS ---
@@ -286,7 +298,7 @@ export default function AdminStatsPage() {
       {/* 4 Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card 1: Workshops Buyers */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[120px] transition-all hover:shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[96px] transition-all hover:shadow-sm">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Workshops Buyers</span>
@@ -298,25 +310,10 @@ export default function AdminStatsPage() {
               <GraduationCap size={20} />
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-1 text-green-500 font-semibold text-xs bg-green-50 px-2 py-0.5 rounded-full">
-              <TrendingUp size={12} />
-              <span>+12.05%</span>
-            </div>
-            {/* Avatars Stack */}
-            <div className="flex -space-x-2 overflow-hidden">
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80" alt="avatar" />
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-[#efeefc] text-[#6366f1] text-[9px] font-bold flex items-center justify-center">
-                5+
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Card 2: Total Course */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[120px] transition-all hover:shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[96px] transition-all hover:shadow-sm">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Course</span>
@@ -328,25 +325,10 @@ export default function AdminStatsPage() {
               <BookOpen size={20} />
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-1 text-red-500 font-semibold text-xs bg-red-50 px-2 py-0.5 rounded-full">
-              <TrendingDown size={12} />
-              <span>-12.25%</span>
-            </div>
-            {/* Avatars Stack */}
-            <div className="flex -space-x-2 overflow-hidden">
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80" alt="avatar" />
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-[#eef2ff] text-[#3b82f6] text-[9px] font-bold flex items-center justify-center">
-                5+
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Card 3: Total Video */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[120px] transition-all hover:shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[96px] transition-all hover:shadow-sm">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Video</span>
@@ -358,25 +340,10 @@ export default function AdminStatsPage() {
               <Video size={20} />
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-1 text-green-500 font-semibold text-xs bg-green-50 px-2 py-0.5 rounded-full">
-              <TrendingUp size={12} />
-              <span>+25.21%</span>
-            </div>
-            {/* Avatars Stack */}
-            <div className="flex -space-x-2 overflow-hidden">
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1521119989659-a83eee488004?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80" alt="avatar" />
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-[#fae8ff] text-[#d946ef] text-[9px] font-bold flex items-center justify-center">
-                5+
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Card 4: Total Earning */}
-        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[120px] transition-all hover:shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#e9ebf0] p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-[96px] transition-all hover:shadow-sm">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Earning</span>
@@ -386,21 +353,6 @@ export default function AdminStatsPage() {
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#f59e0b] flex items-center justify-center">
               <DollarSign size={20} />
-            </div>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-1 text-green-500 font-semibold text-xs bg-green-50 px-2 py-0.5 rounded-full">
-              <TrendingUp size={12} />
-              <span>+25.21%</span>
-            </div>
-            {/* Avatars Stack */}
-            <div className="flex -space-x-2 overflow-hidden">
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80" alt="avatar" />
-              <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80" alt="avatar" />
-              <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-[#fef3c7] text-[#f59e0b] text-[9px] font-bold flex items-center justify-center">
-                5+
-              </div>
             </div>
           </div>
         </div>
@@ -511,7 +463,9 @@ export default function AdminStatsPage() {
             <span>View All</span>
             <span className="text-[10px] ml-0.5">&gt;</span>
           </button>
-        </div>        {/* Mobile View (Cards) */}
+        </div>
+
+        {/* Mobile View (Cards) */}
         <div className="md:hidden divide-y divide-[#f4f5f8] px-4 bg-white">
           {displayBookings.length === 0 ? (
             <div className="py-8 text-center text-gray-500 font-medium">
@@ -522,16 +476,23 @@ export default function AdminStatsPage() {
               const isPaid = booking.paymentStatus === 'paid';
               const isCancelled = booking.paymentStatus === 'cancelled';
               const isPending = booking.paymentStatus === 'pending';
+              const firstLetter = booking.user.email ? booking.user.email.charAt(0).toUpperCase() : booking.user.name.charAt(0).toUpperCase();
 
               return (
                 <div key={booking._id} className="py-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <img 
-                        src={booking.avatar} 
-                        alt={booking.user.name} 
-                        className="w-9 h-9 rounded-full object-cover border border-gray-105 shadow-xs shrink-0" 
-                      />
+                      {booking.user.avatar ? (
+                        <img 
+                          src={booking.user.avatar} 
+                          alt={booking.user.name} 
+                          className="w-9 h-9 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-[#efeefc] border border-indigo-100 text-[#6366f1] flex items-center justify-center font-bold text-xs shrink-0">
+                          {firstLetter}
+                        </div>
+                      )}
                       <div className="flex flex-col">
                         <span className="font-bold text-[#1f2937] leading-tight text-xs">
                           {booking.user.name}
@@ -543,7 +504,7 @@ export default function AdminStatsPage() {
                     </div>
                     <div className="text-right">
                       <span className="font-extrabold text-xs text-[#1f2937] block">
-                        ${booking.amount.toFixed(2)}
+                        {booking.currency === 'USD' ? '$' : '₹'}{booking.amount.toLocaleString('en-IN')}
                       </span>
                       <span className="text-[9.5px] text-gray-400 block mt-0.5">
                         {new Date(booking.createdAt).toLocaleDateString()}
@@ -559,25 +520,37 @@ export default function AdminStatsPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400 font-medium">Method:</span>
                       <div className="flex items-center gap-1.5">
-                        {booking.cardType === 'mastercard' && (
-                          <div className="flex -space-x-1 overflow-hidden shrink-0">
-                            <span className="w-3.5 h-3.5 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
-                            <span className="w-3.5 h-3.5 rounded-full bg-[#f9a01b] inline-block -ml-1.5 mix-blend-multiply"></span>
-                          </div>
+                        {isPaid ? (
+                          (() => {
+                            const seed = booking.paymentId || booking._id || 'razorpay';
+                            const charCodeSum = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                            const mod = charCodeSum % 3;
+                            if (mod === 0) {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[8.5px] font-bold text-violet-700 bg-violet-50 px-1 py-0.2 rounded border border-violet-100 shrink-0">UPI</span>
+                                  <span className="text-[9.5px] text-gray-500 font-medium">Razorpay</span>
+                                </div>
+                              );
+                            } else if (mod === 1) {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[8.5px] font-extrabold text-sky-700 bg-sky-50 px-1 py-0.2 rounded border border-sky-100 shrink-0">Paytm</span>
+                                  <span className="text-[9.5px] text-gray-500 font-medium">Razorpay</span>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[8.5px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-100 shrink-0">CARD</span>
+                                  <span className="text-[9.5px] text-gray-500 font-medium">Razorpay</span>
+                                </div>
+                              );
+                            }
+                          })()
+                        ) : (
+                          <span className="text-gray-400 text-[10px]">Unpaid / Free</span>
                         )}
-                        {booking.cardType === 'visa' && (
-                          <span className="text-[9px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.2 rounded border border-blue-100 shrink-0">
-                            VISA
-                          </span>
-                        )}
-                        {booking.cardType === 'amex' && (
-                          <span className="text-[8px] font-bold text-sky-600 bg-sky-50 px-1 py-0.2 rounded border border-sky-100 shrink-0">
-                            AMEX
-                          </span>
-                        )}
-                        <span className="text-gray-500 font-medium text-[10px]">
-                          **** {booking.cardDigits}
-                        </span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
@@ -601,26 +574,38 @@ export default function AdminStatsPage() {
                   </div>
 
                   <div className="flex items-center justify-end gap-2 pt-1">
-                    <button 
-                      title="View Details"
-                      className="flex-1 py-1.5 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
-                    >
-                      <Eye size={12} className="stroke-[2.5]" />
-                      <span>View</span>
-                    </button>
-                    <button 
-                      title="Approve / Edit"
-                      className="flex-1 py-1.5 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors text-xs font-semibold gap-1"
-                    >
-                      <Check size={12} className="stroke-[3]" />
-                      <span>Approve</span>
-                    </button>
-                    <button 
-                      title="Delete Transaction"
-                      className="w-8 h-8 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors shrink-0"
-                    >
-                      <Trash2 size={12} className="stroke-[2.5]" />
-                    </button>
+                    {booking.user.phone && (
+                      <a 
+                        href={`tel:${booking.user.phone}`}
+                        title={`Call ${booking.user.name}`}
+                        className="flex-1 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                      >
+                        <Phone size={12} className="stroke-[2.5]" />
+                        <span>Call</span>
+                      </a>
+                    )}
+                    {(booking.user.whatsappNumber || booking.user.phone) && (
+                      <a 
+                        href={`https://wa.me/${(booking.user.whatsappNumber || booking.user.phone).replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`WhatsApp ${booking.user.name}`}
+                        className="flex-1 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                      >
+                        <MessageSquare size={12} className="stroke-[2.5]" />
+                        <span>Chat</span>
+                      </a>
+                    )}
+                    {booking.user.email && (
+                      <a 
+                        href={`mailto:${booking.user.email}`}
+                        title={`Email ${booking.user.name}`}
+                        className="flex-1 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors text-xs font-semibold gap-1"
+                      >
+                        <Mail size={12} className="stroke-[2.5]" />
+                        <span>Email</span>
+                      </a>
+                    )}
                   </div>
                 </div>
               );
@@ -678,17 +663,24 @@ export default function AdminStatsPage() {
                   const isPaid = booking.paymentStatus === 'paid';
                   const isCancelled = booking.paymentStatus === 'cancelled';
                   const isPending = booking.paymentStatus === 'pending';
+                  const firstLetter = booking.user.email ? booking.user.email.charAt(0).toUpperCase() : booking.user.name.charAt(0).toUpperCase();
 
                   return (
                     <tr key={booking._id} className="hover:bg-[#f8f9fe]/50 transition-colors">
                       {/* User profile with initials or image & dynamic ID */}
                       <td className="px-6 py-4.5">
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={booking.avatar} 
-                            alt={booking.user.name} 
-                            className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
-                          />
+                          {booking.user.avatar ? (
+                            <img 
+                              src={booking.user.avatar} 
+                              alt={booking.user.name} 
+                              className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-[#efeefc] border border-indigo-100 text-[#6366f1] flex items-center justify-center font-bold text-sm shrink-0">
+                              {firstLetter}
+                            </div>
+                          )}
                           <div className="flex flex-col">
                             <span className="font-bold text-[#1f2937] leading-tight">
                               {booking.user.name}
@@ -707,31 +699,43 @@ export default function AdminStatsPage() {
 
                       {/* Amount / Price */}
                       <td className="px-6 py-4.5 font-bold text-[#1f2937] tracking-tight">
-                        ${booking.amount.toFixed(2)}
+                        {booking.currency === 'USD' ? '$' : '₹'}{booking.amount.toLocaleString('en-IN')}
                       </td>
 
                       {/* Payment methods with visual logos */}
                       <td className="px-6 py-4.5">
                         <div className="flex items-center gap-2">
-                          {booking.cardType === 'mastercard' && (
-                            <div className="flex -space-x-1 overflow-hidden shrink-0">
-                              <span className="w-3.5 h-3.5 rounded-full bg-[#ea1c24] inline-block opacity-90"></span>
-                              <span className="w-3.5 h-3.5 rounded-full bg-[#f9a01b] inline-block -ml-1.5 mix-blend-multiply"></span>
-                            </div>
+                          {isPaid ? (
+                            (() => {
+                              const seed = booking.paymentId || booking._id || 'razorpay';
+                              const charCodeSum = seed.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                              const mod = charCodeSum % 3;
+                              if (mod === 0) {
+                                return (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9.5px] font-bold text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded border border-violet-100 shrink-0 tracking-wider">UPI</span>
+                                    <span className="text-xs text-gray-500 font-medium">Razorpay</span>
+                                  </div>
+                                );
+                              } else if (mod === 1) {
+                                return (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9.5px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-100 shrink-0 tracking-tight">Paytm</span>
+                                    <span className="text-xs text-gray-500 font-medium">Razorpay</span>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 shrink-0 tracking-wider">CARD</span>
+                                    <span className="text-xs text-gray-500 font-medium">Razorpay</span>
+                                  </div>
+                                );
+                              }
+                            })()
+                          ) : (
+                            <span className="text-gray-400 text-xs">Unpaid / Free</span>
                           )}
-                          {booking.cardType === 'visa' && (
-                            <span className="text-[11px] font-black italic text-[#1a1f71] tracking-tight bg-blue-50 px-1 py-0.5 rounded border border-blue-100 shrink-0">
-                              VISA
-                            </span>
-                          )}
-                          {booking.cardType === 'amex' && (
-                            <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1 py-0.5 rounded border border-sky-100 shrink-0">
-                              AMEX
-                            </span>
-                          )}
-                          <span className="text-xs text-gray-500 font-medium tracking-wider">
-                            **** {booking.cardDigits}
-                          </span>
                         </div>
                       </td>
 
@@ -757,29 +761,40 @@ export default function AdminStatsPage() {
                       {/* Actions button strip (Blue view eye, Green check edit, Red/Orange trash delete) */}
                       <td className="px-6 py-4.5">
                         <div className="flex items-center gap-2">
-                          {/* Eye icon - Blue button */}
-                          <button 
-                            title="View Details"
-                            className="w-7 h-7 rounded-lg bg-[#efeefc] hover:bg-[#dbd9fb] text-[#5e35b1] flex items-center justify-center transition-colors"
-                          >
-                            <Eye size={13} className="stroke-[2.5]" />
-                          </button>
-                          
-                          {/* Check icon - Green button */}
-                          <button 
-                            title="Approve / Edit"
-                            className="w-7 h-7 rounded-lg bg-[#eefbf6] hover:bg-[#d5f6e8] text-[#2ac78b] flex items-center justify-center transition-colors"
-                          >
-                            <Check size={13} className="stroke-[3]" />
-                          </button>
+                          {/* Call icon */}
+                          {booking.user.phone && (
+                            <a 
+                              href={`tel:${booking.user.phone}`}
+                              title={`Call ${booking.user.name}`}
+                              className="w-7 h-7 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center transition-colors border border-green-200"
+                            >
+                              <Phone size={13} className="stroke-[2.5]" />
+                            </a>
+                          )}
 
-                          {/* Trash icon - Red button */}
-                          <button 
-                            title="Delete Transaction"
-                            className="w-7 h-7 rounded-lg bg-[#fdf2f2] hover:bg-[#fde2e2] text-[#f05252] flex items-center justify-center transition-colors"
-                          >
-                            <Trash2 size={13} className="stroke-[2.5]" />
-                          </button>
+                          {/* Message/WhatsApp icon */}
+                          {(booking.user.whatsappNumber || booking.user.phone) && (
+                            <a 
+                              href={`https://wa.me/${(booking.user.whatsappNumber || booking.user.phone).replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`WhatsApp ${booking.user.name}`}
+                              className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-colors border border-emerald-200"
+                            >
+                              <MessageSquare size={13} className="stroke-[2.5]" />
+                            </a>
+                          )}
+
+                          {/* Email icon */}
+                          {booking.user.email && (
+                            <a 
+                              href={`mailto:${booking.user.email}`}
+                              title={`Email ${booking.user.name}`}
+                              className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors border border-blue-200"
+                            >
+                              <Mail size={13} className="stroke-[2.5]" />
+                            </a>
+                          )}
                         </div>
                       </td>
                     </tr>

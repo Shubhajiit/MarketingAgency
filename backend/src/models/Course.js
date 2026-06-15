@@ -75,7 +75,25 @@ const courseSchema = new mongoose.Schema({
   metaHandsOnSubtitle: {
     type: String,
     default: 'Learn more'
-  }
+  },
+
+  // Thumbnail URL (Cloudinary or S3)
+  thumbnailUrl: {
+    type: String,
+    default: ''
+  },
+
+  // Course videos stored in AWS S3 (private bucket)
+  // Each video has a title, S3 key (path in bucket), order, and optional duration
+  videos: [
+    {
+      title: { type: String, required: true },
+      s3Key: { type: String, required: true },  // e.g. "courses/course-id/intro.mp4"
+      order: { type: Number, default: 0 },
+      duration: { type: String, default: '' },  // e.g. "12:34"
+      description: { type: String, default: '' },
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Course', courseSchema);

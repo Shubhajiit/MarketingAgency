@@ -11,56 +11,35 @@ exports.getStats = async (req, res) => {
       Workshop.countDocuments({ isActive: true }),
     ]);
 
-    const users = await User.find({ role: 'user' })
-      .populate('enrolledWorkshops')
-      .populate('enrolledCourses');
+    // Fetch latest registrations for the transaction list
+    const registrations = await WorkshopRegistration.find()
+      .populate('userId', 'avatar name email phoneNumber whatsappNumber')
+      .sort({ createdAt: -1 })
+      .limit(30);
 
-    let totalRevenue = 0;
-    const recentBookings = [];
+    // Calculate revenue from paid registrations
+    const paidRegistrations = await WorkshopRegistration.find({ paymentStatus: 'paid' });
+    const totalRevenue = paidRegistrations.reduce((sum, reg) => sum + (reg.amountPaid || 0), 0);
 
-    users.forEach(user => {
-      if (user.enrolledWorkshops) {
-        user.enrolledWorkshops.forEach(w => {
-          totalRevenue += w.price || 0;
-          recentBookings.push({
-            _id: `${user._id}-${w._id}`,
-            user: {
-              _id: user._id,
-              name: user.name,
-              email: user.email
-            },
-            workshop: {
-              title: w.title
-            },
-            paymentStatus: 'paid',
-            amount: w.price || 0,
-            createdAt: user.updatedAt || new Date()
-          });
-        });
-      }
-      if (user.enrolledCourses) {
-        user.enrolledCourses.forEach(c => {
-          totalRevenue += c.price || 0;
-          recentBookings.push({
-            _id: `${user._id}-${c._id}`,
-            user: {
-              _id: user._id,
-              name: user.name,
-              email: user.email
-            },
-            workshop: {
-              title: c.title
-            },
-            paymentStatus: 'paid',
-            amount: c.price || 0,
-            createdAt: user.updatedAt || new Date()
-          });
-        });
-      }
-    });
-
-    recentBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    const latestBookings = recentBookings.slice(0, 10);
+    const recentBookings = registrations.map(reg => ({
+      _id: reg._id,
+      user: {
+        _id: reg.userId ? reg.userId._id : null,
+        name: reg.name || (reg.userId ? reg.userId.name : 'Customer'),
+        email: reg.email || (reg.userId ? reg.userId.email : ''),
+        avatar: reg.userId ? reg.userId.avatar : null,
+        phone: reg.phone,
+        whatsappNumber: reg.whatsappNumber
+      },
+      workshop: {
+        title: reg.workshopTitle
+      },
+      paymentStatus: reg.paymentStatus,
+      amount: reg.amountPaid || 0,
+      createdAt: reg.createdAt,
+      paymentId: reg.paymentId,
+      currency: reg.currency || 'INR'
+    }));
 
     // Calculate daily registrations/enrollments for the last 7 days
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -125,7 +104,7 @@ exports.getStats = async (req, res) => {
           totalVideos: 0,
           totalRevenue: totalRevenue || 0,
         },
-        recentBookings: latestBookings,
+        recentBookings: recentBookings,
         chartData
       },
     });

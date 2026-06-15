@@ -1,6 +1,8 @@
 const Workshop = require('../models/Workshop');
 const WorkshopRegistration = require('../models/WorkshopRegistration');
 const User = require('../models/User');
+const { sendWorkshopConfirmationEmail } = require('../utils/emailService');
+const { getCache, setCache, delCache } = require('../utils/redis');
 
 // ─── Public: List all active workshops ───────────────────────
 exports.listWorkshops = async (req, res) => {
@@ -42,14 +44,29 @@ exports.listWorkshops = async (req, res) => {
 // ─── Public: Get single workshop by slug ─────────────────────
 exports.getWorkshopBySlug = async (req, res) => {
   try {
+    const { slug } = req.params;
+    const cacheKey = `workshop:slug:${slug}`;
+
+    // Try to get from Redis cache
+    const cachedWorkshop = await getCache(cacheKey);
+    if (cachedWorkshop) {
+      console.log(`[Redis] Cache HIT for key: ${cacheKey}`);
+      return res.status(200).json({ success: true, data: { workshop: cachedWorkshop } });
+    }
+
+    console.log(`[Redis] Cache MISS for key: ${cacheKey}`);
+    // Cache miss - query MongoDB
     const workshop = await Workshop.findOne({
-      slug: req.params.slug,
+      slug,
       isActive: true,
     }).select('-__v');
 
     if (!workshop) {
       return res.status(404).json({ success: false, message: 'Workshop not found' });
     }
+
+    // Cache the retrieved workshop (TTL: 1 hour)
+    await setCache(cacheKey, workshop, 3600);
 
     res.status(200).json({ success: true, data: { workshop } });
   } catch (error) {
@@ -150,6 +167,8 @@ exports.updateWorkshop = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Workshop not found' });
     }
 
+    const oldSlug = workshop.slug;
+
     const allowedFields = [
       'title', 'subtitle', 'description', 'instructor',
       'instructorImage', 'instructorDescription',
@@ -174,6 +193,15 @@ exports.updateWorkshop = async (req, res) => {
     }
 
     await workshop.save();
+
+    // Invalidate Redis cache
+    if (oldSlug) {
+      await delCache(`workshop:slug:${oldSlug}`);
+    }
+    if (workshop.slug && workshop.slug !== oldSlug) {
+      await delCache(`workshop:slug:${workshop.slug}`);
+    }
+
     res.status(200).json({ success: true, data: { workshop } });
   } catch (error) {
     console.error('Update Workshop Error:', error);
@@ -197,6 +225,11 @@ exports.deleteWorkshop = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Workshop not found' });
     }
 
+    // Invalidate Redis cache
+    if (workshop.slug) {
+      await delCache(`workshop:slug:${workshop.slug}`);
+    }
+
     res.status(200).json({ success: true, message: 'Workshop deactivated successfully' });
   } catch (error) {
     console.error('Delete Workshop Error:', error);
@@ -204,13 +237,62 @@ exports.deleteWorkshop = async (req, res) => {
   }
 };
 
-// ─── Admin: List ALL workshops (including inactive) ───────────
+// ─── Admin: Cancel workshop ──────────────────────────────────
+exports.cancelWorkshop = async (req, res) => {
+  try {
+    // Verify admin role
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Forbidden. Admin access required.' });
+    }
+
+    const workshop = await Workshop.findById(req.params.id);
+    if (!workshop) {
+      return res.status(404).json({ success: false, message: 'Workshop not found' });
+    }
+
+    // Mark workshop as inactive (removes it from the main website) and cancelled
+    workshop.isActive = false;
+    workshop.isCancelled = true;
+    await workshop.save();
+
+    // Invalidate Redis cache
+    if (workshop.slug) {
+      await delCache(`workshop:slug:${workshop.slug}`);
+    }
+
+    // Mark registrations as cancelled in bulk
+    // Find count of registrations to report back
+    const paidRegistrationsCount = await WorkshopRegistration.countDocuments({
+      workshopId: workshop._id,
+      paymentStatus: 'paid',
+      cancellationEmailSent: { $ne: true }
+    });
+
+    // Start the background cancellation queue (non-blocking)
+    const { startCancellationQueue } = require('../utils/cancellationQueue');
+    startCancellationQueue(workshop._id);
+
+    res.status(200).json({
+      success: true,
+      message: `Workshop cancelled successfully. Initalized email queue for ${paidRegistrationsCount} paid participants.`,
+      data: {
+        totalPaidUsers: paidRegistrationsCount
+      }
+    });
+  } catch (error) {
+    console.error('Cancel Workshop Error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+  }
+};
+
+// ─── Admin: List ALL workshops (including inactive/cancelled) ─
 exports.adminListWorkshops = async (req, res) => {
   try {
     const { page = 1, limit = 100, type } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const filter = { isActive: { $ne: false } };
+    // List active workshops, or inactive ones that were cancelled (so they show up as Cancelled)
+    const filter = { $or: [ { isActive: { $ne: false } }, { isCancelled: true } ] };
     if (type) filter.type = type;
 
     const [workshops, total] = await Promise.all([
@@ -219,7 +301,7 @@ exports.adminListWorkshops = async (req, res) => {
         .skip(skip)
         .limit(parseInt(limit))
         .select('-__v'),
-      Workshop.countDocuments({ isActive: { $ne: false } }),
+      Workshop.countDocuments(filter),
     ]);
 
     res.status(200).json({
@@ -295,6 +377,11 @@ exports.registerForWorkshop = async (req, res) => {
       amountPaid: workshop.price || 0,
       currency: workshop.currency || 'INR',
       paymentStatus: 'paid',
+    });
+
+    // Send confirmation email with PDF invoice asynchronously (non-blocking)
+    sendWorkshopConfirmationEmail(registration, workshop).catch((err) => {
+      console.error('[WorkshopController] Error sending confirmation email:', err);
     });
 
     res.status(201).json({

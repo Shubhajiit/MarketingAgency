@@ -16,6 +16,7 @@ import {
   Loader2,
   AlertTriangle,
   Search,
+  CalendarOff,
 } from 'lucide-react';
 
 interface WorkshopFormData {
@@ -28,7 +29,7 @@ interface WorkshopFormData {
   priceCaption: string;
   bonusDeadlineText: string;
   heroPoints: string[];
-  workshopDates: string[];
+  workshopDates: { date: string; place: string }[];
   rating1Value: string;
   rating1Count: string;
   rating1Platform: string;
@@ -260,43 +261,53 @@ function ImageUploadInput({
   );
 }
 
-const extractDateRanges = (dates: string[]) => {
-  if (!dates || dates.length === 0) return [];
+const extractDateRanges = (datesList: any[]) => {
+  if (!datesList || datesList.length === 0) return [];
   
-  // Sort dates ascending
-  const sortedDates = [...dates]
-    .map(d => new Date(d))
-    .sort((a, b) => a.getTime() - b.getTime());
-  
-  const ranges: { startDate: string; endDate: string }[] = [];
-  if (sortedDates.length === 0) return ranges;
-  
-  let currentStart = sortedDates[0];
-  let currentEnd = sortedDates[0];
-  
-  for (let i = 1; i < sortedDates.length; i++) {
-    const d = sortedDates[i];
-    // Check if consecutive (difference of exactly 1 day or similar, using 24h threshold)
+  // Normalize datesList to include both date and place
+  const normalized = datesList.map(d => {
+    if (!d) return { date: '', place: '' };
+    if (typeof d === 'string') return { date: d, place: '' };
+    if (d instanceof Date) return { date: d.toISOString(), place: '' };
+    return { date: d.date || '', place: d.place || '' };
+  }).filter(d => d.date);
+
+  // Sort ascending
+  normalized.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const ranges: { startDate: string; endDate: string; place: string }[] = [];
+  if (normalized.length === 0) return ranges;
+
+  let currentStart = new Date(normalized[0].date);
+  let currentEnd = new Date(normalized[0].date);
+  let currentPlace = normalized[0].place;
+
+  for (let i = 1; i < normalized.length; i++) {
+    const dObj = normalized[i];
+    const d = new Date(dObj.date);
     const diff = d.getTime() - currentEnd.getTime();
     const diffDays = Math.round(diff / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) {
+
+    if (diffDays === 1 && dObj.place === currentPlace) {
       currentEnd = d;
     } else {
       ranges.push({
         startDate: currentStart.toISOString().split('T')[0],
-        endDate: currentEnd.toISOString().split('T')[0]
+        endDate: currentEnd.toISOString().split('T')[0],
+        place: currentPlace
       });
       currentStart = d;
       currentEnd = d;
+      currentPlace = dObj.place;
     }
   }
-  
+
   ranges.push({
     startDate: currentStart.toISOString().split('T')[0],
-    endDate: currentEnd.toISOString().split('T')[0]
+    endDate: currentEnd.toISOString().split('T')[0],
+    place: currentPlace
   });
-  
+
   return ranges;
 };
 
@@ -312,9 +323,10 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   const [formData, setFormData] = useState<WorkshopFormData>(defaultFormData);
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
-  const [dateRanges, setDateRanges] = useState<{ startDate: string; endDate: string }[]>([]);
+  const [dateRanges, setDateRanges] = useState<{ startDate: string; endDate: string; place: string }[]>([]);
 
   // Generate consecutive dates between start and end date (inclusive)
   const generateConsecutiveDates = (start: string, end: string) => {
@@ -372,13 +384,20 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   // Update workshopDates in formData when dateRanges changes (for three-days workshops)
   useEffect(() => {
     if (type === 'three-days') {
-      const allDates: string[] = [];
+      const allDates: { date: string; place: string }[] = [];
       dateRanges.forEach((range) => {
         const generated = generateConsecutiveDates(range.startDate, range.endDate);
-        allDates.push(...generated);
+        generated.forEach((date) => {
+          allDates.push({ date, place: range.place || '' });
+        });
       });
-      const uniqueDates = Array.from(new Set(allDates));
-      updateField('workshopDates', uniqueDates);
+      // Deduplicate by date while keeping the last defined place
+      const dateMap = new Map<string, string>();
+      allDates.forEach(d => {
+        dateMap.set(d.date, d.place);
+      });
+      const normalizedDates = Array.from(dateMap.entries()).map(([date, place]) => ({ date, place }));
+      updateField('workshopDates', normalizedDates);
     }
   }, [dateRanges, type]);
 
@@ -427,7 +446,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   const handleCreate = () => {
     setEditingWorkshop(null);
     setFormData(defaultFormData);
-    setDateRanges([{ startDate: '', endDate: '' }]);
+    setDateRanges([{ startDate: '', endDate: '', place: '' }]);
     setShowModal(true);
     setError('');
   };
@@ -436,12 +455,8 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   const handleEdit = (workshop: Workshop) => {
     setEditingWorkshop(workshop);
 
-    const sortedDates = workshop.workshopDates && workshop.workshopDates.length > 0
-      ? [...workshop.workshopDates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      : [];
-    const dateStrings = sortedDates.map(d => new Date(d).toISOString().split('T')[0]);
-    const ranges = extractDateRanges(dateStrings);
-    setDateRanges(ranges.length > 0 ? ranges : [{ startDate: '', endDate: '' }]);
+    const ranges = extractDateRanges(workshop.workshopDates || []);
+    setDateRanges(ranges.length > 0 ? ranges : [{ startDate: '', endDate: '', place: '' }]);
 
     setFormData({
       title: workshop.title || '',
@@ -456,7 +471,16 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         ? [...workshop.heroPoints, '', '', '', ''].slice(0, 4)
         : ['', '', '', ''],
       workshopDates: (workshop as any).workshopDates
-        ? (workshop as any).workshopDates.map((d: string) => new Date(d).toISOString().split('T')[0])
+        ? (workshop as any).workshopDates.map((d: any) => {
+            if (!d) return { date: '', place: '' };
+            if (typeof d === 'string') {
+              return { date: new Date(d).toISOString().split('T')[0], place: '' };
+            }
+            return {
+              date: d.date ? new Date(d.date).toISOString().split('T')[0] : '',
+              place: d.place || '',
+            };
+          })
         : [],
       rating1Value: (workshop as any).rating1Value || '4.5/5',
       rating1Count: (workshop as any).rating1Count || '(725)',
@@ -535,6 +559,17 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
     }
   };
 
+  // Cancel workshop
+  const handleCancel = async (id: string) => {
+    try {
+      await workshopApi.cancel(id);
+      setCancelConfirm(null);
+      fetchWorkshops();
+    } catch {
+      setError('Failed to cancel workshop');
+    }
+  };
+
   // Update a form field
   const updateField = (field: keyof WorkshopFormData, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -560,6 +595,9 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   const managerDescription = type === 'three-days' 
     ? 'Create and manage all 3-day workshops with dynamic detail pages' 
     : 'Create and manage all 1-day workshops with dynamic detail pages';
+
+  const workshopToDelete = deleteConfirm ? workshops.find((w) => w._id === deleteConfirm) : null;
+  const isNotCancelledYet = workshopToDelete ? !workshopToDelete.isCancelled : false;
 
   return (
     <div className="space-y-6">
@@ -692,7 +730,14 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                               </div>
                             )}
                             <div>
-                              <p className="text-sm font-semibold text-gray-900 leading-tight">{w.title}</p>
+                              <p className="text-sm font-semibold text-gray-900 leading-tight">
+                                {w.title}
+                                {w.isCancelled && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-100 uppercase tracking-wider">
+                                    Cancelled
+                                  </span>
+                                )}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -727,10 +772,20 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                             >
                               <Pencil size={15} />
                             </button>
+                            {!w.isCancelled && (
+                              <button
+                                onClick={() => setCancelConfirm(w._id)}
+                                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-55 transition-all cursor-pointer"
+                                title="Cancel Workshop"
+                              >
+                                <CalendarOff size={15} />
+                              </button>
+                            )}
                             <button
                               onClick={() => setDeleteConfirm(w._id)}
-                              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all cursor-pointer"
-                              title="Delete"
+                              disabled={!w.isCancelled}
+                              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title={w.isCancelled ? "Delete" : "You must cancel the workshop before deleting"}
                             >
                               <Trash2 size={15} />
                             </button>
@@ -871,6 +926,17 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
           <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full flex flex-col items-center text-center">
+            {isNotCancelledYet && (
+              <div className="w-full mb-5 p-4 bg-amber-50/80 border border-amber-200 rounded-xl text-left flex items-start gap-2.5">
+                <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold text-amber-800">Warning: Workshop Not Cancelled</h4>
+                  <p className="text-[10px] text-amber-700 mt-1 leading-relaxed">
+                    This workshop is still active. Deleting it directly is disabled to prevent leaving registered paid users without notice or refund. You must Cancel the workshop first.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
               <AlertTriangle size={24} className="text-red-500" />
             </div>
@@ -885,9 +951,40 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                disabled={isNotCancelledYet}
+                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {cancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setCancelConfirm(null)} />
+          <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
+              <AlertTriangle size={24} className="text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Cancel Workshop?</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to cancel this workshop? This will hide it from the main website and queue refund notification emails to all registered paid users.
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setCancelConfirm(null)}
+                className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => handleCancel(cancelConfirm)}
+                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+              >
+                Cancel Workshop
               </button>
             </div>
           </div>
@@ -1107,7 +1204,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                                   Delete
                                 </button>
                               )}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                   <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block mb-1">Start Date</label>
                                   <input
@@ -1134,6 +1231,20 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                                     className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white text-black"
                                   />
                                 </div>
+                                <div>
+                                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider block mb-1">Place / Location</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Online, Delhi, Mumbai"
+                                    value={range.place || ''}
+                                    onChange={(e) => {
+                                      const updated = [...dateRanges];
+                                      updated[idx] = { ...updated[idx], place: e.target.value };
+                                      setDateRanges(updated);
+                                    }}
+                                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white text-black font-semibold"
+                                  />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1142,7 +1253,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                         <button
                           type="button"
                           onClick={() => {
-                            setDateRanges([...dateRanges, { startDate: '', endDate: '' }]);
+                            setDateRanges([...dateRanges, { startDate: '', endDate: '', place: '' }]);
                           }}
                           className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer mt-3"
                         >
@@ -1155,11 +1266,16 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                               Generated Dates:
                             </span>
                             <div className="flex flex-wrap gap-2">
-                              {formData.workshopDates.map((dateStr, idx) => (
-                                <span key={idx} className="bg-white border border-slate-200 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg">
-                                  📅 {dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                                </span>
-                              ))}
+                              {formData.workshopDates.map((dateObj: any, idx) => {
+                                const dateStr = typeof dateObj === 'string' ? dateObj : dateObj?.date || '';
+                                const placeStr = typeof dateObj === 'string' ? '' : dateObj?.place || '';
+                                return (
+                                  <span key={idx} className="bg-white border border-slate-200 text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg flex flex-col items-start">
+                                    <span>📅 {dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</span>
+                                    {placeStr && <span className="text-[10px] text-gray-500 mt-0.5 font-bold">📍 {placeStr}</span>}
+                                  </span>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
@@ -1167,43 +1283,64 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                     ) : (
                       <>
                         <span className="text-xs text-gray-500 font-medium block">
-                          Add the dates when this workshop is held. These will display in the calendar selector on the details page.
+                          Add the dates when this workshop is held, along with the location/place for each date. These will display in the calendar selector.
                         </span>
-                        <div className="space-y-3">
-                          {formData.workshopDates.map((dateStr, idx) => (
-                            <div key={idx} className="flex items-center gap-3">
-                              <input
-                                type="date"
-                                value={dateStr}
-                                onChange={(e) => {
-                                  const updated = [...formData.workshopDates];
-                                  updated[idx] = e.target.value;
-                                  updateField('workshopDates', updated);
-                                }}
-                                className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = [...formData.workshopDates];
-                                  updated.splice(idx, 1);
-                                  updateField('workshopDates', updated);
-                                }}
-                                className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
+                        <div className="space-y-4">
+                          {formData.workshopDates.map((dateObj, idx) => {
+                            const dateValue = typeof dateObj === 'string' ? dateObj : dateObj?.date || '';
+                            const placeValue = typeof dateObj === 'string' ? '' : dateObj?.place || '';
+                            return (
+                              <div key={idx} className="flex flex-col sm:flex-row items-center gap-3 bg-gray-50/50 p-4 border border-gray-200 rounded-xl relative text-black">
+                                <div className="flex-1 flex flex-col gap-1.5 w-full">
+                                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Date</label>
+                                  <input
+                                    type="date"
+                                    value={dateValue}
+                                    onChange={(e) => {
+                                      const updated = [...formData.workshopDates];
+                                      updated[idx] = { date: e.target.value, place: placeValue };
+                                      updateField('workshopDates', updated);
+                                    }}
+                                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white text-black"
+                                  />
+                                </div>
+                                <div className="flex-1 flex flex-col gap-1.5 w-full">
+                                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Place / Location</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Online, Delhi, Mumbai"
+                                    value={placeValue}
+                                    onChange={(e) => {
+                                      const updated = [...formData.workshopDates];
+                                      updated[idx] = { date: dateValue, place: e.target.value };
+                                      updateField('workshopDates', updated);
+                                    }}
+                                    className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-white text-black font-semibold"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...formData.workshopDates];
+                                    updated.splice(idx, 1);
+                                    updateField('workshopDates', updated);
+                                  }}
+                                  className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold transition-colors active:scale-[0.98] cursor-pointer sm:self-end border-0"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
                         <button
                           type="button"
                           onClick={() => {
-                            updateField('workshopDates', [...formData.workshopDates, '']);
+                            updateField('workshopDates', [...formData.workshopDates, { date: '', place: '' }]);
                           }}
                           className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
                         >
-                          + Add Date
+                          + Add Date & Place
                         </button>
                       </>
                     )}

@@ -1,169 +1,218 @@
 'use client';
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Course, CourseCard } from '@/components/common/CoursesCardsUI';
+import { useState, useCallback } from 'react';
+import {
+  Search,
+  BookOpen,
+  Loader2,
+  PlayCircle,
+  Clock,
+  ChevronRight,
+  Play,
+} from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useRouter } from 'next/navigation';
 
-// Custom mock data to exactly match the screenshot
-const mockActiveCourses: Course[] = [
-  {
-    id: "dsa-supreme-3-pop",
-    title: "Data Structures & Algorithms Master Course [Supreme 3.0]",
-    category: "popular",
-    tag: "PACKAGE",
-    hours: "120 Hours • Self-Paced",
-    price: 0,
-    originalPrice: 0,
-    discount: "0%",
-    bgGradient: "from-blue-600 to-indigo-600",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "View Course",
-    isPackage: true,
-    thumbnailType: "dsa"
-  },
-  {
-    id: "cpp-mock-test-pop",
-    title: "C++ Language Mock Test",
-    category: "popular",
-    tag: "TEST",
-    hours: "10 Hours • Self-Paced",
-    price: 0,
-    originalPrice: 0,
-    discount: "0%",
-    bgGradient: "from-slate-200 to-slate-300",
-    primaryCtaText: "View Course",
-    secondaryCtaText: "View Course",
-    isMockTest: true,
-    authorName: "Love Babbar",
-    validityText: "Lifetime",
-    thumbnailType: "cpp"
-  }
-];
+interface EnrolledCourse {
+  id: string;
+  title: string;
+  instructorName?: string;
+  thumbnailUrl?: string;
+  mentorPicture?: string;
+  instructorImage?: string;
+  bgGradient?: string;
+  metaDuration?: string;
+  hours?: string;
+  category?: string;
+  videos?: any[];
+}
+
 
 export default function ActiveCoursesPage() {
-  const { user } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [searchQuery, setSearchQuery] = useState('');
-  const [launchMessage, setLaunchMessage] = useState<string | null>(null);
 
-  // Map real enrolled courses to Course card structure
-  const enrolledCourses: Course[] = (user?.enrolledCourses || [])
+  // Parse enrolled courses from user store
+  const enrolledCourses: EnrolledCourse[] = (user?.enrolledCourses || [])
     .filter((c: any) => c && typeof c === 'object' && c.title)
     .map((c: any) => ({
       id: c._id || c.id,
       title: c.title,
-      category: c.category || "popular",
-      tag: c.tag || "DMI",
-      hours: c.hours || "Self-Paced",
-      price: c.price || 0,
-      originalPrice: c.originalPrice || 0,
-      discount: c.discount || "0%",
-      bgGradient: c.bgGradient || "from-[#6366f1] to-[#8b5cf6]",
-      primaryCtaText: c.primaryCtaText || "View Course",
-      secondaryCtaText: c.secondaryCtaText || "View Course",
-      isPackage: !c.isGraphicOnly,
-      isMockTest: c.isMockTest || false,
-      authorName: c.authorName || "",
-      validityText: "Lifetime",
-      thumbnailType: c.thumbnailType || undefined,
-      circlesColor: c.circlesColor,
-      mentorPicture: c.mentorPicture || c.instructorImage,
+      instructorName: c.instructorName || c.authorName || '',
+      thumbnailUrl: c.thumbnailUrl || c.mentorPicture || c.instructorImage || '',
+      mentorPicture: c.mentorPicture,
       instructorImage: c.instructorImage,
-      isGraphicOnly: c.isGraphicOnly,
-      graphicType: c.graphicType
+      bgGradient: c.bgGradient || 'from-indigo-50 to-purple-600',
+      metaDuration: c.metaDuration || '',
+      hours: c.hours || '',
+      category: c.category || '',
     }));
 
-  const allActiveCourses = [...enrolledCourses, ...mockActiveCourses];
+  const filteredCourses =
+    activeTab === 'active'
+      ? enrolledCourses.filter(
+          (c) =>
+            !searchQuery ||
+            c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (c.instructorName || '').toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : [];
 
-  const filteredCourses = activeTab === 'active'
-    ? allActiveCourses.filter(course =>
-      course && course.title && (
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (course.authorName && course.authorName.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    )
-    : [];
+  const handlePlayCourse = useCallback((course: EnrolledCourse) => {
+    router.push(`/dashboard/courses/${course.id}`);
+  }, [router]);
 
-  const handleStartNow = (course: Course) => {
-    setLaunchMessage(`Launching "${course.title}"... Enjoy your learning!`);
-    setTimeout(() => {
-      setLaunchMessage(null);
-    }, 3000);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+      </div>
+    );
+  }
+
+  const thumbnailSrc = (c: EnrolledCourse) =>
+    c.thumbnailUrl || c.mentorPicture || c.instructorImage || '';
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 font-sans pt-6">
-      {/* Launch Toast Notification */}
-      {launchMessage && (
-        <div className="fixed top-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg z-50 text-sm font-semibold animate-in fade-in slide-in-from-top-4 duration-300 flex items-center gap-2 border border-slate-800">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          {launchMessage}
-        </div>
-      )}
-
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 w-full">
-        <button
-          onClick={() => setActiveTab('active')}
-          className={`pb-3 px-12 text-base transition-all duration-200 outline-none border-b-[3px] -mb-[1px] ${
-            activeTab === 'active'
-              ? 'text-slate-900 font-bold border-[#4f46e5]'
-              : 'text-slate-400 font-medium hover:text-slate-600 border-transparent'
-          }`}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => setActiveTab('archived')}
-          className={`pb-3 px-12 text-base transition-all duration-200 outline-none border-b-[3px] -mb-[1px] ${
-            activeTab === 'archived'
-              ? 'text-slate-900 font-bold border-[#4f46e5]'
-              : 'text-slate-400 font-medium hover:text-slate-600 border-transparent'
-          }`}
-        >
-          Archived
-        </button>
-      </div>
-
-      {/* Search Input Bar */}
-      <div className="relative w-full max-w-full">
-        <input
-          type="text"
-          placeholder="Search for a chapter, course or package"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors pr-10"
-        />
-        <Search className="w-5 h-5 text-slate-800 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-      </div>
-
-      {/* Course Cards Grid */}
-      {filteredCourses.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-4">
-          {filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              onPrimaryClick={handleStartNow}
-            />
+    <>
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 font-sans pt-6">
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200 w-full">
+          {(['active', 'archived'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 px-12 text-base transition-all duration-200 outline-none border-b-[3px] -mb-[1px] capitalize ${
+                activeTab === tab
+                  ? 'text-slate-900 font-bold border-[#4f46e5]'
+                  : 'text-slate-400 font-medium hover:text-slate-600 border-transparent'
+              }`}
+            >
+              {tab}
+            </button>
           ))}
         </div>
-      ) : (
-        /* Empty State */
-        <div className="py-20 text-center max-w-md mx-auto space-y-4">
-          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-slate-400">
-            <Search className="w-8 h-8" />
-          </div>
-          <h2 className="text-lg font-bold text-slate-800">No courses found</h2>
-          <p className="text-sm text-slate-500">
-            {activeTab === 'archived'
-              ? "You do not have any archived courses."
-              : "We couldn't find any courses matching your search."
-            }
-          </p>
+
+        {/* Search */}
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Search for a course"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors pr-10"
+          />
+          <Search className="w-5 h-5 text-slate-800 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
-      )}
-    </div>
+
+        {/* Course Thumbnail Cards Grid */}
+        {filteredCourses.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2">
+            {filteredCourses.map((course) => {
+              const imgSrc = thumbnailSrc(course);
+              const duration = course.metaDuration
+                ? `${course.metaDuration} hrs`
+                : course.hours || '';
+
+              return (
+                <div
+                  key={course.id}
+                  onClick={() => handlePlayCourse(course)}
+                  className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer group"
+                >
+                  {/* Thumbnail with play overlay */}
+                  <div
+                    className={`relative h-44 bg-gradient-to-br ${course.bgGradient || 'from-indigo-500 to-purple-600'} overflow-hidden`}
+                  >
+                    {imgSrc ? (
+                      <img
+                        src={imgSrc}
+                        alt={course.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <BookOpen className="w-14 h-14 text-white/30" />
+                      </div>
+                    )}
+
+                    {/* Dark overlay on hover */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300" />
+
+                    {/* Play button */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300">
+                        <Play className="w-6 h-6 text-indigo-600 fill-indigo-600 ml-1" />
+                      </div>
+                    </div>
+
+                    {/* Duration badge */}
+                    {duration && (
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded-md">
+                        <Clock className="w-3 h-3" />
+                        {duration}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card info */}
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold text-slate-800 leading-snug line-clamp-2">
+                      {course.title}
+                    </h3>
+                    {course.instructorName && (
+                      <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+                        <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[8px] font-bold shrink-0">
+                          {course.instructorName.charAt(0).toUpperCase()}
+                        </span>
+                        {course.instructorName}
+                      </p>
+                    )}
+                    <div className="mt-3 pt-3 border-t border-slate-50 flex items-center gap-1.5 text-[11px] text-indigo-500 font-semibold">
+                      <PlayCircle className="w-4 h-4" />
+                      Continue Learning
+                      <ChevronRight className="w-3.5 h-3.5 ml-auto" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Empty state */
+          <div className="py-20 text-center max-w-md mx-auto space-y-5">
+            <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mx-auto">
+              <BookOpen className="w-10 h-10 text-indigo-300" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">
+                {activeTab === 'archived'
+                  ? 'No archived courses'
+                  : enrolledCourses.length === 0
+                  ? 'No courses yet'
+                  : 'No courses found'}
+              </h2>
+              <p className="text-sm text-slate-500 mt-2">
+                {activeTab === 'archived'
+                  ? 'You do not have any archived courses.'
+                  : enrolledCourses.length === 0
+                  ? "You haven't enrolled in any courses yet. Browse and buy a course to get started!"
+                  : "We couldn't find any courses matching your search."}
+              </p>
+            </div>
+            {activeTab === 'active' && enrolledCourses.length === 0 && (
+              <button
+                onClick={() => router.push('/all-course')}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors"
+              >
+                Browse Courses
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

@@ -72,6 +72,7 @@ const workshopSchema = new mongoose.Schema(
 
     // Status
     isActive: { type: Boolean, default: true },
+    isCancelled: { type: Boolean, default: false },
 
     // Rich content
     highlights: { type: [highlightSchema], default: [] },
@@ -82,7 +83,7 @@ const workshopSchema = new mongoose.Schema(
     courseOutcomes: { type: [courseOutcomeSchema], default: [] },
     experts: { type: [expertSchema], default: [] },
     heroPoints: { type: [String], default: [] },
-    workshopDates: { type: [Date], default: [] },
+    workshopDates: { type: [mongoose.Schema.Types.Mixed], default: [] },
 
     // Ratings
     rating1Value: { type: String, default: '4.5/5' },

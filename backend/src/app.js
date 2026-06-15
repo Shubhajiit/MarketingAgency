@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
@@ -7,10 +8,20 @@ const workshopRoutes = require('./routes/workshop.routes');
 const courseRoutes = require('./routes/course.routes');
 const userRoutes = require('./routes/user.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const contactRoutes = require('./routes/contact.routes');
 
 const path = require('path');
 
 const app = express();
+
+// Rate limiter for payment endpoints (100 req / 15 min per IP)
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests. Please try again after 15 minutes.' },
+});
 
 app.use(cors({
   origin: ['http://localhost:3000', 'https://scaleai-ashy.vercel.app', process.env.CLIENT_URL].filter(Boolean),
@@ -24,7 +35,8 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/workshops', workshopRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/payments', paymentLimiter, paymentRoutes);
+app.use('/api/v1/contact', contactRoutes);
 
 app.get('/', (req, res) => {
   res.json({
