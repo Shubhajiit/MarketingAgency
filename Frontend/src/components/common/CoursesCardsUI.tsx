@@ -19,8 +19,8 @@ export interface Course {
   instructorImage?: string;
   isGraphicOnly?: boolean;
   graphicType?: "ai" | "seo" | "ppc" | "strategy";
-  primaryCtaText: "Download Brochure" | "View Course";
-  secondaryCtaText: "View Course" | "Buy Now";
+  primaryCtaText?: string;
+  secondaryCtaText?: string;
 
   // Custom properties for replica UI
   isMockTest?: boolean;
@@ -292,13 +292,13 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
             onClick={() => onPrimaryClick && onPrimaryClick(course)}
             className="w-full py-1.5 md:py-2 bg-white border border-[#0c102a] text-[#0c102a] hover:bg-slate-50 font-extrabold text-[9px] sm:text-[10px] md:text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap overflow-hidden text-ellipsis"
           >
-            {course.primaryCtaText}
+            {course.primaryCtaText || "Buy Now"}
           </button>
           <button
             onClick={() => onSecondaryClick && onSecondaryClick(course)}
             className="w-full py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[9px] sm:text-[10px] md:text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
           >
-            {course.secondaryCtaText}
+            {course.secondaryCtaText || "View Course"}
           </button>
         </div>
       </div>

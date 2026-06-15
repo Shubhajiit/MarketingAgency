@@ -6,6 +6,8 @@ import { getSyllabusModules } from "@/components/MainWebsite/Courses/certificati
 import { Course } from "@/components/common/CoursesCardsUI";
 import { coursesApi } from "@/lib/api/courses";
 import { useCartStore } from "@/store/cart.store";
+import { useAuthStore } from "@/store/auth.store";
+import { useRouter } from "next/navigation";
 
 const countryCodes = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -201,6 +203,8 @@ const getCourseDetailMeta = (course: Course | null) => {
 export default function CourseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { addToCart } = useCartStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -362,6 +366,16 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     });
   };
 
+  const isEnrolled = React.useMemo(() => {
+    if (!isAuthenticated || !user || !user.enrolledCourses || !course) return false;
+    const courseId = (course as any)._id || course.id;
+    return user.enrolledCourses.some((c: any) => {
+      if (!c) return false;
+      if (typeof c === 'string') return c === courseId;
+      return c._id === courseId || c.id === courseId;
+    });
+  }, [isAuthenticated, user, course]);
+
   return (
     <div className="flex-1 flex flex-col bg-white text-gray-900 relative">
 
@@ -395,12 +409,21 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleBuyNow}
-                className="bg-[#ebf3fc] hover:bg-[#ebf3fc]/80 text-[#0056d2] active:scale-[0.99] text-xs md:text-sm font-semibold py-2 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
-              >
-                Buy NOW
-              </button>
+              {isEnrolled ? (
+                <button
+                  onClick={() => router.push(`/dashboard/activecourse`)}
+                  className="bg-[#ebf3fc] hover:bg-[#ebf3fc]/80 text-[#0056d2] active:scale-[0.99] text-xs md:text-sm font-semibold py-2 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
+                >
+                  Start Module
+                </button>
+              ) : (
+                <button
+                  onClick={handleBuyNow}
+                  className="bg-[#ebf3fc] hover:bg-[#ebf3fc]/80 text-[#0056d2] active:scale-[0.99] text-xs md:text-sm font-semibold py-2 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
+                >
+                  Buy NOW
+                </button>
+              )}
               <button
                 onClick={() => {
                   const formEl = document.getElementById("enrollment-form");
@@ -567,13 +590,22 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           {/* Action Buttons */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-row flex-wrap items-center gap-3">
-              <button
-                onClick={handleBuyNow}
-                disabled={!course}
-                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
-              >
-                Buy NOW
-              </button>
+              {isEnrolled ? (
+                <button
+                  onClick={() => router.push(`/dashboard/activecourse`)}
+                  className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0"
+                >
+                  Start Module
+                </button>
+              ) : (
+                <button
+                  onClick={handleBuyNow}
+                  disabled={!course}
+                  className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
+                >
+                  Buy NOW
+                </button>
+              )}
               <button
                 onClick={() => {
                   const formEl = document.getElementById("enrollment-form");

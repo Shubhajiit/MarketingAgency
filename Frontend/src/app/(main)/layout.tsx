@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from "@/components/MainWebsite/common/Navbar";
-import Footer from "@/components/MainWebsite/common/Footer";
+import ConditionalFooter from "@/components/MainWebsite/common/ConditionalFooter";
 import AnnoucementBar from "@/components/MainWebsite/common/AnnoucementBar";
 import CartDrawer from "@/components/MainWebsite/common/CartDrawer";
 
@@ -17,7 +17,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 {children}
             </main>
 
-            <Footer />
+            <ConditionalFooter />
             <CartDrawer />
         </div>
     );

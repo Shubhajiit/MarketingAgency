@@ -61,7 +61,7 @@ export default function ActiveCoursesPage() {
       : [];
 
   const handlePlayCourse = useCallback((course: EnrolledCourse) => {
-    router.push(`/dashboard/courses/${course.id}`);
+    router.push(`/dashboard/activecourses/${course.id}`);
   }, [router]);
 
   if (isLoading) {

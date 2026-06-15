@@ -85,7 +85,7 @@ export default function AllCoursesPage() {
     }
 
     if (isEnrolled(course)) {
-      router.push(`/dashboard/courses/${cid}`);
+      router.push(`/dashboard/activecourses/${cid}`);
       return;
     }
 
@@ -248,10 +248,23 @@ export default function AllCoursesPage() {
           <span className="ml-auto text-xs text-slate-400 self-center">{filtered.length} courses</span>
         </div>
 
-        {/* Course Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col h-[380px]">
+                <div className="h-44 bg-slate-200 animate-pulse w-full"></div>
+                <div className="p-4 flex flex-col flex-1 gap-3">
+                  <div className="h-5 bg-slate-200 animate-pulse rounded w-3/4"></div>
+                  <div className="h-3 bg-slate-200 animate-pulse rounded w-1/2 mt-1"></div>
+                  <div className="flex gap-2 mt-2">
+                    <div className="h-3 bg-slate-200 animate-pulse rounded w-1/4"></div>
+                    <div className="h-3 bg-slate-200 animate-pulse rounded w-1/4"></div>
+                  </div>
+                  <div className="h-6 bg-slate-200 animate-pulse rounded w-1/3 mt-2"></div>
+                  <div className="mt-auto h-10 bg-slate-200 animate-pulse rounded-xl w-full"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center py-24 text-center">

@@ -1,11 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, ShoppingCart, Loader2, CheckCircle2, Trash2 } from "lucide-react";
+import { X, ShoppingCart, Loader2, CheckCircle2, Trash2, ArrowLeft } from "lucide-react";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
 import { coursesApi } from "@/lib/api/courses";
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function CartDrawer() {
   const { isOpen, cartCount, selectedCourse, closeDrawer, removeFromCart } = useCartStore();
@@ -14,6 +24,14 @@ export default function CartDrawer() {
   const [checkoutStatus, setCheckoutStatus] = useState<"idle" | "loading" | "success">("idle");
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  
+  // Checkout Form State
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsappNumber: "",
+  });
 
   // Manage mount and transition classes
   useEffect(() => {
@@ -49,64 +67,163 @@ export default function CartDrawer() {
   useEffect(() => {
     if (!isOpen) {
       setCheckoutStatus("idle");
+      setShowCheckoutForm(false);
     }
   }, [isOpen]);
 
+  // Prefill user data
+  useEffect(() => {
+    if (user && isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+      }));
+    }
+  }, [user, isOpen]);
+
   if (!mounted) return null;
 
-  const handleCheckout = async () => {
+  const handleInitialCheckout = () => {
     if (!isAuthenticated) {
       closeDrawer();
-      router.push("/login?redirect=cart");
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
+    if (!selectedCourse) return;
+    setShowCheckoutForm(true);
+  };
 
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!selectedCourse) return;
 
     setCheckoutStatus("loading");
+
     try {
       const courseId = (selectedCourse as unknown as { _id?: string })._id || selectedCourse.id;
-      await coursesApi.enroll(courseId);
 
-      // Update state in Zustand store
-      if (user) {
-        const enrolled = user.enrolledCourses || [];
-        const newCourseObj = {
-          _id: courseId,
-          title: selectedCourse.title,
-          category: selectedCourse.category,
-          hours: selectedCourse.hours,
-          price: selectedCourse.price,
-          originalPrice: selectedCourse.originalPrice,
-          discount: selectedCourse.discount,
-          mentorPicture: selectedCourse.mentorPicture,
-          isActive: true
-        };
-        if (!enrolled.some((c: unknown) => {
-          if (!c) return false;
-          if (typeof c === 'string') return c === courseId;
-          const courseItem = c as { _id?: string; id?: string };
-          return courseItem._id === courseId || courseItem.id === courseId;
-        })) {
-          setAuth({
-            ...user,
-            enrolledCourses: [...enrolled, newCourseObj]
-          });
-        }
+      // Ensure Razorpay SDK is loaded
+      const res = await loadRazorpayScript();
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setCheckoutStatus("idle");
+        return;
       }
 
-      setCheckoutStatus("success");
-      setTimeout(() => {
-        removeFromCart();
-        closeDrawer();
-      }, 2200);
-    } catch (error) {
-      console.error("Failed to enroll in course:", error);
+      // Step 1: Create Order
+      const orderResponse = await coursesApi.createCourseOrder(courseId);
+      
+      if (!orderResponse.success) {
+        alert(orderResponse.message || "Failed to create order");
+        setCheckoutStatus("idle");
+        return;
+      }
+
+      // If course is free and auto-enrolled
+      if (orderResponse.free) {
+        handleSuccessUpdate(courseId);
+        return;
+      }
+
+      const { orderId, amount, currency, enrollmentId, keyId, courseTitle } = orderResponse.data;
+
+      // Step 2: Open Razorpay Checkout
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: "Marketing Agency",
+        description: `Enrollment for ${courseTitle || selectedCourse.title}`,
+        order_id: orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify Payment
+            const verifyRes = await coursesApi.verifyCoursePayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              enrollmentId: enrollmentId,
+            });
+
+            if (verifyRes.success) {
+              handleSuccessUpdate(courseId);
+            } else {
+              alert(verifyRes.message || "Payment verification failed");
+              setCheckoutStatus("idle");
+            }
+          } catch (verifyError: any) {
+            console.error("Verification error:", verifyError);
+            alert("Payment verification failed. Please contact support.");
+            setCheckoutStatus("idle");
+          }
+        },
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.whatsappNumber,
+        },
+        theme: {
+          color: "#0056d2",
+        },
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
+      
+      paymentObject.on('payment.failed', async function (response: any) {
+        alert("Payment Failed. Reason: " + response.error.description);
+        await coursesApi.markCoursePaymentFailed(enrollmentId);
+        setCheckoutStatus("idle");
+      });
+
+      paymentObject.open();
+
+    } catch (error: any) {
+      console.error("Payment initialization error:", error);
+      alert(error.response?.data?.message || "Failed to initialize payment");
       setCheckoutStatus("idle");
-      const err = error as { response?: { data?: { message?: string } } };
-      const serverMsg = err.response?.data?.message;
-      alert(serverMsg || "Enrollment failed. Please try again.");
     }
+  };
+
+  const handleSuccessUpdate = (courseId: string) => {
+    // Update state in Zustand store
+    if (user) {
+      const enrolled = user.enrolledCourses || [];
+      const newCourseObj = {
+        _id: courseId,
+        title: selectedCourse?.title,
+        category: selectedCourse?.category,
+        hours: selectedCourse?.hours,
+        price: selectedCourse?.price,
+        originalPrice: selectedCourse?.originalPrice,
+        discount: selectedCourse?.discount,
+        mentorPicture: selectedCourse?.mentorPicture,
+        isActive: true
+      };
+      if (!enrolled.some((c: unknown) => {
+        if (!c) return false;
+        if (typeof c === 'string') return c === courseId;
+        const courseItem = c as { _id?: string; id?: string };
+        return courseItem._id === courseId || courseItem.id === courseId;
+      })) {
+        setAuth({
+          ...user,
+          enrolledCourses: [...enrolled, newCourseObj]
+        });
+      }
+    }
+
+    setCheckoutStatus("success");
+    setTimeout(() => {
+      removeFromCart();
+      closeDrawer();
+      setShowCheckoutForm(false);
+      
+      // Auto redirect to active courses if purchased from within the dashboard
+      if (window.location.pathname.includes('/dashboard')) {
+        router.push('/dashboard/activecourse');
+      }
+    }, 2200);
   };
 
   const getCleanDescription = (desc?: string) => {
@@ -133,10 +250,21 @@ export default function CartDrawer() {
         
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-          <div className="flex items-center gap-1.5">
-            <ShoppingCart className="w-4 h-4 text-[#0056d2]" />
-            <h2 className="text-sm font-semibold text-slate-800">Shopping Cart</h2>
-            {cartCount > 0 && (
+          <div className="flex items-center gap-2">
+            {showCheckoutForm && checkoutStatus !== "success" ? (
+              <button 
+                onClick={() => setShowCheckoutForm(false)}
+                className="p-1 -ml-1 rounded-full text-slate-500 hover:bg-slate-100 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            ) : (
+              <ShoppingCart className="w-4 h-4 text-[#0056d2]" />
+            )}
+            <h2 className="text-sm font-semibold text-slate-800">
+              {showCheckoutForm ? "Checkout Details" : "Shopping Cart"}
+            </h2>
+            {!showCheckoutForm && cartCount > 0 && (
               <span className="bg-[#ebf3fc] text-[#0056d2] text-[10.5px] font-medium px-2 py-0.5 rounded-full">
                 {cartCount} {cartCount === 1 ? "item" : "items"}
               </span>
@@ -171,7 +299,54 @@ export default function CartDrawer() {
                 Browse our catalog and add a course to start learning.
               </p>
             </div>
+          ) : showCheckoutForm ? (
+            // Checkout Form View
+            <form id="checkout-form" onSubmit={handlePaymentSubmit} className="flex flex-col gap-4">
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-2">
+                <h4 className="text-xs font-semibold text-slate-800 mb-1 line-clamp-1">{selectedCourse.title}</h4>
+                <p className="text-xs text-slate-500">Total: <span className="font-semibold text-slate-800">₹{selectedCourse.price || "Free"}</span></p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-[#0056d2] focus:ring-1 focus:ring-[#0056d2] transition-colors"
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-[#0056d2] focus:ring-1 focus:ring-[#0056d2] transition-colors"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">WhatsApp Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={formData.whatsappNumber}
+                  onChange={(e) => setFormData({...formData, whatsappNumber: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-[#0056d2] focus:ring-1 focus:ring-[#0056d2] transition-colors"
+                  placeholder="Enter 10-digit number"
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number"
+                />
+              </div>
+            </form>
           ) : (
+            // Cart Items View
             <div className="flex flex-col gap-5 flex-1">
               
               {/* Course Item Card */}
@@ -262,20 +437,31 @@ export default function CartDrawer() {
               </span>
             </div>
 
-            <button
-              onClick={handleCheckout}
-              disabled={checkoutStatus === "loading"}
-              className="w-full bg-[#0056d2] hover:bg-[#00419e] disabled:bg-slate-350 text-white font-semibold py-3 px-5 rounded-lg shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs uppercase tracking-wide"
-            >
-              {checkoutStatus === "loading" ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Processing Checkout...
-                </>
-              ) : (
-                "Buy NOW"
-              )}
-            </button>
+            {showCheckoutForm ? (
+              <button
+                type="submit"
+                form="checkout-form"
+                disabled={checkoutStatus === "loading"}
+                className="w-full bg-[#0056d2] hover:bg-[#00419e] disabled:bg-slate-350 text-white font-semibold py-3 px-5 rounded-lg shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs uppercase tracking-wide"
+              >
+                {checkoutStatus === "loading" ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Proceed to Pay"
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleInitialCheckout}
+                disabled={checkoutStatus === "loading"}
+                className="w-full bg-[#0056d2] hover:bg-[#00419e] disabled:bg-slate-350 text-white font-semibold py-3 px-5 rounded-lg shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs uppercase tracking-wide"
+              >
+                Buy NOW
+              </button>
+            )}
             
             <p className="text-[10px] text-slate-400 text-center mt-2.5">
               By completing purchase, you agree to our Terms of Service & Privacy Policy.

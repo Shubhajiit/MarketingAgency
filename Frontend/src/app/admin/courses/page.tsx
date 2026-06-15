@@ -32,8 +32,8 @@ interface CourseFormData {
   instructorImage: string;
   isGraphicOnly: boolean;
   graphicType: 'ai' | 'seo' | 'ppc' | 'strategy' | '';
-  primaryCtaText: 'Download Brochure' | 'View Course';
-  secondaryCtaText: 'View Course' | 'Buy Now';
+  primaryCtaText: string;
+  secondaryCtaText: string;
   isActive: boolean;
 
   // Metadata configuration fields
@@ -64,7 +64,7 @@ const defaultFormData: CourseFormData = {
   instructorImage: '',
   isGraphicOnly: false,
   graphicType: '',
-  primaryCtaText: 'Download Brochure',
+  primaryCtaText: 'Buy Now',
   secondaryCtaText: 'View Course',
   isActive: true,
 
@@ -296,7 +296,7 @@ export default function AdminCoursesPage() {
       instructorImage: course.instructorImage || '',
       isGraphicOnly: !!course.isGraphicOnly,
       graphicType: course.graphicType || '',
-      primaryCtaText: course.primaryCtaText || 'Download Brochure',
+      primaryCtaText: course.primaryCtaText || 'Buy Now',
       secondaryCtaText: course.secondaryCtaText || 'View Course',
       isActive: course.isActive !== false,
 
@@ -422,9 +422,29 @@ export default function AdminCoursesPage() {
       {/* Table List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-16 flex flex-col items-center justify-center gap-3">
-            <Loader2 size={28} className="animate-spin text-[#6366f1]" />
-            <span className="text-sm text-gray-500 font-medium">Loading courses...</span>
+          <div className="w-full">
+            <div className="flex border-b border-gray-100 bg-gray-50/60 px-5 py-3.5 gap-4">
+              <div className="w-1/4 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center border-b border-gray-50 px-5 py-4 gap-4">
+                <div className="w-1/4 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse shrink-0"></div>
+                  <div className="flex flex-col gap-2 w-full max-w-[150px]">
+                    <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="w-2/3 h-3 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/6 h-5 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
           </div>
         ) : filteredCourses.length === 0 ? (
           <div className="p-16 flex flex-col items-center justify-center gap-3">

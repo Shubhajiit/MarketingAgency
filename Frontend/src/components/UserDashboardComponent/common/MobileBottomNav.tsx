@@ -4,16 +4,18 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { 
-	Book, 
-	Video, 
-	Bookmark, 
-	Settings, 
-	RefreshCw, 
-	Wallet, 
-	History, 
-	Bell, 
-	Store 
+import {
+	Book,
+	Video,
+	Bookmark,
+	Settings,
+	RefreshCw,
+	Wallet,
+	History,
+	Bell,
+	Store,
+	Compass,
+	Calendar
 } from 'lucide-react';
 
 export default function MobileBottomNav() {
@@ -40,9 +42,10 @@ export default function MobileBottomNav() {
 	}, [isProfileOpen]);
 
 	const tabs = [
-		{ label: 'COURSES', href: '/dashboard/activecourse', icon: Book },
-		{ label: 'WORKSHOPS', href: '/dashboard/workshops', icon: Video },
-		{ label: 'BOOKMARKS', href: '/dashboard/bookings', icon: Bookmark }
+		{ label: 'Courses', href: '/dashboard/activecourse', icon: Book },
+		{ label: 'Explore', href: '/all-course', icon: Compass },
+		{ label: 'Upcoming', href: '/', icon: Calendar },
+		{ label: 'Workshops', href: '/dashboard/workshops', icon: Video }
 	];
 
 	const menuItems = [
@@ -56,11 +59,10 @@ export default function MobileBottomNav() {
 		<>
 			{/* Profile Popup Overlay */}
 			<div
-				className={`fixed inset-0 pb-16 bg-white z-30 flex flex-col md:hidden transition-all duration-300 ease-in-out ${
-					isProfileOpen
+				className={`fixed inset-0 pb-16 bg-white z-30 flex flex-col md:hidden transition-all duration-300 ease-in-out ${isProfileOpen
 						? 'translate-y-0 opacity-100 pointer-events-auto'
 						: 'translate-y-4 opacity-0 pointer-events-none'
-				}`}
+					}`}
 			>
 				{/* Top Header */}
 				<div className="h-[73px] px-6 border-b border-[#f2f4f8] flex items-center justify-between bg-[#f8f9fa] shrink-0">

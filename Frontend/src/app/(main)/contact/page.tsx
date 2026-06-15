@@ -222,20 +222,15 @@ export default function ContactUsPage() {
 
               {/* Workshop Interest Dropdown */}
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-bold text-slate-800 tracking-wide uppercase">Topic of Interest *</label>
-                <select
+                <label className="text-[11px] font-bold text-slate-800 tracking-wide uppercase">Subject *</label>
+                <input
+                  type="text"
+                  placeholder="Enter the subject"
                   value={workshopInterest}
                   onChange={(e) => { setWorkshopInterest(e.target.value); setErrors(prev => ({ ...prev, interest: false })); }}
                   className={`w-full text-sm px-4 py-2.5 border rounded-xl bg-white text-black focus:outline-none focus:border-black transition-colors ${errors.interest ? 'border-red-400' : 'border-slate-200'}`}
-                >
-                  <option value="" disabled>Select program or workshop category</option>
-                  <option value="One Day Workshop">One Day AI Workshop</option>
-                  <option value="Three Days Workshops">Three Days AI Workshops</option>
-                  <option value="Certification Courses">Executive Certification Programs</option>
-                  <option value="Enterprise Inquiries">Corporate / Enterprise Training</option>
-                  <option value="General Support">General Support & Other</option>
-                </select>
-                {errors.interest && <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Please select a category</p>}
+                />
+                {errors.interest && <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Please enter a subject</p>}
               </div>
 
               {/* Message Field */}

@@ -72,10 +72,7 @@ export const getSyllabusModules = (courseTitle: string) => {
 export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50" }: { bgColor?: string }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("popular");
-  const [selectedBrochureCourse, setSelectedBrochureCourse] = useState<Course | null>(null);
   const [selectedViewCourse, setSelectedViewCourse] = useState<Course | null>(null);
-  const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,19 +92,7 @@ export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50"
     fetchCourses();
   }, []);
 
-  // Brochure Request Form State
-  const [brochureForm, setBrochureForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneCode: "+91",
-    phone: "",
-    jobTitle: "",
-    workExperience: "",
-    city: "",
-  });
-  const [brochureErrors, setBrochureErrors] = useState<Record<string, boolean>>({});
-  const [isDownloading, setIsDownloading] = useState(false);
+
 
   // Course Enrollment Form State
   const [enrollForm, setEnrollForm] = useState({
@@ -120,89 +105,7 @@ export default function CertificationCoursesSection({ bgColor = "bg-slate-50/50"
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
 
-  const handleBrochureInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setBrochureForm((prev) => ({ ...prev, [name]: value }));
-    if (brochureErrors[name]) {
-      setBrochureErrors((prev) => ({ ...prev, [name]: false }));
-    }
-  };
 
-  const validateBrochureForm = (): boolean => {
-    const newErrors: Record<string, boolean> = {};
-    let isValid = true;
-    if (!brochureForm.firstName.trim()) { newErrors.firstName = true; isValid = false; }
-    if (!brochureForm.lastName.trim()) { newErrors.lastName = true; isValid = false; }
-    if (!brochureForm.email.trim() || !/\S+@\S+\.\S+/.test(brochureForm.email)) { newErrors.email = true; isValid = false; }
-    if (!brochureForm.phone.trim() || !/^\d{7,15}$/.test(brochureForm.phone.replace(/[\s-()]/g, ""))) { newErrors.phone = true; isValid = false; }
-    if (!brochureForm.jobTitle.trim()) { newErrors.jobTitle = true; isValid = false; }
-    if (!brochureForm.workExperience) { newErrors.workExperience = true; isValid = false; }
-    if (!brochureForm.city.trim()) { newErrors.city = true; isValid = false; }
-    setBrochureErrors(newErrors);
-    return isValid;
-  };
-
-  const handleBrochureSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedBrochureCourse) return;
-    if (validateBrochureForm()) {
-      setIsDownloading(true);
-      setTimeout(() => {
-        setIsDownloading(false);
-        const course = selectedBrochureCourse;
-        setSelectedBrochureCourse(null);
-        setShowSuccessModal(true);
-
-        const brochureText = `
-==================================================
-${course.title.toUpperCase()} — PROGRAMME BROCHURE
-==================================================
-Sponsor/Academy: AI Scale
-Certification: DMI Certification Track
-Category Tag: ${course.tag}
-Duration: ${course.hours}
-
-Congratulations ${brochureForm.firstName} ${brochureForm.lastName}!
-Thank you for downloading the official syllabus brochure.
-
---------------------------------------------------
-WHAT YOU WILL LEARN IN THIS CERTIFICATION:
---------------------------------------------------
-${getSyllabusModules(course.title).map((m, i) => `${i + 1}. ${m.title}\n   ${m.description}`).join('\n\n')}
-
---------------------------------------------------
-PROGRAMME INVESTMENT:
---------------------------------------------------
-* Full Tuition Fee: ₹${course.price}
-* Original Price: ₹${course.originalPrice}
-* Savings: ${course.discount} OFF (₹${course.originalPrice - course.price} saved)
-
---------------------------------------------------
-APPLICANT INFORMATION:
---------------------------------------------------
-* Name: ${brochureForm.firstName} ${brochureForm.lastName}
-* Email: ${brochureForm.email}
-* Phone: ${brochureForm.phoneCode} ${brochureForm.phone}
-* Job Title: ${brochureForm.jobTitle}
-* Experience: ${brochureForm.workExperience}
-* City: ${brochureForm.city}
-
-Contact us: 1800 4122 6965
-Email: contact@aiscale.com
-==================================================
-`;
-        const blob = new Blob([brochureText.trim()], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${course.title.replace(/\s+/g, "_")}_Brochure.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 1200);
-    }
-  };
 
   const handleEnrollInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -268,22 +171,34 @@ Email: contact@aiscale.com
         </div>
 
         {/* Grid of Course Cards */}
-        {filteredCourses.length > 0 ? (
+        {loading ? (
+          <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col gap-4 animate-pulse">
+                <div className="h-[100px] md:h-[155px] bg-slate-200 rounded-xl w-full" />
+                <div className="h-5 bg-slate-200 rounded w-3/4 mx-auto" />
+                <div className="h-4 bg-slate-200 rounded w-1/2 mx-auto" />
+                <div className="h-8 bg-slate-200 rounded w-full mt-2" />
+                <div className="h-6 bg-slate-200 rounded w-1/3 mx-auto" />
+              </div>
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
           <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {filteredCourses.map((course) => {
               const cid = (course as any)._id || course.id;
               return (
                 <CourseCard
                   key={cid}
-                  course={course}
-                  onPrimaryClick={(course) => {
-                    if (course.primaryCtaText === "Download Brochure") {
-                      setSelectedBrochureCourse(course);
-                    } else {
-                      router.push(`/coursedetails/${cid}`);
-                    }
+                  course={{
+                    ...course,
+                    primaryCtaText: "Buy Now",
+                    secondaryCtaText: "View Course"
                   }}
-                  onSecondaryClick={(course) => {
+                  onPrimaryClick={() => {
+                    router.push(`/coursedetails/${cid}`);
+                  }}
+                  onSecondaryClick={() => {
                     router.push(`/coursedetails/${cid}`);
                   }}
                 />
@@ -304,273 +219,6 @@ Email: contact@aiscale.com
           </div>
         )}
       </div>
-
-      {/* Course Brochure Modal */}
-      {selectedBrochureCourse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-xs"
-            onClick={() => setSelectedBrochureCourse(null)}
-          />
-          <div className="relative bg-white text-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-[500px] border border-gray-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200 z-10">
-            <button
-              onClick={() => setSelectedBrochureCourse(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors text-xl font-bold cursor-pointer"
-            >
-              ✕
-            </button>
-            <h2 className="text-xl font-black tracking-tight text-[#0c102a] mb-1 font-sans">
-              Get Programme Brochure
-            </h2>
-            <p className="text-xs text-slate-500 mb-4 font-medium">
-              Download the comprehensive syllabus for <strong className="text-slate-800">{selectedBrochureCourse.title}</strong>
-            </p>
-            <form onSubmit={handleBrochureSubmit} className="flex flex-col gap-3">
-              {/* First Name & Last Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    name="firstName"
-                    placeholder="First Name"
-                    value={brochureForm.firstName}
-                    onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.firstName
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                      }`}
-                  />
-                  {brochureErrors.firstName && (
-                    <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                      ⚠️ Required
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    name="lastName"
-                    placeholder="Last Name"
-                    value={brochureForm.lastName}
-                    onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.lastName
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                      }`}
-                  />
-                  {brochureErrors.lastName && (
-                    <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                      ⚠️ Required
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  name="email"
-                  placeholder="Email"
-                  value={brochureForm.email}
-                  onChange={handleBrochureInputChange}
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.email
-                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                    : "border-gray-300 focus:border-gray-900"
-                    }`}
-                />
-                {brochureErrors.email && (
-                  <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                    ⚠️ Valid email required
-                  </span>
-                )}
-              </div>
-
-              {/* Phone */}
-              <div className="flex flex-col">
-                <div className="flex flex-row relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsCountrySelectOpen(!isCountrySelectOpen)}
-                    className="flex items-center gap-1 px-2 border border-r-0 border-gray-300 bg-gray-50 rounded-l hover:bg-gray-100 transition-colors select-none text-sm shrink-0 min-w-[70px] justify-between cursor-pointer"
-                  >
-                    <span className="text-base">
-                      {countryCodes.find((c) => c.code === brochureForm.phoneCode)?.flag || "🇮🇳"}
-                    </span>
-                    <svg
-                      className={`w-3 h-3 text-gray-500 transition-transform ${isCountrySelectOpen ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isCountrySelectOpen && (
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg py-1 z-30 max-h-52 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
-                      {countryCodes.map((c) => (
-                        <button
-                          key={c.code}
-                          type="button"
-                          onClick={() => {
-                            setBrochureForm((prev) => ({ ...prev, phoneCode: c.code }));
-                            setIsCountrySelectOpen(false);
-                          }}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-2.5 text-gray-700 cursor-pointer"
-                        >
-                          <span className="text-base shrink-0">{c.flag}</span>
-                          <span className="font-semibold text-gray-900 w-10">{c.code}</span>
-                          <span className="text-gray-500 truncate">{c.country}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div className="relative flex-1">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none select-none text-xs text-gray-400 font-bold">
-                      {brochureForm.phoneCode}
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="Phone"
-                      value={brochureForm.phone}
-                      onChange={handleBrochureInputChange}
-                      className={`w-full text-sm pl-12 pr-3 py-2 border rounded-r focus:outline-none transition-colors ${brochureErrors.phone
-                        ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
-                        : "border-gray-300 focus:border-gray-900 border-l"
-                        }`}
-                    />
-                  </div>
-                </div>
-                {brochureErrors.phone && (
-                  <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                    ⚠️ Valid phone required
-                  </span>
-                )}
-              </div>
-
-              {/* Job Title & Experience */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    name="jobTitle"
-                    placeholder="Job Title"
-                    value={brochureForm.jobTitle}
-                    onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.jobTitle
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                      }`}
-                  />
-                  {brochureErrors.jobTitle && (
-                    <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                      ⚠️ Required
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col relative">
-                  <select
-                    name="workExperience"
-                    value={brochureForm.workExperience}
-                    onChange={handleBrochureInputChange}
-                    className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors appearance-none bg-white pr-8 ${brochureErrors.workExperience
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-300 focus:border-gray-900"
-                      }`}
-                  >
-                    <option value="" disabled hidden>
-                      Work Experience
-                    </option>
-                    <option value="Entry Level">Entry Level (0-2 years)</option>
-                    <option value="Mid Level">Mid Level (3-5 years)</option>
-                    <option value="Senior Level">Senior Level (5-10 years)</option>
-                    <option value="Executive Level">Executive Level (10+ years)</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                  {brochureErrors.workExperience && (
-                    <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                      ⚠️ Required
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* City */}
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={brochureForm.city}
-                  onChange={handleBrochureInputChange}
-                  className={`w-full text-sm px-3 py-2 border rounded focus:outline-none transition-colors ${brochureErrors.city
-                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                    : "border-gray-300 focus:border-gray-900"
-                    }`}
-                  />
-                {brochureErrors.city && (
-                  <span className="text-[10px] text-red-600 font-semibold mt-1 flex items-center gap-1">
-                    ⚠️ Required
-                  </span>
-                )}
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isDownloading}
-                className="mt-2 bg-[#cc0000] hover:bg-[#b30000] text-white text-center font-bold py-3 px-5 rounded uppercase tracking-wider text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 w-full flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {isDownloading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Downloading...
-                  </>
-                ) : (
-                  "DOWNLOAD BROCHURE"
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Brochure Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSuccessModal(false)}></div>
-          <div className="relative bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full border border-gray-100 flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mb-5 text-[#22c55e]">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-black text-gray-900 mb-3 tracking-tight">Brochure Downloaded Successfully!</h3>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6 font-medium">
-              Thank you, <strong className="text-gray-900 font-semibold">{brochureForm.firstName}</strong>.
-              The brochure has been generated and downloaded to your device. Our program advisors will contact you shortly to answer any questions about the curriculum.
-            </p>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="bg-[#0c102a] hover:bg-slate-800 text-white font-bold py-2.5 px-8 rounded-lg text-sm transition-colors w-full focus:outline-none cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Course View / Details Modal */}
       {selectedViewCourse && (

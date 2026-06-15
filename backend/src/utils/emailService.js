@@ -570,7 +570,7 @@ const sendContactEmail = async (contactData) => {
                 <td class="value"><a href="tel:${phone}">${phone}</a></td>
               </tr>
               <tr>
-                <td class="label">Topic of Interest:</td>
+                <td class="label">Subject:</td>
                 <td class="value"><span style="background-color: #eff6ff; color: #0052FF; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;">${topic}</span></td>
               </tr>
               <tr>
