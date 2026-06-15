@@ -20,7 +20,7 @@ import {
 interface CourseFormData {
   title: string;
   instructorName: string;
-  category: 'popular' | 'pro-specialist' | 'short' | 'advanced';
+  category: string;
   tag: string;
   hours: string;
   price: number;
@@ -47,6 +47,11 @@ interface CourseFormData {
   metaDurationSubtitle: string;
   metaHandsOn: string;
   metaHandsOnSubtitle: string;
+
+  // Dynamic About Section lists
+  whatYouWillLearn: string[];
+  skillsYouWillPractice: string[];
+  toolsYouWillUse: string[];
 }
 
 const defaultFormData: CourseFormData = {
@@ -79,6 +84,11 @@ const defaultFormData: CourseFormData = {
   metaDurationSubtitle: 'Learn at your own pace',
   metaHandsOn: 'Hands-on learning',
   metaHandsOnSubtitle: 'Learn more',
+
+  // Dynamic lists
+  whatYouWillLearn: [],
+  skillsYouWillPractice: [],
+  toolsYouWillUse: [],
 };
 
 export default function AdminCoursesPage() {
@@ -92,12 +102,74 @@ export default function AdminCoursesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
 
+  // Compute unique categories from all courses plus defaults
+  const existingCategories = Array.from(new Set(courses.map(c => c.category).filter(Boolean)));
+  const defaultCats = ['popular', 'pro-specialist', 'short', 'advanced'];
+  const uniqueCats = Array.from(new Set([...defaultCats, ...existingCategories]));
+
   // Course videos states
   const [videos, setVideos] = useState<CourseVideo[]>([]);
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDuration, setVideoDuration] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
+
+  // Dynamic About section input states
+  const [newLearnPoint, setNewLearnPoint] = useState('');
+  const [newSkillPoint, setNewSkillPoint] = useState('');
+  const [newToolPoint, setNewToolPoint] = useState('');
+
+  // Category custom input states
+  const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
+  const [customCategoryVal, setCustomCategoryVal] = useState('');
+
+  const handleAddLearnPoint = () => {
+    if (!newLearnPoint.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      whatYouWillLearn: [...prev.whatYouWillLearn, newLearnPoint.trim()]
+    }));
+    setNewLearnPoint('');
+  };
+
+  const handleRemoveLearnPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      whatYouWillLearn: prev.whatYouWillLearn.filter((_, idx) => idx !== index)
+    }));
+  };
+
+  const handleAddSkillPoint = () => {
+    if (!newSkillPoint.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      skillsYouWillPractice: [...prev.skillsYouWillPractice, newSkillPoint.trim()]
+    }));
+    setNewSkillPoint('');
+  };
+
+  const handleRemoveSkillPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      skillsYouWillPractice: prev.skillsYouWillPractice.filter((_, idx) => idx !== index)
+    }));
+  };
+
+  const handleAddToolPoint = () => {
+    if (!newToolPoint.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      toolsYouWillUse: [...prev.toolsYouWillUse, newToolPoint.trim()]
+    }));
+    setNewToolPoint('');
+  };
+
+  const handleRemoveToolPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      toolsYouWillUse: prev.toolsYouWillUse.filter((_, idx) => idx !== index)
+    }));
+  };
   const [videoUploading, setVideoUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState('');
@@ -161,6 +233,11 @@ export default function AdminCoursesPage() {
     setVideoFile(null);
     setUploadProgress(0);
     setUploadError('');
+    setNewLearnPoint('');
+    setNewSkillPoint('');
+    setNewToolPoint('');
+    setShowCustomCategoryInput(false);
+    setCustomCategoryVal('');
     setShowModal(true);
     setError('');
   };
@@ -281,6 +358,11 @@ export default function AdminCoursesPage() {
     setVideoFile(null);
     setUploadProgress(0);
     setUploadError('');
+    setNewLearnPoint('');
+    setNewSkillPoint('');
+    setNewToolPoint('');
+    setShowCustomCategoryInput(false);
+    setCustomCategoryVal('');
     setFormData({
       title: course.title || '',
       instructorName: course.instructorName || '',
@@ -311,6 +393,11 @@ export default function AdminCoursesPage() {
       metaDurationSubtitle: course.metaDurationSubtitle || 'Learn at your own pace',
       metaHandsOn: course.metaHandsOn || 'Hands-on learning',
       metaHandsOnSubtitle: course.metaHandsOnSubtitle || 'Learn more',
+
+      // Dynamic About lists
+      whatYouWillLearn: course.whatYouWillLearn || [],
+      skillsYouWillPractice: course.skillsYouWillPractice || [],
+      toolsYouWillUse: course.toolsYouWillUse || [],
     });
     setShowModal(true);
     setError('');
@@ -352,6 +439,11 @@ export default function AdminCoursesPage() {
         metaDurationSubtitle: (formData.metaDurationSubtitle || '').trim(),
         metaHandsOn: (formData.metaHandsOn || '').trim(),
         metaHandsOnSubtitle: (formData.metaHandsOnSubtitle || '').trim(),
+
+        // Dynamic lists
+        whatYouWillLearn: formData.whatYouWillLearn,
+        skillsYouWillPractice: formData.skillsYouWillPractice,
+        toolsYouWillUse: formData.toolsYouWillUse,
       };
 
       if (editingCourse) {
@@ -805,19 +897,61 @@ export default function AdminCoursesPage() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</label>
-                    <select
-                      value={formData.category || 'popular'}
-                      onChange={(e) => updateField('category', e.target.value)}
-                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all"
-                    >
-                      <option value="popular">Popular Courses</option>
-                      <option value="pro-specialist">Pro & Specialist Courses</option>
-                      <option value="short">Short Courses</option>
-                      <option value="advanced">Advanced Courses</option>
-                    </select>
-                  </div>
+                  {showCustomCategoryInput ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">New Category Name</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCustomCategoryInput(false);
+                            updateField('category', uniqueCats[0] || 'popular');
+                          }}
+                          className="text-[10px] font-bold text-[#6366f1] hover:underline cursor-pointer"
+                        >
+                          Choose Existing
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={customCategoryVal}
+                        onChange={(e) => {
+                          setCustomCategoryVal(e.target.value);
+                          updateField('category', e.target.value);
+                        }}
+                        placeholder="e.g. bootcamps, marketing-101"
+                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</label>
+                      <select
+                        value={formData.category || 'popular'}
+                        onChange={(e) => {
+                          if (e.target.value === '__new__') {
+                            setShowCustomCategoryInput(true);
+                            setCustomCategoryVal('');
+                            updateField('category', '');
+                          } else {
+                            updateField('category', e.target.value);
+                          }
+                        }}
+                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all"
+                      >
+                        {uniqueCats.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat === 'popular' ? 'Popular Courses' :
+                             cat === 'pro-specialist' ? 'Pro & Specialist Courses' :
+                             cat === 'short' ? 'Short Courses' :
+                             cat === 'advanced' ? 'Advanced Courses' : cat}
+                          </option>
+                        ))}
+                        <option value="__new__">➕ Add New Category...</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Discount Text</label>
@@ -1022,6 +1156,172 @@ export default function AdminCoursesPage() {
                       placeholder="e.g. Learn more"
                       className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
                     />
+                  </div>
+                </div>
+
+                {/* Course About Section (Dynamic Lists) */}
+                <div className="pb-2 border-b border-gray-100 mb-2 mt-8">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course "About" Details</h3>
+                </div>
+
+                <div className="space-y-6">
+                  {/* 1. What You'll Learn Section */}
+                  <div className="bg-slate-50/60 border border-slate-200 rounded-xl p-5 md:p-6 space-y-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800">What You'll Learn Points</h4>
+                      <p className="text-xs text-slate-500 mt-1">Add key topics or outcomes that students will achieve in this course.</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newLearnPoint}
+                        onChange={(e) => setNewLearnPoint(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddLearnPoint();
+                          }
+                        }}
+                        placeholder="e.g. Define your target audience and position your brand strategy..."
+                        className="flex-1 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddLearnPoint}
+                        className="px-4 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-1 shrink-0 active:scale-[0.98]"
+                      >
+                        <Plus size={16} />
+                        Add
+                      </button>
+                    </div>
+
+                    {formData.whatYouWillLearn.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2 mt-3">
+                        {formData.whatYouWillLearn.map((point, idx) => (
+                          <div key={idx} className="flex items-start justify-between gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-100 transition-all shadow-xs group">
+                            <div className="flex items-start gap-2.5">
+                              <span className="text-emerald-500 font-bold mt-0.5 text-sm">✓</span>
+                              <span className="text-sm text-slate-700 leading-relaxed font-medium">{point}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveLearnPoint(idx)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                              title="Delete Point"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No learn points added yet. Type a point and click Add.</p>
+                    )}
+                  </div>
+
+                  {/* 2. Skills You'll Practice Section */}
+                  <div className="bg-slate-50/60 border border-slate-200 rounded-xl p-5 md:p-6 space-y-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800">Skills You'll Practice</h4>
+                      <p className="text-xs text-slate-500 mt-1">Add specific technical skills or methodologies practiced in this course.</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newSkillPoint}
+                        onChange={(e) => setNewSkillPoint(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddSkillPoint();
+                          }
+                        }}
+                        placeholder="e.g. Social Strategy, Prompt Engineering..."
+                        className="flex-1 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSkillPoint}
+                        className="px-4 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-1 shrink-0 active:scale-[0.98]"
+                      >
+                        <Plus size={16} />
+                        Add
+                      </button>
+                    </div>
+
+                    {formData.skillsYouWillPractice.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.skillsYouWillPractice.map((skill, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#efeefc] text-[#6366f1] text-xs font-bold rounded-lg border border-indigo-100 hover:border-indigo-250 transition-all select-none">
+                            <span>{skill}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSkillPoint(idx)}
+                              className="p-0.5 rounded-md hover:bg-[#dbdaf9] text-[#6366f1] hover:text-red-500 transition-colors"
+                              title="Delete Skill"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No skills added yet. Type a skill and click Add.</p>
+                    )}
+                  </div>
+
+                  {/* 3. Tools You'll Use Section */}
+                  <div className="bg-slate-50/60 border border-slate-200 rounded-xl p-5 md:p-6 space-y-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800">Tools You'll Use</h4>
+                      <p className="text-xs text-slate-500 mt-1">Add software platforms, software products, frameworks, or APIs taught in this course.</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newToolPoint}
+                        onChange={(e) => setNewToolPoint(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddToolPoint();
+                          }
+                        }}
+                        placeholder="e.g. Meta Ads Manager, Hootsuite, ChatGPT..."
+                        className="flex-1 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddToolPoint}
+                        className="px-4 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-1 shrink-0 active:scale-[0.98]"
+                      >
+                        <Plus size={16} />
+                        Add
+                      </button>
+                    </div>
+
+                    {formData.toolsYouWillUse.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {formData.toolsYouWillUse.map((tool, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 hover:border-slate-350 transition-all select-none">
+                            <span>{tool}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveToolPoint(idx)}
+                              className="p-0.5 rounded-md hover:bg-slate-200 text-slate-500 hover:text-red-500 transition-colors"
+                              title="Delete Tool"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No tools added yet. Type a tool and click Add.</p>
+                    )}
                   </div>
                 </div>
               </div>

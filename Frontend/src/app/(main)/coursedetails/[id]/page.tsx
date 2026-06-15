@@ -3,11 +3,13 @@
 import React, { use, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { getSyllabusModules } from "@/components/MainWebsite/Courses/certification-courses";
-import { Course } from "@/components/common/CoursesCardsUI";
+import { Course, CourseCard } from "@/components/common/CoursesCardsUI";
 import { coursesApi } from "@/lib/api/courses";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, ShieldAlert, ArrowRight, X } from "lucide-react";
+import { contactApi } from "@/lib/api/contact";
 
 const countryCodes = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -197,6 +199,9 @@ const getCourseDetailMeta = (course: Course | null) => {
     rating: course.metaRating || mapped.rating,
     reviewsCount: course.metaReviewsCount || mapped.reviewsCount,
     level: course.metaLevel || mapped.level,
+    whatYoullLearn: course.whatYouWillLearn && course.whatYouWillLearn.length > 0 ? course.whatYouWillLearn : mapped.whatYoullLearn,
+    skills: course.skillsYouWillPractice && course.skillsYouWillPractice.length > 0 ? course.skillsYouWillPractice : mapped.skills,
+    tools: course.toolsYouWillUse && course.toolsYouWillUse.length > 0 ? course.toolsYouWillUse : mapped.tools,
   };
 };
 
@@ -233,6 +238,63 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
+
+  // Contact Sales Modal States
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactSubject, setContactSubject] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactErrors, setContactErrors] = useState<Record<string, boolean>>({});
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+  const [isContactSuccess, setIsContactSuccess] = useState(false);
+  const [contactErrorMsg, setContactErrorMsg] = useState<string | null>(null);
+
+  // Initialize contact subject when course title is available
+  useEffect(() => {
+    if (course?.title) {
+      setContactSubject(`Inquiry about ${course.title}`);
+    }
+  }, [course]);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Record<string, boolean> = {};
+
+    if (!contactName.trim()) newErrors.name = true;
+    if (!contactEmail.trim() || !/\S+@\S+\.\S+/.test(contactEmail)) newErrors.email = true;
+    if (!contactPhone.trim() || !/^\+?\d{7,15}$/.test(contactPhone.replace(/[\s-()]/g, ""))) newErrors.phone = true;
+    if (!contactSubject.trim()) newErrors.subject = true;
+    if (!contactMessage.trim() || contactMessage.length < 10) newErrors.message = true;
+
+    setContactErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setIsSubmittingContact(true);
+    setContactErrorMsg(null);
+
+    try {
+      await contactApi.submitContactForm({
+        name: contactName.trim(),
+        email: contactEmail.trim(),
+        phone: contactPhone.trim(),
+        topic: contactSubject.trim(),
+        message: contactMessage.trim(),
+      });
+      setIsContactSuccess(true);
+      // Reset fields
+      setContactName("");
+      setContactEmail("");
+      setContactPhone("");
+      setContactMessage("");
+    } catch (err: any) {
+      console.error("Error submitting contact sales form:", err);
+      setContactErrorMsg(err.response?.data?.message || "Failed to send message. Please try again later.");
+    } finally {
+      setIsSubmittingContact(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -426,10 +488,8 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               )}
               <button
                 onClick={() => {
-                  const formEl = document.getElementById("enrollment-form");
-                  if (formEl) {
-                    formEl.scrollIntoView({ behavior: "smooth" });
-                  }
+                  setIsContactModalOpen(true);
+                  setIsContactSuccess(false);
                 }}
                 className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-xs md:text-sm font-semibold py-2.5 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
               >
@@ -608,10 +668,8 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               )}
               <button
                 onClick={() => {
-                  const formEl = document.getElementById("enrollment-form");
-                  if (formEl) {
-                    formEl.scrollIntoView({ behavior: "smooth" });
-                  }
+                  setIsContactModalOpen(true);
+                  setIsContactSuccess(false);
                 }}
                 disabled={!course}
                 className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 active:scale-[0.99] text-sm font-semibold py-3 px-8 rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
@@ -817,14 +875,14 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
 
           {/* Conditional Rendering based on selected Tab */}
           {activeSubTab === "about" && (
-            <div className="flex flex-col gap-6 md:gap-10 animate-in fade-in duration-200">
+            <div className="flex flex-col gap-4 md:gap-6 animate-in fade-in duration-200">
               {/* What you'll learn section */}
-              <section className="flex flex-col gap-4">
+              <section className="flex flex-col gap-2.5">
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   What you'll learn
                 </h3>
                 {course ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                     {detailMeta.whatYoullLearn.map((item, idx) => (
                       <div key={idx} className="flex items-start gap-3">
                         <span className="text-slate-800 text-[14px] mt-0.5 shrink-0 font-bold">✓</span>
@@ -833,7 +891,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 animate-pulse">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 animate-pulse">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="flex items-start gap-3">
                         <span className="text-slate-200 text-[14px] mt-0.5 shrink-0 font-bold">✓</span>
@@ -848,12 +906,12 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </section>
 
               {/* Skills you'll practice section */}
-              <section className="flex flex-col gap-4 border-t border-slate-100 pt-5 md:pt-8">
+              <section className="flex flex-col gap-3 border-t border-slate-100 pt-4 md:pt-5">
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   Skills you'll practice
                 </h3>
                 {course ? (
-                  <div className="flex flex-wrap gap-2.5">
+                  <div className="flex flex-wrap gap-2">
                     {detailMeta.skills.map((skill, idx) => (
                       <span
                         key={idx}
@@ -864,7 +922,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2.5 animate-pulse">
+                  <div className="flex flex-wrap gap-2 animate-pulse">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="h-9 bg-slate-200 rounded-full w-24"></div>
                     ))}
@@ -873,12 +931,12 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </section>
 
               {/* Tools you'll use section */}
-              <section className="flex flex-col gap-4 border-t border-slate-100 pt-5 md:pt-8">
+              <section className="flex flex-col gap-3 border-t border-slate-100 pt-4 md:pt-5">
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   Tools you'll use
                 </h3>
                 {course ? (
-                  <div className="flex flex-wrap gap-2.5">
+                  <div className="flex flex-wrap gap-2">
                     {detailMeta.tools.map((tool, idx) => (
                       <span
                         key={idx}
@@ -889,7 +947,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2.5 animate-pulse">
+                  <div className="flex flex-wrap gap-2 animate-pulse">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="h-9 bg-slate-200 rounded-full w-24"></div>
                     ))}
@@ -898,7 +956,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               </section>
 
               {/* Details to know grid */}
-              <section className="flex flex-col gap-5 border-t border-slate-100 pt-5 md:pt-8">
+              <section className="flex flex-col gap-3.5 border-t border-slate-100 pt-4 md:pt-5">
                 <h3 className="text-[19px] font-bold text-slate-900 tracking-tight">
                   Details to know
                 </h3>
@@ -1088,155 +1146,161 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            <hr className="border-slate-100" />
-
-            {/* Enrollment form body */}
-            {enrollSuccess ? (
+            {/* Enrollment form body replaced with Send Us a Message contact form */}
+            {isContactSuccess ? (
               <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-5 text-center flex flex-col items-center gap-3 animate-in fade-in duration-200">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-lg font-bold">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-lg font-bold animate-bounce">
                   ✓
                 </div>
                 <h4 className="text-base font-bold text-emerald-950">
-                  Enquiry Received!
+                  Message Sent Successfully!
                 </h4>
                 <p className="text-xs text-emerald-800 leading-relaxed font-medium">
-                  Thank you, <strong className="text-emerald-950 font-bold">{enrollForm.name}</strong>. Your enquiry for <strong className="text-emerald-950 font-bold">{course ? course.title : ""}</strong> has been submitted. A study advisor will contact you within 24 hours at <strong className="text-emerald-950 font-bold">{enrollForm.email}</strong> to assist with enrolment details.
+                  Thank you for reaching out. One of our course coordinators will call or email you shortly.
                 </p>
                 <button
-                  onClick={() => setEnrollSuccess(false)}
+                  onClick={() => setIsContactSuccess(false)}
                   className="mt-2 text-xs font-semibold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
                 >
-                  Submit another inquiry
+                  Send Another Message
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleEnrollSubmit} className="flex flex-col gap-4">
+              <form onSubmit={handleContactSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col">
                   <h4 className="text-xs font-black text-slate-800 tracking-wider uppercase mb-1">
-                    Secure Your Seat
+                    Send Us a Message
                   </h4>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    Submit your application details below. No upfront payment required to register.
+                    Fill in your details below and we will get back to you immediately.
                   </p>
                 </div>
 
+                {contactErrorMsg && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-650 text-[11px] font-semibold flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 shrink-0 text-red-500" />
+                    {contactErrorMsg}
+                  </div>
+                )}
+
                 {/* Name */}
                 <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Full Name *</label>
                   <input
                     type="text"
-                    name="name"
-                    placeholder="Full Name"
-                    value={enrollForm.name}
-                    onChange={handleEnrollInputChange}
-                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${enrollErrors.name
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    placeholder="John Doe"
+                    value={contactName}
+                    onChange={(e) => {
+                      setContactName(e.target.value);
+                      setContactErrors((prev) => ({ ...prev, name: false }));
+                    }}
+                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.name
+                      ? "border-red-500 focus:border-red-500"
                       : "border-gray-200 focus:border-[#0056d2]"
                       }`}
                   />
-                  {enrollErrors.name && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Name is required</span>
+                  {contactErrors.name && (
+                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Full Name is required</span>
                   )}
                 </div>
 
-                {/* Email */}
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    name="email"
-                    placeholder="Work/Personal Email"
-                    value={enrollForm.email}
-                    onChange={handleEnrollInputChange}
-                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${enrollErrors.email
-                      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      : "border-gray-200 focus:border-[#0056d2]"
-                      }`}
-                  />
-                  {enrollErrors.email && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid email is required</span>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div className="flex flex-col">
-                  <div className="flex flex-row relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsCountrySelectOpen(!isCountrySelectOpen)}
-                      className="flex items-center gap-1 px-2.5 border border-r-0 border-gray-200 bg-slate-50 rounded-l-lg hover:bg-slate-100 transition-colors select-none text-xs shrink-0 min-w-[70px] justify-between cursor-pointer"
-                    >
-                      <span className="text-sm">
-                        {countryCodes.find((c) => c.code === enrollForm.phoneCode)?.flag || "🇮🇳"}
-                      </span>
-                      <svg
-                        className={`w-2.5 h-2.5 text-gray-500 transition-transform ${isCountrySelectOpen ? "rotate-180" : ""}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {isCountrySelectOpen && (
-                      <div className="absolute bottom-full left-0 mb-1 w-44 bg-white border border-gray-100 rounded-lg shadow-lg py-1 z-30 max-h-48 overflow-y-auto animate-in fade-in slide-in-from-bottom-1 duration-150">
-                        {countryCodes.map((c) => (
-                          <button
-                            key={c.code}
-                            type="button"
-                            onClick={() => {
-                              setEnrollForm((prev) => ({ ...prev, phoneCode: c.code }));
-                              setIsCountrySelectOpen(false);
-                            }}
-                            className="w-full text-left px-3 py-2 text-[11px] hover:bg-gray-50 flex items-center gap-2 text-gray-700 cursor-pointer"
-                          >
-                            <span className="text-sm shrink-0">{c.flag}</span>
-                            <span className="font-bold text-gray-900 w-8">{c.code}</span>
-                            <span className="text-gray-450 truncate">{c.country}</span>
-                          </button>
-                        ))}
-                      </div>
+                {/* Email & Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Email */}
+                  <div className="flex flex-col">
+                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Email Address *</label>
+                    <input
+                      type="email"
+                      placeholder="john@example.com"
+                      value={contactEmail}
+                      onChange={(e) => {
+                        setContactEmail(e.target.value);
+                        setContactErrors((prev) => ({ ...prev, email: false }));
+                      }}
+                      className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.email
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-200 focus:border-[#0056d2]"
+                        }`}
+                    />
+                    {contactErrors.email && (
+                      <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid email is required</span>
                     )}
-                    <div className="relative flex-1">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none select-none text-[11px] text-gray-400 font-bold">
-                        {enrollForm.phoneCode}
-                      </div>
-                      <input
-                        type="tel"
-                        name="phone"
-                        placeholder="Phone Number"
-                        value={enrollForm.phone}
-                        onChange={handleEnrollInputChange}
-                        className={`w-full text-xs pl-12 pr-3.5 py-2.5 border rounded-r-lg focus:outline-none transition-colors ${enrollErrors.phone
-                          ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 border-l"
-                          : "border-gray-200 focus:border-[#0056d2] border-l"
-                          }`}
-                      />
-                    </div>
                   </div>
-                  {enrollErrors.phone && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid phone is required</span>
+
+                  {/* Phone */}
+                  <div className="flex flex-col">
+                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Phone Number *</label>
+                    <input
+                      type="tel"
+                      placeholder="9876543210"
+                      value={contactPhone}
+                      onChange={(e) => {
+                        setContactPhone(e.target.value);
+                        setContactErrors((prev) => ({ ...prev, phone: false }));
+                      }}
+                      className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.phone
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-200 focus:border-[#0056d2]"
+                        }`}
+                    />
+                    {contactErrors.phone && (
+                      <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid phone is required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Subject */}
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Subject *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter the subject"
+                    value={contactSubject}
+                    onChange={(e) => {
+                      setContactSubject(e.target.value);
+                      setContactErrors((prev) => ({ ...prev, subject: false }));
+                    }}
+                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.subject
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-gray-200 focus:border-[#0056d2]"
+                      }`}
+                  />
+                  {contactErrors.subject && (
+                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Subject is required</span>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Your Message *</label>
+                  <textarea
+                    rows={4}
+                    placeholder="Write your questions or notes here..."
+                    value={contactMessage}
+                    onChange={(e) => {
+                      setContactMessage(e.target.value);
+                      setContactErrors((prev) => ({ ...prev, message: false }));
+                    }}
+                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.message
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-gray-200 focus:border-[#0056d2]"
+                      }`}
+                  />
+                  {contactErrors.message && (
+                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Message must be at least 10 characters</span>
                   )}
                 </div>
 
                 {/* Submit button */}
                 <button
                   type="submit"
-                  disabled={isEnrolling}
-                  className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] transition-all disabled:bg-slate-300 text-white font-bold text-xs py-3 px-4 rounded-lg w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2"
+                  disabled={isSubmittingContact}
+                  className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] transition-all disabled:bg-slate-350 text-white font-bold text-xs py-3 px-4 rounded-lg w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2"
                 >
-                  {isEnrolling ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      Sending details...
-                    </>
+                  {isSubmittingContact ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    "Apply & Enroll Now"
+                    "Send Message"
                   )}
                 </button>
               </form>
@@ -1685,79 +1749,191 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               People who took this course also explored these top programs:
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {loading ? (
-                [1, 2, 3].map((i) => (
+                [1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="bg-white rounded-xl border border-slate-150 shadow-[0_2px_10px_rgba(0,0,0,0.01)] transition-all overflow-hidden flex flex-col animate-pulse"
+                    className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs flex flex-col gap-4 animate-pulse"
                   >
-                    {/* Thumbnail Skeleton */}
-                    <div className="relative aspect-[16/9] w-full bg-slate-200"></div>
-
-                    {/* Card Content Skeleton */}
-                    <div className="p-5 flex-1 flex flex-col gap-3 justify-between">
-                      <div className="flex flex-col gap-2">
-                        <div className="h-3.5 bg-slate-200 rounded w-20"></div>
-                        <div className="h-5 bg-slate-200 rounded w-full mt-1"></div>
-                        <div className="h-5 bg-slate-200 rounded w-2/3"></div>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
-                        <div className="h-4 bg-slate-200 rounded w-24"></div>
-                        <div className="h-4 bg-slate-200 rounded w-16"></div>
-                      </div>
-                    </div>
+                    <div className="h-[100px] md:h-[155px] bg-slate-200 rounded-xl w-full" />
+                    <div className="h-5 bg-slate-200 rounded w-3/4 mx-auto" />
+                    <div className="h-4 bg-slate-200 rounded w-1/2 mx-auto" />
+                    <div className="h-8 bg-slate-200 rounded w-full mt-2" />
+                    <div className="h-6 bg-slate-200 rounded w-1/3 mx-auto" />
                   </div>
                 ))
               ) : (
                 recommendedCourses.map((c) => {
                   const cid = (c as any)._id || c.id;
+                  const handleBuyNowCourse = (selectedCourse: Course) => {
+                    const meta = getCourseDetailMeta(selectedCourse);
+                    addToCart({
+                      id: (selectedCourse as any)._id || selectedCourse.id,
+                      title: selectedCourse.title,
+                      category: selectedCourse.category,
+                      hours: selectedCourse.hours,
+                      price: selectedCourse.price,
+                      originalPrice: selectedCourse.originalPrice,
+                      discount: selectedCourse.discount,
+                      mentorPicture: selectedCourse.mentorPicture || selectedCourse.instructorImage,
+                      instructorName: meta.instructorName,
+                      instructorBio: meta.instructorBio,
+                      level: meta.level
+                    });
+                  };
                   return (
-                    <Link
+                    <CourseCard
                       key={cid}
-                      href={`/coursedetails/${cid}`}
-                      className="bg-white rounded-xl border border-slate-150 shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-md hover:border-slate-300 transition-all overflow-hidden flex flex-col cursor-pointer group"
-                    >
-                      {/* Thumbnail / Image */}
-                      <div className="relative aspect-[16/9] w-full bg-slate-100 overflow-hidden">
-                        <img
-                          src={c.mentorPicture || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
-                          alt={c.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        {c.tag && (
-                          <div className="absolute top-3 left-3 bg-[#0056d2] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-                            {c.tag}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="p-5 flex-1 flex flex-col gap-3 justify-between">
-                        <div className="flex flex-col gap-2">
-                          <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                            {c.category ? c.category.replace("-", " ") : "Course"}
-                          </span>
-                          <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#0056d2] transition-colors line-clamp-2">
-                            {c.title}
-                          </h4>
-                        </div>
-
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-2 text-xs font-bold text-slate-650">
-                          <span>{c.hours || "Flexible Hours"}</span>
-                          <span className="text-[#0056d2] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                            Explore Page <span>→</span>
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
+                      course={c}
+                      onPrimaryClick={handleBuyNowCourse}
+                      onSecondaryClick={() => {
+                        router.push(`/coursedetails/${cid}`);
+                      }}
+                    />
                   );
                 })
               )}
             </div>
           </div>
         </section>
+      )}
+
+      {/* Contact Sales Popup Modal */}
+      {isContactModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          {/* Backdrop with smooth blur */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs" 
+            onClick={() => setIsContactModalOpen(false)} 
+          />
+
+          {/* Modal Container */}
+          <div className="relative bg-white text-gray-900 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-lg border border-slate-100 max-h-[90vh] overflow-y-auto z-10 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
+            {/* Close Cross Button */}
+            <button
+              onClick={() => setIsContactModalOpen(false)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {isContactSuccess ? (
+              <div className="py-8 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 border-4 border-emerald-100 flex items-center justify-center mb-6 text-emerald-500 animate-bounce">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-2">Message Sent Successfully!</h3>
+                <p className="text-slate-500 text-sm max-w-sm leading-relaxed mb-6">
+                  Thank you for reaching out. One of our course coordinators will call or email you shortly.
+                </p>
+                <button 
+                  onClick={() => setIsContactModalOpen(false)}
+                  className="bg-[#001A5A] hover:bg-[#003063] text-white font-extrabold px-6 py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+                >
+                  Close Window
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="flex flex-col gap-4 text-black">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-xl font-extrabold text-slate-900">Send Us a Message</h3>
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    Fill in your details below and we will get back to you immediately.
+                  </p>
+                </div>
+
+                {contactErrorMsg && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-semibold flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 shrink-0 text-red-500" />
+                    {contactErrorMsg}
+                  </div>
+                )}
+
+                {/* Name */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Full Name *</label>
+                  <input 
+                    type="text"
+                    placeholder="John Doe"
+                    value={contactName}
+                    onChange={(e) => { setContactName(e.target.value); setContactErrors(prev => ({ ...prev, name: false })); }}
+                    className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.name ? 'border-red-400' : 'border-slate-200'}`}
+                  />
+                  {contactErrors.name && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Full Name is required</p>}
+                </div>
+
+                {/* Email & Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Email Address *</label>
+                    <input 
+                      type="email"
+                      placeholder="john@example.com"
+                      value={contactEmail}
+                      onChange={(e) => { setContactEmail(e.target.value); setContactErrors(prev => ({ ...prev, email: false })); }}
+                      className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.email ? 'border-red-400' : 'border-slate-200'}`}
+                    />
+                    {contactErrors.email && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Valid email required</p>}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Phone Number *</label>
+                    <input 
+                      type="tel"
+                      placeholder="9876543210"
+                      value={contactPhone}
+                      onChange={(e) => { setContactPhone(e.target.value); setContactErrors(prev => ({ ...prev, phone: false })); }}
+                      className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.phone ? 'border-red-400' : 'border-slate-200'}`}
+                    />
+                    {contactErrors.phone && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Valid phone required</p>}
+                  </div>
+                </div>
+
+                {/* Subject */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Subject *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter the subject"
+                    value={contactSubject}
+                    onChange={(e) => { setContactSubject(e.target.value); setContactErrors(prev => ({ ...prev, subject: false })); }}
+                    className={`w-full text-xs px-4 py-2 border rounded-xl bg-white text-black focus:outline-none focus:border-black transition-colors ${contactErrors.subject ? 'border-red-400' : 'border-slate-200'}`}
+                  />
+                  {contactErrors.subject && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Subject is required</p>}
+                </div>
+
+                {/* Message */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Your Message *</label>
+                  <textarea 
+                    rows={4}
+                    placeholder="Write your questions or notes here..."
+                    value={contactMessage}
+                    onChange={(e) => { setContactMessage(e.target.value); setContactErrors(prev => ({ ...prev, message: false })); }}
+                    className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.message ? 'border-red-400' : 'border-slate-200'}`}
+                  />
+                  {contactErrors.message && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Message must be at least 10 characters</p>}
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isSubmittingContact}
+                  className="w-full bg-[#0052FF] hover:bg-blue-600 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-lg mt-2"
+                >
+                  {isSubmittingContact ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Send Message <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
       )}
 
       {/* 4. Floating Help Button (Coursera style support icon) */}

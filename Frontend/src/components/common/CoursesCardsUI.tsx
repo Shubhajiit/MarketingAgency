@@ -7,7 +7,7 @@ export interface Course {
   id: string;
   title: string;
   instructorName?: string;
-  category: "popular" | "pro-specialist" | "short" | "advanced";
+  category: string;
   tag: string;
   hours: string;
   price: number;
@@ -42,6 +42,9 @@ export interface Course {
   metaHandsOn?: string;
   metaHandsOnSubtitle?: string;
   videos?: any[];
+  whatYouWillLearn?: string[];
+  skillsYouWillPractice?: string[];
+  toolsYouWillUse?: string[];
 }
 
 interface CourseCardProps {
@@ -238,7 +241,10 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
 
   // Fallback / original styling if needed
   return (
-    <div className="bg-white border border-slate-100 rounded-xl md:rounded-2xl flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group">
+    <div
+      onClick={() => onSecondaryClick && onSecondaryClick(course)}
+      className="bg-white border border-slate-100 rounded-xl md:rounded-2xl flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group cursor-pointer"
+    >
       <div className={`relative h-[100px] md:h-[155px] w-full bg-gradient-to-tr ${course.bgGradient} shrink-0`}>
         {course.circlesColor && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
@@ -289,13 +295,19 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
 
         <div className="w-full flex flex-col gap-1 mt-3 md:mt-4.5">
           <button
-            onClick={() => onPrimaryClick && onPrimaryClick(course)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrimaryClick && onPrimaryClick(course);
+            }}
             className="w-full py-1.5 md:py-2 bg-white border border-[#0c102a] text-[#0c102a] hover:bg-slate-50 font-extrabold text-[9px] sm:text-[10px] md:text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap overflow-hidden text-ellipsis"
           >
             {course.primaryCtaText || "Buy Now"}
           </button>
           <button
-            onClick={() => onSecondaryClick && onSecondaryClick(course)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSecondaryClick && onSecondaryClick(course);
+            }}
             className="w-full py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[9px] sm:text-[10px] md:text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
           >
             {course.secondaryCtaText || "View Course"}
