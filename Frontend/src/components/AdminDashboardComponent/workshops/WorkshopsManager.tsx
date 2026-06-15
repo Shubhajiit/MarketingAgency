@@ -40,8 +40,9 @@ interface WorkshopFormData {
   instructorImage: string;
   instructorDescription: string;
   learningOutcomes: string[];
-  whatYouWillLearn: WorkshopWhatYouWillLearnStep[];
+  modules: { title: string; content: string[] }[];
   courseOutcomes: WorkshopCourseOutcome[];
+  highlights: string[];
 }
 
 const defaultFormData: WorkshopFormData = {
@@ -65,8 +66,9 @@ const defaultFormData: WorkshopFormData = {
   instructorImage: '',
   instructorDescription: '',
   learningOutcomes: [],
-  whatYouWillLearn: [],
+  modules: [],
   courseOutcomes: [],
+  highlights: [],
 };
 
 // ─── Collapsible Section Component ──────────────────────────
@@ -492,8 +494,9 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
       instructorImage: (workshop as any).instructorImage || '',
       instructorDescription: (workshop as any).instructorDescription || '',
       learningOutcomes: workshop.learningOutcomes || [],
-      whatYouWillLearn: workshop.whatYouWillLearn || [],
+      modules: workshop.modules || [],
       courseOutcomes: workshop.courseOutcomes || [],
+      highlights: (workshop.highlights || []).map(h => typeof h === 'string' ? h : h.title || ''),
     });
     setShowModal(true);
     setError('');
@@ -515,8 +518,8 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         originalPrice: Number(formData.originalPrice) || 0,
         priceCaption: formData.priceCaption,
         bonusDeadlineText: formData.bonusDeadlineText,
-        heroPoints: formData.heroPoints.filter(p => p.trim() !== ''),
-        workshopDates: formData.workshopDates.filter(Boolean),
+        heroPoints: (formData.heroPoints || []).filter(p => p && typeof p === 'string' && p.trim() !== ''),
+        workshopDates: (formData.workshopDates || []).filter(Boolean),
         rating1Value: formData.rating1Value,
         rating1Count: formData.rating1Count,
         rating1Platform: formData.rating1Platform,
@@ -526,9 +529,15 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         instructor: formData.instructor,
         instructorImage: formData.instructorImage,
         instructorDescription: formData.instructorDescription,
-        learningOutcomes: formData.learningOutcomes.filter(p => p.trim() !== ''),
-        whatYouWillLearn: formData.whatYouWillLearn.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
-        courseOutcomes: formData.courseOutcomes.filter(step => step.title.trim() !== '' || step.description.trim() !== ''),
+        learningOutcomes: (formData.learningOutcomes || []).filter(p => p && typeof p === 'string' && p.trim() !== ''),
+        modules: (formData.modules || [])
+          .filter(step => step && typeof step.title === 'string' && step.title.trim() !== '')
+          .map(step => ({
+            title: step.title,
+            content: Array.isArray(step.content) ? step.content.filter(p => p && typeof p === 'string' && p.trim() !== '') : []
+          })),
+        courseOutcomes: (formData.courseOutcomes || []).filter(step => step && typeof step.title === 'string' && (step.title.trim() !== '' || (typeof step.description === 'string' && step.description.trim() !== ''))),
+        highlights: (formData.highlights || []).filter(p => p && typeof p === 'string' && p.trim() !== '').map(p => ({ title: p, description: '' })),
         type, // Hardcode the type based on the page manager prop
       };
 
@@ -1423,65 +1432,150 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                   </div>
                 </CollapsibleSection>
 
-                {/* What You'll Learn */}
-                <CollapsibleSection title="📖 What You'll Learn">
+                {/* Key Highlights */}
+                <CollapsibleSection title="🔑 Key Highlights (Pill / Tag Items)">
                   <div className="space-y-4">
                     <span className="text-xs text-gray-500 font-medium block">
-                      Add steps/topics to show under the "What You'll Learn" section on the details page.
+                      Add the key highlight points (which display as tag/pill items on the details page).
                     </span>
-                    <div className="space-y-4">
-                      {formData.whatYouWillLearn.map((step, idx) => (
-                        <div key={idx} className="border border-gray-150 rounded-xl p-4 bg-gray-50/30 space-y-3 relative group/step">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                              Step {idx + 1}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = [...formData.whatYouWillLearn];
-                                updated.splice(idx, 1);
-                                updateField('whatYouWillLearn', updated);
-                              }}
-                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
-                            >
-                              Remove Step
-                            </button>
-                          </div>
-                          <div className="grid grid-cols-1 gap-3">
-                            <FormInput
-                              label="Step Heading"
-                              value={step.title}
-                              onChange={(v) => {
-                                const updated = [...formData.whatYouWillLearn];
-                                updated[idx] = { ...updated[idx], title: v };
-                                updateField('whatYouWillLearn', updated);
-                              }}
-                              placeholder="e.g. Social Media Handling with AI"
-                            />
-                            <FormTextArea
-                              label="Step Description"
-                              value={step.description}
-                              onChange={(v) => {
-                                const updated = [...formData.whatYouWillLearn];
-                                updated[idx] = { ...updated[idx], description: v };
-                                updateField('whatYouWillLearn', updated);
-                              }}
-                              placeholder="e.g. Create, schedule, analyze & grow your social media using powerful AI tools."
-                              rows={2}
-                            />
-                          </div>
+                    <div className="space-y-3">
+                      {(formData.highlights || []).map((point, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <input
+                            type="text"
+                            value={point}
+                            onChange={(e) => {
+                              const updated = [...formData.highlights];
+                              updated[idx] = e.target.value;
+                              updateField('highlights', updated);
+                            }}
+                            placeholder={`Highlight point ${idx + 1}`}
+                            className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...formData.highlights];
+                              updated.splice(idx, 1);
+                              updateField('highlights', updated);
+                            }}
+                            className="px-3 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
+                          >
+                            Remove
+                          </button>
                         </div>
                       ))}
                     </div>
                     <button
                       type="button"
                       onClick={() => {
-                        updateField('whatYouWillLearn', [...formData.whatYouWillLearn, { title: '', description: '' }]);
+                        updateField('highlights', [...(formData.highlights || []), '']);
                       }}
                       className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
                     >
-                      + Add Step
+                      + Add Key Highlight Point
+                    </button>
+                  </div>
+                </CollapsibleSection>
+
+                {/* What You'll Learn */}
+                <CollapsibleSection title="📖 what u will leanrn in this course">
+                  <div className="space-y-6">
+                    <span className="text-xs text-gray-500 font-medium block">
+                      Add modules and their corresponding content points to show under the curriculum section.
+                    </span>
+                    <div className="space-y-6">
+                      {formData.modules && formData.modules.map((module, mIdx) => (
+                        <div key={mIdx} className="border border-gray-150 rounded-xl p-5 bg-gray-50/30 space-y-4 relative">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-gray-700">
+                              Module {mIdx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...formData.modules];
+                                updated.splice(mIdx, 1);
+                                updateField('modules', updated);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold transition-colors cursor-pointer border-0"
+                            >
+                              Remove Module
+                            </button>
+                          </div>
+                          
+                          <FormInput
+                            label="Module Title"
+                            value={module.title}
+                            onChange={(v) => {
+                              const updated = [...formData.modules];
+                              updated[mIdx] = { ...updated[mIdx], title: v };
+                              updateField('modules', updated);
+                            }}
+                            placeholder="e.g. Introduction to Generative AI for Business"
+                          />
+
+                          <div className="space-y-3 pl-4 border-l-2 border-gray-200">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                              Module Points
+                            </label>
+                            
+                            {module.content && module.content.map((point, pIdx) => (
+                              <div key={pIdx} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={point}
+                                  onChange={(e) => {
+                                    const updatedContent = [...module.content];
+                                    updatedContent[pIdx] = e.target.value;
+                                    const updatedModules = [...formData.modules];
+                                    updatedModules[mIdx] = { ...updatedModules[mIdx], content: updatedContent };
+                                    updateField('modules', updatedModules);
+                                  }}
+                                  placeholder={`Point ${pIdx + 1}`}
+                                  className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] bg-white text-black"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedContent = [...module.content];
+                                    updatedContent.splice(pIdx, 1);
+                                    const updatedModules = [...formData.modules];
+                                    updatedModules[mIdx] = { ...updatedModules[mIdx], content: updatedContent };
+                                    updateField('modules', updatedModules);
+                                  }}
+                                  className="px-3 py-2.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold rounded-xl border-0 cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updatedContent = [...(module.content || []), ''];
+                                const updatedModules = [...formData.modules];
+                                updatedModules[mIdx] = { ...updatedModules[mIdx], content: updatedContent };
+                                updateField('modules', updatedModules);
+                              }}
+                              className="py-1.5 px-3 border border-dashed border-gray-300 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
+                            >
+                              + Add Point
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField('modules', [...(formData.modules || []), { title: '', content: [] }]);
+                      }}
+                      className="w-full py-3 border border-dashed border-gray-300 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      + Add Module
                     </button>
                   </div>
                 </CollapsibleSection>

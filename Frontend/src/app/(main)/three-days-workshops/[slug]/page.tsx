@@ -1247,16 +1247,16 @@ function ThreeDaysWorkshopsContent() {
               ) : (
                 <button
                   onClick={handlePriceButtonClick}
-                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                  className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-3.5 px-4 md:px-6 rounded-lg shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5 cursor-pointer text-center text-sm sm:text-base md:text-lg tracking-wide border-0"
                 >
                   <span className="font-semibold leading-tight">
                     {workshop.priceCaption || "Pay"}
                   </span>
                   <span className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">
+                    <span className="line-through text-blue-200 text-sm md:text-base font-semibold">
                       ₹{workshop.originalPrice || 1999}
                     </span>
-                    <span className="text-white text-base md:text-xl font-black">
+                    <span className="text-white text-lg md:text-xl font-semibold md:font-black">
                       ₹{workshop.price || 199}/-
                     </span>
                   </span>
@@ -1313,7 +1313,7 @@ function ThreeDaysWorkshopsContent() {
             {/* Key Highlights Section */}
             <section className="bg-white pt-12 pb-6 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans" id="workshop-highlights-skills">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
-                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                <h2 className="text-2xl md:text-[48px] font-extrabold md:font-black italic text-left text-gray-900 leading-tight">
                   {(() => {
                     const isDM = workshop.title?.toLowerCase().includes("digital marketing") || workshop.title?.toLowerCase().includes("foundation");
                     return isDM
@@ -1332,8 +1332,8 @@ function ThreeDaysWorkshopsContent() {
 
                 <div className="flex flex-wrap gap-3 w-full">
                   {(() => {
-                    const pills = (workshop.tags && workshop.tags.length > 0)
-                      ? workshop.tags
+                    const pills = (workshop.highlights && workshop.highlights.length > 0)
+                      ? workshop.highlights.map(h => typeof h === 'string' ? h : h.title || '')
                       : [
                         "Digital Marketing", "WordPress Website Designing", "Ad Copy Writing", "Creative Designing", "Affiliate Marketing",
                         "Content Marketing", "SEO Auditing", "Google Ads", "Bing Ads", "Mobile App Advertising", "Remarketing",
@@ -1355,13 +1355,13 @@ function ThreeDaysWorkshopsContent() {
             </section>
 
             {/* What You'll Learn Section */}
-            {workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0 && (
+            {workshop.modules && workshop.modules.length > 0 && (
               <section className="bg-white pt-6 pb-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
                 <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
-                  <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
-                    Latest Curriculum Co-Created<br />by Industry Leaders
+                  <h2 className="text-2xl md:text-[48px] font-extrabold md:font-black italic text-left text-gray-900 leading-tight">
+                    What you will learn in this course.
                   </h2>
-                  <p className="text-gray-700 text-sm md:text-base font-medium text-left max-w-3xl mt-4 leading-relaxed">
+                  <p className="text-gray-700 text-xs sm:text-sm md:text-base font-medium text-left max-w-3xl mt-4 leading-relaxed">
                     Master advanced curriculum approved by industry leaders at our AI digital marketing leadership course for entrepreneurs. We combine expert-led training with a syllabus recognized by top professionals to ensure you are job ready.
                   </p>
 
@@ -1379,7 +1379,7 @@ function ThreeDaysWorkshopsContent() {
                   </div>
 
                   <div className="flex flex-col gap-4 w-full text-left">
-                    {workshop.whatYouWillLearn.map((step, idx) => {
+                    {workshop.modules.map((moduleItem, idx) => {
                       const isOpen = activeModule === idx;
                       const liveSessions = idx === 0 ? 5 : idx === 1 ? 10 : idx === 2 ? 8 : idx === 3 ? 6 : 5;
                       const assignments = 2;
@@ -1410,12 +1410,12 @@ function ThreeDaysWorkshopsContent() {
                                   <span className="italic text-gray-900 font-medium mr-1.5">Module</span>
                                   <span className="text-purple-700 font-black italic mr-2">{idx + 1}</span>
                                   <span className="text-gray-450 font-bold mx-1.5">—</span>
-                                  <span className="text-gray-950 font-extrabold">{step.title}</span>
+                                  <span className="text-gray-950 font-extrabold">{moduleItem.title}</span>
                                 </h3>
 
                                 {/* Desktop-only Heading */}
                                 <h3 className="hidden sm:block text-lg sm:text-xl md:text-2xl font-bold text-[#0a2540] pr-4 mb-2">
-                                  {step.title}
+                                  {moduleItem.title}
                                 </h3>
 
                                 {/* Badges */}
@@ -1454,12 +1454,7 @@ function ThreeDaysWorkshopsContent() {
                           {isOpen && (
                             <div className="border-t-[1.5px] border-black p-6 sm:p-8">
                               {(() => {
-                                const points = step.description
-                                  ? step.description
-                                    .split(/\n+/)
-                                    .map(p => p.trim().replace(/^[-*•\s✓]+/, ''))
-                                    .filter(Boolean)
-                                  : [];
+                                const points = moduleItem.content || [];
 
                                 if (points.length > 0) {
                                   return (
@@ -1490,7 +1485,7 @@ function ThreeDaysWorkshopsContent() {
             {/* Tools You'll Master Section */}
             <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-tools-mastered">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
-                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                <h2 className="text-2xl md:text-[48px] font-extrabold md:font-black italic text-left text-gray-900 leading-tight">
                   {(() => {
                     const isDM = workshop.title?.toLowerCase().includes("digital marketing") || workshop.title?.toLowerCase().includes("foundation");
                     return isDM
@@ -1521,7 +1516,7 @@ function ThreeDaysWorkshopsContent() {
             {/* Next-Gen AI-Powered Tools Section */}
             <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-ai-tools">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
-                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                <h2 className="text-2xl md:text-[48px] font-extrabold md:font-black italic text-left text-gray-900 leading-tight">
                   Next-Gen AI-Powered Tools
                 </h2>
                 <p className="text-gray-700 text-sm md:text-base font-semibold text-left mt-4 mb-8 max-w-3xl leading-relaxed">
@@ -1529,14 +1524,14 @@ function ThreeDaysWorkshopsContent() {
                 </p>
 
                 {/* Filter Tabs */}
-                <div className="flex flex-wrap gap-2.5 mb-8">
+                <div className="flex overflow-x-auto no-scrollbar w-full gap-2.5 mb-8 pb-1 md:pb-0 md:flex-wrap md:overflow-visible">
                   {["All", "Design", "Website", "Writing", "Video"].map((cat) => {
                     const isActive = selectedCategory === cat;
                     return (
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold border transition-all cursor-pointer ${isActive
+                        className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold border transition-all cursor-pointer shrink-0 ${isActive
                           ? "border-red-500 text-red-500 bg-red-50/50"
                           : "border-gray-300 text-gray-700 hover:border-gray-900 bg-white"
                           }`}
@@ -1611,7 +1606,7 @@ function ThreeDaysWorkshopsContent() {
 
             {/* What you'll learn in this Cohort Section */}
             {workshop.courseOutcomes && workshop.courseOutcomes.length > 0 && (
-              <section className="w-full bg-[#EBF5FF] pb-16 md:pb-24 relative font-sans" id="workshop-what-you-learn">
+              <section className="w-full bg-[#EBF5FF] pb-8 md:pb-10 relative font-sans" id="workshop-what-you-learn">
                 {/* SVG Curve transition from white to light-blue */}
                 <div className="w-full bg-white leading-none">
                   <svg
@@ -1680,6 +1675,26 @@ function ThreeDaysWorkshopsContent() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Download Brochure Button */}
+                  <div className="flex justify-center mt-6 mb-0">
+                    <button
+                      onClick={() => alert("Brochure download starting shortly...")}
+                      className="px-5 py-2.5 sm:px-8 sm:py-3.5 bg-white border-2 border-black rounded-full font-bold text-gray-900 text-xs sm:text-sm md:text-base flex items-center gap-2 shadow-[4px_4px_0px_0px_#000000] hover:shadow-[0px_0px_0px_0px_#000000] hover:translate-x-[4px] hover:translate-y-[4px] transition-all duration-150 active:scale-[0.98] cursor-pointer"
+                    >
+                      Download Workshop Details Brochure
+                      <svg
+                        className="w-4 h-4 md:w-5 md:h-5 text-black shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </section>
             )}
@@ -1743,12 +1758,12 @@ function ThreeDaysWorkshopsContent() {
                     <>
                       <button
                         onClick={handlePriceButtonClick}
-                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-sm sm:text-base md:text-lg tracking-wide border-0"
                       >
                         <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
                         <span className="flex items-center gap-1.5 whitespace-nowrap">
-                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
-                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                          <span className="line-through text-blue-200 text-sm md:text-base font-semibold">₹{workshop.originalPrice || 1999}</span>
+                          <span className="text-white text-lg md:text-xl font-semibold md:font-black">₹{workshop.price || 199}/-</span>
                         </span>
                       </button>
 
@@ -1811,12 +1826,12 @@ function ThreeDaysWorkshopsContent() {
                     <>
                       <button
                         onClick={handlePriceButtonClick}
-                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-xs sm:text-sm md:text-lg tracking-wide border-0"
+                        className="w-full bg-[#0052FF] hover:bg-[#0040D9] active:scale-[0.99] text-white font-extrabold py-4 px-4 md:px-6 rounded-xl shadow-[0_4px_14px_rgba(0,82,255,0.3)] transition-all flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 cursor-pointer text-center text-sm sm:text-base md:text-lg tracking-wide border-0"
                       >
                         <span className="font-semibold leading-tight">{workshop.priceCaption || "Become A Python Using AI Expert Now At"}</span>
                         <span className="flex items-center gap-1.5 whitespace-nowrap">
-                          <span className="line-through text-blue-200 text-xs md:text-sm font-semibold">₹{workshop.originalPrice || 1999}</span>
-                          <span className="text-white text-base md:text-xl font-semibold">₹{workshop.price || 199}/-</span>
+                          <span className="line-through text-blue-200 text-sm md:text-base font-semibold">₹{workshop.originalPrice || 1999}</span>
+                          <span className="text-white text-lg md:text-xl font-semibold md:font-black">₹{workshop.price || 199}/-</span>
                         </span>
                       </button>
 

@@ -138,21 +138,25 @@ export default function Navbar() {
             {/* Navbar */}
             <header className="relative bg-white border-b border-gray-100 py-3 px-4 md:px-36 flex justify-between items-center z-50 w-full">
                 <div className="flex items-center">
-                    <img src="/Logo/Logo.png" alt="Datamites Logo" className="h-12 w-auto object-contain" />
+                    <Link href="/">
+                        <img src="/Logo/Logo.png" alt="Datamites Logo" className="h-12 w-auto object-contain cursor-pointer" />
+                    </Link>
                 </div>
 
-                <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-gray-800 tracking-wide">
-                    {/* <a href="#" className="hover:text-[#009ee3]">HOME</a> */}
+                <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium text-gray-800 tracking-wide">
+                    <Link href="/" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        Home
+                    </Link>
                     <Link href="/courses" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
-                        COURSES
+                        Courses
                     </Link>
                     <div
                         className="h-full flex items-center"
                         onMouseEnter={handleWorkshopsMouseEnter}
                         onMouseLeave={handleWorkshopsMouseLeave}
                     >
-                        <a href="#" className="hover:text-[#009ee3] flex items-center gap-1 py-4 uppercase">
-                            ONE DAY WORKSHOP
+                        <a href="#" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                            One Day Workshop
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -163,15 +167,15 @@ export default function Navbar() {
                         onMouseEnter={handleThreeDaysMouseEnter}
                         onMouseLeave={handleThreeDaysMouseLeave}
                     >
-                        <Link href="/three-days-workshops" className="hover:text-[#009ee3] flex items-center gap-1 py-4 uppercase">
-                            THREE DAYS WORKSHOPS
+                        <Link href="/three-days-workshops" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                            Three Days Workshops
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isThreeDaysOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </Link>
                     </div>
-                    <Link href="/about" className="hover:text-[#009ee3] flex items-center gap-1">ABOUT US</Link>
-                    <Link href="/contact" className="hover:text-[#009ee3]">CONTACT US</Link>
+                    <Link href="/about" className="hover:text-[#009ee3] flex items-center gap-1">About Us</Link>
+                    <Link href="/contact" className="hover:text-[#009ee3]">Contact Us</Link>
 
                     {/* Cart Button */}
                     <button
@@ -402,11 +406,11 @@ export default function Navbar() {
 
                 {/* Mobile Menu Dropdown */}
                 {isMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-50 w-full shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
-                        <Link href="/" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</Link>
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-sm font-semibold text-gray-800 tracking-wide transition-all duration-300 z-50 w-full shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
+                        <Link href="/" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">Home</Link>
 
                         <Link href="/courses" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">
-                            COURSES
+                            Courses
                         </Link>
 
                         <button
@@ -414,9 +418,9 @@ export default function Navbar() {
                                 setIsMobileWorkshopsOpen(!isMobileWorkshopsOpen);
                                 fetchLiveWorkshops();
                             }}
-                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
+                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-sm text-gray-800"
                         >
-                            ONE DAY WORKSHOP
+                            One Day Workshop
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -459,9 +463,9 @@ export default function Navbar() {
                                 setIsMobileThreeDaysOpen(!isMobileThreeDaysOpen);
                                 fetchLiveWorkshops();
                             }}
-                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-xs text-gray-800 uppercase"
+                            className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between w-full text-left font-semibold text-sm text-gray-800"
                         >
-                            THREE DAYS WORKSHOPS
+                            Three Days Workshops
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isMobileThreeDaysOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -498,8 +502,8 @@ export default function Navbar() {
                                 </div>
                             </div>
                         )}
-                        <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">PARTNERS <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></a>
-                        <a href="#" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between">REVIEWS</a>
+                        <Link href="/about" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between" onClick={() => setIsMenuOpen(false)}>About Us</Link>
+                        <Link href="/contact" className="hover:text-[#009ee3] py-2.5 flex items-center justify-between" onClick={() => setIsMenuOpen(false)}>Contact Us</Link>
                         {!mounted || isLoading ? (
                             <div className="py-2.5 border-t border-gray-100 mt-2 flex flex-col gap-3 w-full animate-pulse">
                                 <div className="flex items-center gap-3">

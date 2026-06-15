@@ -292,7 +292,7 @@ exports.adminListWorkshops = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // List active workshops, or inactive ones that were cancelled (so they show up as Cancelled)
-    const filter = { $or: [ { isActive: { $ne: false } }, { isCancelled: true } ] };
+    const filter = { $or: [{ isActive: { $ne: false } }, { isCancelled: true }] };
     if (type) filter.type = type;
 
     const [workshops, total] = await Promise.all([
