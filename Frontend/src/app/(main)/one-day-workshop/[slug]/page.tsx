@@ -4,7 +4,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
+import { Plus, Minus, FileText, CheckSquare, CheckCircle2, Radio, ClipboardList, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
+
+// Import logos from WorkshopsAILogos
+import AdobeFirefly from '../../../../../public/WorkshopsAILogos/AdobeFirefly.png';
+import Canva from '../../../../../public/WorkshopsAILogos/Canva.png';
+import ChatGPT from '../../../../../public/WorkshopsAILogos/ChatGPT.webp';
+import DescriptAI from '../../../../../public/WorkshopsAILogos/DescriptAI.png';
+import ElevenLabs from '../../../../../public/WorkshopsAILogos/ElevenLabs.webp';
+import Grammerly from '../../../../../public/WorkshopsAILogos/Grammerly.png';
+import Jasper from '../../../../../public/WorkshopsAILogos/Jasper.png';
+import Lumen5 from '../../../../../public/WorkshopsAILogos/Lumen5.png';
+import MidJourney from '../../../../../public/WorkshopsAILogos/MidJourney.jpg';
+import NotionAI from '../../../../../public/WorkshopsAILogos/NotionAI.png';
+import OpusClip from '../../../../../public/WorkshopsAILogos/OpusClip.png';
+import PeechAI from '../../../../../public/WorkshopsAILogos/PeechAI.jpg';
+import PictoryAI from '../../../../../public/WorkshopsAILogos/PictoryAI.png';
+import QuillBot from '../../../../../public/WorkshopsAILogos/QuillBot.png';
+import Runway from '../../../../../public/WorkshopsAILogos/Runway.png';
+import SurferAI from '../../../../../public/WorkshopsAILogos/SurferAI.webp';
+import Synthesia from '../../../../../public/WorkshopsAILogos/Synthesia.webp';
+import TomeAI from '../../../../../public/WorkshopsAILogos/TomeAI.webp';
+import CopyAI from '../../../../../public/WorkshopsAILogos/copyAI.png';
 
 interface FormState {
   firstName: string;
@@ -232,6 +254,7 @@ export default function DynamicWorkshopPage() {
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
   const [activeModule, setActiveModule] = useState<number | null>(0);
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<FormState>({
@@ -1226,7 +1249,7 @@ Email: contact@aiscale.com
                                   className={`w-[130px] sm:w-[150px] min-h-[72px] border-[2px] rounded-xl px-4 py-3 flex flex-row items-center justify-center gap-3 cursor-pointer transition-[transform,colors,shadow] duration-200 ease-out group ${isSelected
                                     ? 'border-[#0052FF] bg-[#0052FF] shadow-[0_2px_12px_rgba(0,82,255,0.3)] scale-[1.03]'
                                     : 'bg-white border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:border-[#0052FF] hover:bg-blue-50/50 hover:shadow-[0_2px_8px_rgba(0,82,255,0.15)] hover:scale-[1.02]'
-                                  }`}
+                                    }`}
                                 >
                                   <img src="/Dates/calendar.png" alt="calendar" className="w-6 h-6 object-contain shrink-0" />
                                   <div className="flex flex-col items-start text-left leading-none">
@@ -1375,42 +1398,175 @@ Email: contact@aiscale.com
 
         {!loading && workshop && (
           <>
+            {/* Key Highlights Section */}
+            <section className="bg-white pt-12 pb-6 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans" id="workshop-highlights-skills">
+              <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
+                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                  {(() => {
+                    const isDM = workshop.title?.toLowerCase().includes("digital marketing") || workshop.title?.toLowerCase().includes("foundation");
+                    return isDM
+                      ? "Key Highlights of Our AI-Driven Digital Marketing Program for Entrepreneurs"
+                      : `Key Highlights of Our ${workshop.title}`;
+                  })()}
+                </h2>
+                <p className="text-blue-900 text-sm md:text-base font-bold text-left mt-3 mb-8">
+                  {(() => {
+                    const isDM = workshop.title?.toLowerCase().includes("digital marketing") || workshop.title?.toLowerCase().includes("foundation");
+                    return isDM
+                      ? "Digital Marketing Leadership Skills You'll Master to Lead the Future"
+                      : "Leadership Skills You'll Master to Lead the Future";
+                  })()}
+                </p>
+
+                <div className="flex flex-wrap gap-3 w-full">
+                  {(() => {
+                    const pills = (workshop.tags && workshop.tags.length > 0)
+                      ? workshop.tags
+                      : [
+                        "Digital Marketing", "WordPress Website Designing", "Ad Copy Writing", "Creative Designing", "Affiliate Marketing",
+                        "Content Marketing", "SEO Auditing", "Google Ads", "Bing Ads", "Mobile App Advertising", "Remarketing",
+                        "SEO", "Facebook", "Linkedin", "Instagram", "Youtube", "Quora", "Adsense", "Twitter",
+                        "Email Marketing", "Google Analytics", "Marketing Automation", "Whatsapp Marketing"
+                      ];
+                    return pills.map((pill, pIdx) => (
+                      <div
+                        key={pIdx}
+                        className="flex items-center gap-2 px-4 py-2 border border-black rounded-full bg-white text-xs sm:text-sm font-semibold text-gray-900 select-none shadow-[1.5px_1.5px_0px_#000000]"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        {pill}
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            </section>
+
             {/* What You'll Learn Section */}
             {workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0 && (
-              <section className="bg-white pt-6 pb-12 md:py-12 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
-                <div className="max-w-7xl w-full mx-auto flex flex-col items-center text-center">
-                  <h2 className="text-2xl sm:text-[32px] font-black text-gray-900 tracking-tight leading-tight">
-                    What You&apos;ll Learn
+              <section className="bg-white pt-6 pb-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
+                <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
+                  <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                    Latest Curriculum Co-Created<br />by Industry Leaders
                   </h2>
-                  <p className="text-gray-600 text-sm md:text-[15px] font-semibold mt-2.5 mb-10">
-                    Starts from Jun 14, 2026
+                  <p className="text-gray-700 text-sm md:text-base font-medium text-left max-w-3xl mt-4 leading-relaxed">
+                    Master advanced curriculum approved by industry leaders at our AI digital marketing leadership course for entrepreneurs. We combine expert-led training with a syllabus recognized by top professionals to ensure you are job ready.
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5 w-full text-left">
+                  <hr className="w-full border-gray-200 my-6" />
+
+                  <div className="flex flex-wrap gap-x-12 gap-y-3 text-left w-full mb-8 text-sm">
+                    <div>
+                      <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider mb-0.5">Learning Mode</span>
+                      <span className="font-extrabold text-gray-900 italic">Offline</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider mb-0.5">Batch Timings</span>
+                      <span className="font-extrabold text-gray-900 italic">9:00AM to 11:00AM | 11:30 AM to 1:00 PM</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 w-full text-left">
                     {workshop.whatYouWillLearn.map((step, idx) => {
-                      const stepObj = {
-                        step: `Step ${idx + 1}`,
-                        title: step.title,
-                        tags: [step.description]
-                      };
-                      const isEven = idx % 2 === 1;
+                      const isOpen = activeModule === idx;
+                      const liveSessions = idx === 0 ? 5 : idx === 1 ? 10 : idx === 2 ? 8 : idx === 3 ? 6 : 5;
+                      const assignments = 2;
+                      const caseStudies = 3;
+                      const assessments = 1;
+
                       return (
                         <div
                           key={idx}
-                          className={`${isEven ? "bg-[#EAFBF0]" : "bg-[#FCF5F0]"
-                            } border border-[#0052FF] shadow-[6px_6px_0px_#0052FF] rounded-2xl px-4 py-5 md:px-5 md:py-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#0052FF] transition-all duration-300`}
+                          className={`w-full border-[1.5px] border-black rounded-2xl overflow-hidden transition-all duration-200 ${isOpen ? 'bg-[#E5DEFF] shadow-[4px_4px_0px_#000000]' : 'bg-white shadow-[4px_4px_0px_#000000]'}`}
                         >
-                          <div className="flex flex-col gap-1">
-                            <h3 className="text-xl md:text-2xl font-semibold text-gray-900">{stepObj.step}</h3>
-                            <h4 className={`text-sm md:text-base font-semibold leading-snug ${isEven ? "text-[#1E7F46]" : "text-blue-600"}`}>{stepObj.title}</h4>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {stepObj.tags.filter(Boolean).map((item, i) => (
-                              <div key={i} className="bg-white border border-gray-200/50 rounded-lg px-3 py-1.5 text-xs md:text-sm font-semibold text-gray-800 shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:bg-gray-50 hover:scale-[1.02] transition-all duration-200 cursor-default select-none">
-                                {item}
+                          {/* Header */}
+                          <div
+                            onClick={() => setActiveModule(isOpen ? null : idx)}
+                            className="flex items-center justify-between p-6 sm:p-8 cursor-pointer select-none hover:bg-gray-50/50 transition-colors"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 flex-1 min-w-0">
+                              {/* Desktop-only Module Badge */}
+                              <div className="hidden sm:flex flex-col items-start leading-none shrink-0">
+                                <span className="text-[11px] font-bold text-gray-500 italic uppercase tracking-wider mb-0.5">Module</span>
+                                <span className="text-4xl sm:text-5xl font-black italic text-purple-700">{idx + 1}</span>
                               </div>
-                            ))}
+
+                              {/* Content area */}
+                              <div className="flex-1 min-w-0 text-left">
+                                {/* Mobile-only Inline Title */}
+                                <h3 className="block sm:hidden text-base font-bold text-[#0a2540] pr-4 mb-3 leading-snug">
+                                  <span className="italic text-gray-900 font-medium mr-1.5">Module</span>
+                                  <span className="text-purple-700 font-black italic mr-2">{idx + 1}</span>
+                                  <span className="text-gray-450 font-bold mx-1.5">—</span>
+                                  <span className="text-gray-950 font-extrabold">{step.title}</span>
+                                </h3>
+
+                                {/* Desktop-only Heading */}
+                                <h3 className="hidden sm:block text-lg sm:text-xl md:text-2xl font-bold text-[#0a2540] pr-4 mb-2">
+                                  {step.title}
+                                </h3>
+
+                                {/* Badges */}
+                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs font-semibold text-gray-800 w-full sm:w-auto">
+                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                    <Radio className="w-3.5 h-3.5 text-purple-700 shrink-0" />
+                                    <span>{liveSessions} Live Sessions</span>
+                                  </span>
+                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                    <ClipboardList className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{assignments} Assignments</span>
+                                  </span>
+                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                    <FileText className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{caseStudies} Case Study</span>
+                                  </span>
+                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                    <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{assessments} Assessments</span>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Collapse indicator */}
+                            <div className="shrink-0 ml-4">
+                              {isOpen ? (
+                                <Minus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
+                              ) : (
+                                <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
+                              )}
+                            </div>
                           </div>
+
+                          {/* Collapsible content */}
+                          {isOpen && (
+                            <div className="border-t-[1.5px] border-black p-6 sm:p-8">
+                              {(() => {
+                                const points = step.description
+                                  ? step.description
+                                    .split(/\n+/)
+                                    .map(p => p.trim().replace(/^[-*•\s✓]+/, ''))
+                                    .filter(Boolean)
+                                  : [];
+
+                                if (points.length > 0) {
+                                  return (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                                      {points.map((point, pIdx) => (
+                                        <div key={pIdx} className="flex items-start gap-2.5">
+                                          <span className="text-gray-900 font-black text-sm mt-0.5 shrink-0">✓</span>
+                                          <span className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-bold leading-relaxed">
+                                            {point}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -1418,6 +1574,163 @@ Email: contact@aiscale.com
                 </div>
               </section>
             )}
+
+            {/* Tools You'll Master Section */}
+            <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-tools-mastered">
+              <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
+                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                  {(() => {
+                    const isDM = workshop.title?.toLowerCase().includes("digital marketing") || workshop.title?.toLowerCase().includes("foundation");
+                    return isDM
+                      ? "Digital Marketing Leadership Tools You'll Master"
+                      : `${workshop.title} Tools You'll Master`;
+                  })()}
+                </h2>
+                <p className="text-gray-700 text-sm md:text-base font-semibold text-left mt-4 mb-10 max-w-3xl leading-relaxed">
+                  Work with the most in-demand platforms every day with AI Scale&apos;s AI-led digital marketing programs.
+                </p>
+
+                <div className="flex flex-wrap gap-4 items-center justify-start w-full">
+                  {/* Google Analytics 4 */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Google_Analytics_4_logo.svg" alt="GA4" className="h-10 w-10 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[14px] font-bold text-gray-500">Google</span>
+                      <span className="text-[12px] font-semibold text-gray-400 mt-0.5">Analytics 4</span>
+                    </div>
+                  </div>
+
+                  {/* Google Search Console */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Google_Search_Console_logo.svg" alt="GSC" className="h-10 w-10 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[14px] font-bold text-blue-600">Google</span>
+                      <span className="text-[10px] font-semibold text-gray-500 mt-0.5">Search Console</span>
+                    </div>
+                  </div>
+
+                  {/* Google Ads */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Ads_logo.svg" alt="Google Ads" className="h-10 w-10 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[14px] font-bold text-gray-700">Google Ads</span>
+                    </div>
+                  </div>
+
+                  {/* Meta Business Suite */}
+                  <div className="bg-gradient-to-tr from-[#E0F2FE] via-[#EEF2FF] to-[#ECFDF5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[180px] sm:w-[200px] shrink-0 border border-[#CBD5E1] shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" alt="Meta" className="h-8 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-tight">
+                      <span className="text-[14px] font-bold text-blue-900">Meta</span>
+                      <span className="text-[11px] font-extrabold text-gray-800 leading-none">Business Suite</span>
+                    </div>
+                  </div>
+
+                  {/* WordPress */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Wordpress_Blue_Logo.svg" alt="WordPress" className="h-10 w-10 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[14px] font-bold text-gray-800">WORDPRESS</span>
+                    </div>
+                  </div>
+
+                  {/* Canva */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center justify-center h-20 w-[150px] sm:w-[170px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Canva_icon_2021.svg" alt="Canva" className="h-12 w-12 object-contain" />
+                  </div>
+
+                  {/* Google Tag Manager */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-3 h-20 w-[170px] sm:w-[190px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_Tag_Manager_Logo.svg" alt="GTM" className="h-10 w-10 object-contain shrink-0" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[10px] font-semibold text-gray-500">Google Tag Manager</span>
+                    </div>
+                  </div>
+
+                  {/* Google Business Profile */}
+                  <div className="bg-[#f5f5f5] rounded-2xl p-4 flex items-center gap-2.5 h-20 w-[180px] sm:w-[200px] shrink-0 border border-gray-200/50 shadow-xs">
+                    <div className="relative h-10 w-10 shrink-0">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Google_My_Business_logo.svg" alt="GMB" className="h-full w-full object-contain" />
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[14px] font-bold text-blue-600">Google</span>
+                      <span className="text-[10px] font-semibold text-gray-500 mt-0.5">Business Profile</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Next-Gen AI-Powered Tools Section */}
+            <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-ai-tools">
+              <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
+                <h2 className="text-4xl md:text-[48px] font-black italic text-left text-gray-900 leading-tight">
+                  Next-Gen AI-Powered Tools
+                </h2>
+                <p className="text-gray-700 text-sm md:text-base font-semibold text-left mt-4 mb-8 max-w-3xl leading-relaxed">
+                  AI empowers modern marketers to blend creativity with performance in this digital marketing leadership program.
+                </p>
+
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap gap-2.5 mb-8">
+                  {["All", "Design", "Website", "Writing", "Video"].map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold border transition-all cursor-pointer ${isActive
+                          ? "border-red-500 text-red-500 bg-red-50/50"
+                          : "border-gray-300 text-gray-700 hover:border-gray-900 bg-white"
+                          }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Tools Grid */}
+                <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 w-full">
+                  {(() => {
+                    const aiTools = [
+                      { name: "AdobeFirefly", cat: "Design", icon: AdobeFirefly.src },
+                      { name: "Canva", cat: "Design", icon: Canva.src },
+                      { name: "ChatGPT", cat: "Writing", icon: ChatGPT.src },
+                      { name: "DescriptAI", cat: "Video", icon: DescriptAI.src },
+                      { name: "ElevenLabs", cat: "Video", icon: ElevenLabs.src },
+                      { name: "Grammerly", cat: "Writing", icon: Grammerly.src },
+                      { name: "Jasper", cat: "Writing", icon: Jasper.src },
+                      { name: "Lumen5", cat: "Video", icon: Lumen5.src },
+                      { name: "MidJourney", cat: "Design", icon: MidJourney.src },
+                      { name: "NotionAI", cat: "Writing", icon: NotionAI.src },
+                      { name: "OpusClip", cat: "Video", icon: OpusClip.src },
+                      { name: "PeechAI", cat: "Video", icon: PeechAI.src },
+                      { name: "PictoryAI", cat: "Video", icon: PictoryAI.src },
+                      { name: "QuillBot", cat: "Writing", icon: QuillBot.src },
+                      { name: "Runway", cat: "Video", icon: Runway.src },
+                      { name: "SurferAI", cat: "Writing", icon: SurferAI.src },
+                      { name: "TomeAI", cat: "Design", icon: TomeAI.src },
+                      { name: "copyAI", cat: "Writing", icon: CopyAI.src },
+                      { name: "Synthesia", cat: "Video", icon: Synthesia.src }
+                    ];
+
+                    const filtered = selectedCategory === "All"
+                      ? aiTools
+                      : aiTools.filter(t => t.cat === selectedCategory);
+
+                    return filtered.map((tool, idx) => (
+                      <img
+                        key={idx}
+                        src={tool.icon}
+                        alt={tool.name}
+                        className="h-20 w-full object-contain hover:scale-[1.03] transition-all select-none cursor-default"
+                      />
+                    ));
+                  })()}
+                </div>
+              </div>
+            </section>
 
             {/* Application Deadline */}
             {(workshop as any).applicationDeadline && (

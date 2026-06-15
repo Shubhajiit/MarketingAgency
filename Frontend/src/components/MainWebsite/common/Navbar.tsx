@@ -403,7 +403,7 @@ export default function Navbar() {
                 {/* Mobile Menu Dropdown */}
                 {isMenuOpen && (
                     <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-150 px-6 py-4 flex flex-col gap-3 text-xs font-semibold text-gray-800 tracking-wide transition-all duration-300 z-50 w-full shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
-                        <a href="#" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</a>
+                        <Link href="/" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">HOME</Link>
 
                         <Link href="/courses" className="hover:text-[#009ee3] py-2.5 border-b border-gray-100 flex items-center justify-between">
                             COURSES

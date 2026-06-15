@@ -104,6 +104,14 @@ const courseSchema = new mongoose.Schema({
   toolsYouWillUse: {
     type: [String],
     default: []
+  },
+  description: {
+    type: String,
+    default: ''
+  },
+  learnStepByStep: {
+    type: [String],
+    default: []
   }
 }, { timestamps: true });
 

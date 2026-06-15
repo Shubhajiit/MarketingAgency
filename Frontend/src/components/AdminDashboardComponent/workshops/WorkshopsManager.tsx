@@ -263,7 +263,7 @@ function ImageUploadInput({
 
 const extractDateRanges = (datesList: any[]) => {
   if (!datesList || datesList.length === 0) return [];
-  
+
   // Normalize datesList to include both date and place
   const normalized = datesList.map(d => {
     if (!d) return { date: '', place: '' };
@@ -472,15 +472,15 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
         : ['', '', '', ''],
       workshopDates: (workshop as any).workshopDates
         ? (workshop as any).workshopDates.map((d: any) => {
-            if (!d) return { date: '', place: '' };
-            if (typeof d === 'string') {
-              return { date: new Date(d).toISOString().split('T')[0], place: '' };
-            }
-            return {
-              date: d.date ? new Date(d.date).toISOString().split('T')[0] : '',
-              place: d.place || '',
-            };
-          })
+          if (!d) return { date: '', place: '' };
+          if (typeof d === 'string') {
+            return { date: new Date(d).toISOString().split('T')[0], place: '' };
+          }
+          return {
+            date: d.date ? new Date(d.date).toISOString().split('T')[0] : '',
+            place: d.place || '',
+          };
+        })
         : [],
       rating1Value: (workshop as any).rating1Value || '4.5/5',
       rating1Count: (workshop as any).rating1Count || '(725)',
@@ -592,8 +592,8 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
   };
 
   const managerTitle = type === 'three-days' ? 'Three Days Workshop Management' : 'One Day Workshop Management';
-  const managerDescription = type === 'three-days' 
-    ? 'Create and manage all 3-day workshops with dynamic detail pages' 
+  const managerDescription = type === 'three-days'
+    ? 'Create and manage all 3-day workshops with dynamic detail pages'
     : 'Create and manage all 1-day workshops with dynamic detail pages';
 
   const workshopToDelete = deleteConfirm ? workshops.find((w) => w._id === deleteConfirm) : null;
@@ -623,17 +623,15 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
         <button
           onClick={() => setActiveTab('workshops')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'workshops' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${activeTab === 'workshops' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           Workshops
         </button>
         <button
           onClick={() => setActiveTab('registrations')}
-          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === 'registrations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'registrations' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+            }`}
         >
           Registrations
           {registrations.length > 0 && (
@@ -840,12 +838,12 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                         </td>
                       </tr>
                     ))
-                  ) : registrations.filter(r => 
-                      r.name?.toLowerCase().includes(regSearch.toLowerCase()) ||
-                      r.email?.toLowerCase().includes(regSearch.toLowerCase()) ||
-                      r.phone?.toLowerCase().includes(regSearch.toLowerCase()) ||
-                      r.workshopTitle?.toLowerCase().includes(regSearch.toLowerCase())
-                    ).length === 0 ? (
+                  ) : registrations.filter(r =>
+                    r.name?.toLowerCase().includes(regSearch.toLowerCase()) ||
+                    r.email?.toLowerCase().includes(regSearch.toLowerCase()) ||
+                    r.phone?.toLowerCase().includes(regSearch.toLowerCase()) ||
+                    r.workshopTitle?.toLowerCase().includes(regSearch.toLowerCase())
+                  ).length === 0 ? (
                     <tr>
                       <td colSpan={7} className="p-16 text-center">
                         <div className="flex flex-col items-center justify-center gap-3">
@@ -860,7 +858,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                     </tr>
                   ) : (
                     registrations
-                      .filter(r => 
+                      .filter(r =>
                         r.name?.toLowerCase().includes(regSearch.toLowerCase()) ||
                         r.email?.toLowerCase().includes(regSearch.toLowerCase()) ||
                         r.phone?.toLowerCase().includes(regSearch.toLowerCase()) ||
@@ -895,13 +893,12 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                             {(r.amountPaid || 0).toLocaleString()}
                           </td>
                           <td className="px-5 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                              r.paymentStatus === 'paid'
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${r.paymentStatus === 'paid'
                                 ? 'bg-green-50 text-green-700 border border-green-100'
                                 : r.paymentStatus === 'pending'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                : 'bg-red-50 text-red-700 border border-red-100'
-                            }`}>
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                  : 'bg-red-50 text-red-700 border border-red-100'
+                              }`}>
                               {r.paymentStatus}
                             </span>
                           </td>

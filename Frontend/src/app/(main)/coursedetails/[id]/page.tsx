@@ -443,7 +443,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <div className="hidden md:flex gap-2 sm:gap-6 overflow-x-auto whitespace-nowrap scrollbar-none py-1.5 select-none items-center">
             {[
               { id: "about", label: "About" },
-              { id: "syllabus", label: "Project details" },
+              { id: "syllabus", label: "Course details" },
               { id: "testimonials", label: "Testimonials" },
               { id: "reviews", label: "Reviews" },
               { id: "recommendations", label: "Recommendations" }
@@ -763,7 +763,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <div id="main-content-tabs" className="border-b border-slate-200 flex gap-6 pb-2 mb-2 overflow-x-auto whitespace-nowrap scrollbar-none select-none scroll-mt-28">
             {[
               { id: "about", label: "About" },
-              { id: "syllabus", label: "Project details" },
+              { id: "syllabus", label: "Course details" },
               { id: "testimonials", label: "Testimonials" },
               { id: "reviews", label: "Reviews" },
               { id: "recommendations", label: "Recommendations" }
@@ -944,7 +944,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                       About this Guided Project
                     </h3>
                     <p className="text-[14px] text-slate-700 leading-relaxed font-medium">
-                      In this project, you will learn the foundation of data analysis with Microsoft Excel using sales data from a sample company. You will learn how to use sorting and filtering tools to reorganize your data and access specific information about your data. You will also learn about the use of functions like IF and VLOOKUP functions to create new data and relate data from different tables. Finally, you...
+                      {course.description || "In this project, you will learn the foundation of data analysis with Microsoft Excel using sales data from a sample company. You will learn how to use sorting and filtering tools to reorganize your data and access specific information about your data. You will also learn about the use of functions like IF and VLOOKUP functions to create new data and relate data from different tables. Finally, you..."}
                     </p>
                     <button className="text-[13.5px] text-[#0056d2] font-bold hover:underline self-start">
                       Read more
@@ -975,26 +975,37 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                     </div>
 
                     <ol className="flex flex-col gap-3.5 text-[13.5px] text-slate-700 font-medium">
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-[#0056d2] font-bold shrink-0">1 .</span>
-                        <span>Upload a document using the free online version of Microsoft Office 365.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-[#0056d2] font-bold shrink-0">2 .</span>
-                        <span>Perform data analysis using sorting and filtering tools.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-[#0056d2] font-bold shrink-0">3 .</span>
-                        <span>Perform data mining using the IF function.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-[#0056d2] font-bold shrink-0">4 .</span>
-                        <span>Create references between tables and search for information with VLOOKUP.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-[#0056d2] font-bold shrink-0">5 .</span>
-                        <span>Perform data analysis using PivotTables.</span>
-                      </li>
+                      {(course.learnStepByStep && course.learnStepByStep.length > 0) ? (
+                        course.learnStepByStep.map((step: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">{idx + 1} .</span>
+                            <span>{step}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">1 .</span>
+                            <span>Upload a document using the free online version of Microsoft Office 365.</span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">2 .</span>
+                            <span>Perform data analysis using sorting and filtering tools.</span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">3 .</span>
+                            <span>Perform data mining using the IF function.</span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">4 .</span>
+                            <span>Create references between tables and search for information with VLOOKUP.</span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-[#0056d2] font-bold shrink-0">5 .</span>
+                            <span>Perform data analysis using PivotTables.</span>
+                          </li>
+                        </>
+                      )}
                     </ol>
 
                     <div className="border-t border-slate-100 pt-5 flex flex-col gap-1.5">

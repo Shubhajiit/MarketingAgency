@@ -52,6 +52,10 @@ interface CourseFormData {
   whatYouWillLearn: string[];
   skillsYouWillPractice: string[];
   toolsYouWillUse: string[];
+
+  // Course Details
+  description: string;
+  learnStepByStep: string[];
 }
 
 const defaultFormData: CourseFormData = {
@@ -89,6 +93,10 @@ const defaultFormData: CourseFormData = {
   whatYouWillLearn: [],
   skillsYouWillPractice: [],
   toolsYouWillUse: [],
+
+  // Course Details
+  description: '',
+  learnStepByStep: [],
 };
 
 export default function AdminCoursesPage() {
@@ -118,10 +126,27 @@ export default function AdminCoursesPage() {
   const [newLearnPoint, setNewLearnPoint] = useState('');
   const [newSkillPoint, setNewSkillPoint] = useState('');
   const [newToolPoint, setNewToolPoint] = useState('');
+  const [newStepPoint, setNewStepPoint] = useState('');
 
   // Category custom input states
   const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
   const [customCategoryVal, setCustomCategoryVal] = useState('');
+
+  const handleAddStepPoint = () => {
+    if (!newStepPoint.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      learnStepByStep: [...prev.learnStepByStep, newStepPoint.trim()]
+    }));
+    setNewStepPoint('');
+  };
+
+  const handleRemoveStepPoint = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      learnStepByStep: prev.learnStepByStep.filter((_, idx) => idx !== index)
+    }));
+  };
 
   const handleAddLearnPoint = () => {
     if (!newLearnPoint.trim()) return;
@@ -236,6 +261,7 @@ export default function AdminCoursesPage() {
     setNewLearnPoint('');
     setNewSkillPoint('');
     setNewToolPoint('');
+    setNewStepPoint('');
     setShowCustomCategoryInput(false);
     setCustomCategoryVal('');
     setShowModal(true);
@@ -361,6 +387,7 @@ export default function AdminCoursesPage() {
     setNewLearnPoint('');
     setNewSkillPoint('');
     setNewToolPoint('');
+    setNewStepPoint('');
     setShowCustomCategoryInput(false);
     setCustomCategoryVal('');
     setFormData({
@@ -398,6 +425,10 @@ export default function AdminCoursesPage() {
       whatYouWillLearn: course.whatYouWillLearn || [],
       skillsYouWillPractice: course.skillsYouWillPractice || [],
       toolsYouWillUse: course.toolsYouWillUse || [],
+
+      // Course Details
+      description: course.description || '',
+      learnStepByStep: (course as any).learnStepByStep || [],
     });
     setShowModal(true);
     setError('');
@@ -444,6 +475,10 @@ export default function AdminCoursesPage() {
         whatYouWillLearn: formData.whatYouWillLearn,
         skillsYouWillPractice: formData.skillsYouWillPractice,
         toolsYouWillUse: formData.toolsYouWillUse,
+
+        // Course Details
+        description: (formData.description || '').trim(),
+        learnStepByStep: formData.learnStepByStep,
       };
 
       if (editingCourse) {
@@ -1321,6 +1356,78 @@ export default function AdminCoursesPage() {
                       </div>
                     ) : (
                       <p className="text-xs text-slate-400 italic">No tools added yet. Type a tool and click Add.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Course Details Section (Description & Step-by-Step) */}
+                <div className="pb-2 border-b border-gray-100 mb-2 mt-8">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Course Details</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</label>
+                    <textarea
+                      value={formData.description || ''}
+                      onChange={(e) => updateField('description', e.target.value)}
+                      placeholder="e.g. In this project, you will learn the foundation of data analysis with Microsoft Excel..."
+                      rows={4}
+                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all bg-gray-50/50 focus:bg-white resize-y"
+                    />
+                  </div>
+
+                  <div className="bg-slate-50/60 border border-slate-200 rounded-xl p-5 md:p-6 space-y-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800">Learn step-by-step</h4>
+                      <p className="text-xs text-slate-500 mt-1">Add step-by-step guide points for what the student will learn.</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newStepPoint}
+                        onChange={(e) => setNewStepPoint(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddStepPoint();
+                          }
+                        }}
+                        placeholder="e.g. Upload a document using the free online version..."
+                        className="flex-1 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 focus:border-[#6366f1] transition-all placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddStepPoint}
+                        className="px-4 py-2.5 bg-[#6366f1] hover:bg-[#5558e6] text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-1 shrink-0 active:scale-[0.98]"
+                      >
+                        <Plus size={16} />
+                        Add
+                      </button>
+                    </div>
+
+                    {formData.learnStepByStep && formData.learnStepByStep.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2 mt-3">
+                        {formData.learnStepByStep.map((point, idx) => (
+                          <div key={idx} className="flex items-start justify-between gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-100 transition-all shadow-xs group">
+                            <div className="flex items-start gap-2.5">
+                              <span className="text-[#0056d2] font-bold mt-0.5 text-sm">{idx + 1}.</span>
+                              <span className="text-sm text-slate-700 leading-relaxed font-medium">{point}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveStepPoint(idx)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                              title="Delete Step"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No step-by-step points added yet. Type a point and click Add.</p>
                     )}
                   </div>
                 </div>

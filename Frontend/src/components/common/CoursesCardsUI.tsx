@@ -45,6 +45,8 @@ export interface Course {
   whatYouWillLearn?: string[];
   skillsYouWillPractice?: string[];
   toolsYouWillUse?: string[];
+  description?: string;
+  learnStepByStep?: string[];
 }
 
 interface CourseCardProps {

@@ -217,7 +217,7 @@ exports.deleteWorkshop = async (req, res) => {
   try {
     const workshop = await Workshop.findByIdAndUpdate(
       req.params.id,
-      { isActive: false },
+      { isActive: false, isCancelled: false },
       { new: true }
     );
 
