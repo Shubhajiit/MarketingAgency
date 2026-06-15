@@ -1807,8 +1807,8 @@ Email: contact@aiscale.com
                 </p>
                 <p className="text-gray-700 text-sm md:text-base font-semibold leading-relaxed mb-6 px-2">
                   For further queries, please email us at{" "}
-                  <a href="mailto:hello@aifortechies.in" className="text-blue-600 underline font-bold hover:text-blue-800 transition-colors">
-                    hello@aifortechies.in
+                  <a href="mailto:shubhajitbasak45@gmail.com" className="text-blue-600 underline font-bold hover:text-blue-800 transition-colors">
+                    shubhajitbasak45@gmail.com
                   </a>
                 </p>
 

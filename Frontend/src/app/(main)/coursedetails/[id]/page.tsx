@@ -9,7 +9,6 @@ import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ShieldAlert, ArrowRight, X } from "lucide-react";
-import { contactApi } from "@/lib/api/contact";
 
 const countryCodes = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -239,62 +238,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
   const [enrollSuccess, setEnrollSuccess] = useState(false);
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
 
-  // Contact Sales Modal States
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactSubject, setContactSubject] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
-  const [contactErrors, setContactErrors] = useState<Record<string, boolean>>({});
-  const [isSubmittingContact, setIsSubmittingContact] = useState(false);
-  const [isContactSuccess, setIsContactSuccess] = useState(false);
-  const [contactErrorMsg, setContactErrorMsg] = useState<string | null>(null);
 
-  // Initialize contact subject when course title is available
-  useEffect(() => {
-    if (course?.title) {
-      setContactSubject(`Inquiry about ${course.title}`);
-    }
-  }, [course]);
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors: Record<string, boolean> = {};
-
-    if (!contactName.trim()) newErrors.name = true;
-    if (!contactEmail.trim() || !/\S+@\S+\.\S+/.test(contactEmail)) newErrors.email = true;
-    if (!contactPhone.trim() || !/^\+?\d{7,15}$/.test(contactPhone.replace(/[\s-()]/g, ""))) newErrors.phone = true;
-    if (!contactSubject.trim()) newErrors.subject = true;
-    if (!contactMessage.trim() || contactMessage.length < 10) newErrors.message = true;
-
-    setContactErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-
-    setIsSubmittingContact(true);
-    setContactErrorMsg(null);
-
-    try {
-      await contactApi.submitContactForm({
-        name: contactName.trim(),
-        email: contactEmail.trim(),
-        phone: contactPhone.trim(),
-        topic: contactSubject.trim(),
-        message: contactMessage.trim(),
-      });
-      setIsContactSuccess(true);
-      // Reset fields
-      setContactName("");
-      setContactEmail("");
-      setContactPhone("");
-      setContactMessage("");
-    } catch (err: any) {
-      console.error("Error submitting contact sales form:", err);
-      setContactErrorMsg(err.response?.data?.message || "Failed to send message. Please try again later.");
-    } finally {
-      setIsSubmittingContact(false);
-    }
-  };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -487,10 +431,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 </button>
               )}
               <button
-                onClick={() => {
-                  setIsContactModalOpen(true);
-                  setIsContactSuccess(false);
-                }}
+                onClick={() => router.push('/contact')}
                 className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-xs md:text-sm font-semibold py-2.5 px-4 rounded-md transition-all uppercase tracking-wide cursor-pointer whitespace-nowrap"
               >
                 Contact sales
@@ -667,10 +608,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                 </button>
               )}
               <button
-                onClick={() => {
-                  setIsContactModalOpen(true);
-                  setIsContactSuccess(false);
-                }}
+                onClick={() => router.push('/contact')}
                 disabled={!course}
                 className="bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 active:scale-[0.99] text-sm font-semibold py-3 px-8 rounded-lg shadow-sm hover:shadow-md transition-all uppercase tracking-wide cursor-pointer shrink-0 disabled:opacity-50"
               >
@@ -1146,164 +1084,21 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            {/* Enrollment form body replaced with Send Us a Message contact form */}
-            {isContactSuccess ? (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-5 text-center flex flex-col items-center gap-3 animate-in fade-in duration-200">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-lg font-bold animate-bounce">
-                  ✓
-                </div>
-                <h4 className="text-base font-bold text-emerald-950">
-                  Message Sent Successfully!
-                </h4>
-                <p className="text-xs text-emerald-800 leading-relaxed font-medium">
-                  Thank you for reaching out. One of our course coordinators will call or email you shortly.
-                </p>
-                <button
-                  onClick={() => setIsContactSuccess(false)}
-                  className="mt-2 text-xs font-semibold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
-                >
-                  Send Another Message
-                </button>
-              </div>
+            {isEnrolled ? (
+              <button
+                onClick={() => router.push(`/dashboard/activecourse`)}
+                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-4 rounded-lg w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                Start Module
+              </button>
             ) : (
-              <form onSubmit={handleContactSubmit} className="flex flex-col gap-4">
-                <div className="flex flex-col">
-                  <h4 className="text-xs font-black text-slate-800 tracking-wider uppercase mb-1">
-                    Send Us a Message
-                  </h4>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Fill in your details below and we will get back to you immediately.
-                  </p>
-                </div>
-
-                {contactErrorMsg && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-650 text-[11px] font-semibold flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 shrink-0 text-red-500" />
-                    {contactErrorMsg}
-                  </div>
-                )}
-
-                {/* Name */}
-                <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    placeholder="John Doe"
-                    value={contactName}
-                    onChange={(e) => {
-                      setContactName(e.target.value);
-                      setContactErrors((prev) => ({ ...prev, name: false }));
-                    }}
-                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.name
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-gray-200 focus:border-[#0056d2]"
-                      }`}
-                  />
-                  {contactErrors.name && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Full Name is required</span>
-                  )}
-                </div>
-
-                {/* Email & Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Email */}
-                  <div className="flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Email Address *</label>
-                    <input
-                      type="email"
-                      placeholder="john@example.com"
-                      value={contactEmail}
-                      onChange={(e) => {
-                        setContactEmail(e.target.value);
-                        setContactErrors((prev) => ({ ...prev, email: false }));
-                      }}
-                      className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.email
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-gray-200 focus:border-[#0056d2]"
-                        }`}
-                    />
-                    {contactErrors.email && (
-                      <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid email is required</span>
-                    )}
-                  </div>
-
-                  {/* Phone */}
-                  <div className="flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Phone Number *</label>
-                    <input
-                      type="tel"
-                      placeholder="9876543210"
-                      value={contactPhone}
-                      onChange={(e) => {
-                        setContactPhone(e.target.value);
-                        setContactErrors((prev) => ({ ...prev, phone: false }));
-                      }}
-                      className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.phone
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-gray-200 focus:border-[#0056d2]"
-                        }`}
-                    />
-                    {contactErrors.phone && (
-                      <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Valid phone is required</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Subject */}
-                <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Subject *</label>
-                  <input
-                    type="text"
-                    placeholder="Enter the subject"
-                    value={contactSubject}
-                    onChange={(e) => {
-                      setContactSubject(e.target.value);
-                      setContactErrors((prev) => ({ ...prev, subject: false }));
-                    }}
-                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.subject
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-gray-200 focus:border-[#0056d2]"
-                      }`}
-                  />
-                  {contactErrors.subject && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Subject is required</span>
-                  )}
-                </div>
-
-                {/* Message */}
-                <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase mb-1">Your Message *</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Write your questions or notes here..."
-                    value={contactMessage}
-                    onChange={(e) => {
-                      setContactMessage(e.target.value);
-                      setContactErrors((prev) => ({ ...prev, message: false }));
-                    }}
-                    className={`w-full text-xs px-3.5 py-2.5 border rounded-lg focus:outline-none transition-colors ${contactErrors.message
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-gray-200 focus:border-[#0056d2]"
-                      }`}
-                  />
-                  {contactErrors.message && (
-                    <span className="text-[10px] text-red-600 font-bold mt-1">⚠️ Message must be at least 10 characters</span>
-                  )}
-                </div>
-
-                {/* Submit button */}
-                <button
-                  type="submit"
-                  disabled={isSubmittingContact}
-                  className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] transition-all disabled:bg-slate-350 text-white font-bold text-xs py-3 px-4 rounded-lg w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2"
-                >
-                  {isSubmittingContact ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    "Send Message"
-                  )}
-                </button>
-              </form>
+              <button
+                onClick={handleBuyNow}
+                disabled={!course}
+                className="bg-[#0056d2] hover:bg-[#00419e] active:scale-[0.99] text-white text-sm font-semibold py-3 px-4 rounded-lg w-full uppercase tracking-wider cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                Buy NOW
+              </button>
             )}
 
             {/* Info guarantee badge */}
@@ -1799,142 +1594,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
         </section>
       )}
 
-      {/* Contact Sales Popup Modal */}
-      {isContactModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          {/* Backdrop with smooth blur */}
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-xs" 
-            onClick={() => setIsContactModalOpen(false)} 
-          />
 
-          {/* Modal Container */}
-          <div className="relative bg-white text-gray-900 rounded-3xl p-6 md:p-8 shadow-2xl w-full max-w-lg border border-slate-100 max-h-[90vh] overflow-y-auto z-10 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
-            {/* Close Cross Button */}
-            <button
-              onClick={() => setIsContactModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {isContactSuccess ? (
-              <div className="py-8 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 border-4 border-emerald-100 flex items-center justify-center mb-6 text-emerald-500 animate-bounce">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-2">Message Sent Successfully!</h3>
-                <p className="text-slate-500 text-sm max-w-sm leading-relaxed mb-6">
-                  Thank you for reaching out. One of our course coordinators will call or email you shortly.
-                </p>
-                <button 
-                  onClick={() => setIsContactModalOpen(false)}
-                  className="bg-[#001A5A] hover:bg-[#003063] text-white font-extrabold px-6 py-2.5 rounded-xl text-sm transition-all cursor-pointer"
-                >
-                  Close Window
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleContactSubmit} className="flex flex-col gap-4 text-black">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-xl font-extrabold text-slate-900">Send Us a Message</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    Fill in your details below and we will get back to you immediately.
-                  </p>
-                </div>
-
-                {contactErrorMsg && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-semibold flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 shrink-0 text-red-500" />
-                    {contactErrorMsg}
-                  </div>
-                )}
-
-                {/* Name */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Full Name *</label>
-                  <input 
-                    type="text"
-                    placeholder="John Doe"
-                    value={contactName}
-                    onChange={(e) => { setContactName(e.target.value); setContactErrors(prev => ({ ...prev, name: false })); }}
-                    className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.name ? 'border-red-400' : 'border-slate-200'}`}
-                  />
-                  {contactErrors.name && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Full Name is required</p>}
-                </div>
-
-                {/* Email & Phone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Email Address *</label>
-                    <input 
-                      type="email"
-                      placeholder="john@example.com"
-                      value={contactEmail}
-                      onChange={(e) => { setContactEmail(e.target.value); setContactErrors(prev => ({ ...prev, email: false })); }}
-                      className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.email ? 'border-red-400' : 'border-slate-200'}`}
-                    />
-                    {contactErrors.email && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Valid email required</p>}
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Phone Number *</label>
-                    <input 
-                      type="tel"
-                      placeholder="9876543210"
-                      value={contactPhone}
-                      onChange={(e) => { setContactPhone(e.target.value); setContactErrors(prev => ({ ...prev, phone: false })); }}
-                      className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.phone ? 'border-red-400' : 'border-slate-200'}`}
-                    />
-                    {contactErrors.phone && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Valid phone required</p>}
-                  </div>
-                </div>
-
-                {/* Subject */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Subject *</label>
-                  <input
-                    type="text"
-                    placeholder="Enter the subject"
-                    value={contactSubject}
-                    onChange={(e) => { setContactSubject(e.target.value); setContactErrors(prev => ({ ...prev, subject: false })); }}
-                    className={`w-full text-xs px-4 py-2 border rounded-xl bg-white text-black focus:outline-none focus:border-black transition-colors ${contactErrors.subject ? 'border-red-400' : 'border-slate-200'}`}
-                  />
-                  {contactErrors.subject && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Subject is required</p>}
-                </div>
-
-                {/* Message */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-800 tracking-wide uppercase">Your Message *</label>
-                  <textarea 
-                    rows={4}
-                    placeholder="Write your questions or notes here..."
-                    value={contactMessage}
-                    onChange={(e) => { setContactMessage(e.target.value); setContactErrors(prev => ({ ...prev, message: false })); }}
-                    className={`w-full text-xs px-4 py-2 border rounded-xl focus:outline-none focus:border-black bg-white text-black transition-colors ${contactErrors.message ? 'border-red-400' : 'border-slate-200'}`}
-                  />
-                  {contactErrors.message && <p className="text-[9px] text-red-500 font-semibold flex items-center gap-1 mt-0.5"><ShieldAlert className="w-3.5 h-3.5" /> Message must be at least 10 characters</p>}
-                </div>
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={isSubmittingContact}
-                  className="w-full bg-[#0052FF] hover:bg-blue-600 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-lg mt-2"
-                >
-                  {isSubmittingContact ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      Send Message <ArrowRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* 4. Floating Help Button (Coursera style support icon) */}
       <div className="fixed bottom-6 right-6 z-50">

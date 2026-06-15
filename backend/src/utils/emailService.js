@@ -308,19 +308,19 @@ const generateInvoicePDF = (registration, workshop) => {
         .text('IMPORTANT INSTRUCTIONS', 50, instructionsTop);
 
       const isOnline = venueStr.toLowerCase().includes('online') || venueStr.toLowerCase().includes('zoom') || venueStr.toLowerCase().includes('meet');
-      const pdfInstructions = isOnline 
+      const pdfInstructions = isOnline
         ? [
-            'Live Zoom/Google Meet session links will be sent to you 2 hours before the start of the session.',
-            'Please join 10 minutes prior using a laptop/computer for the best hands-on learning experience.',
-            'Ensure you have a stable internet connection and Zoom/Meet application installed.',
-            'Workshop recording access and toolkits will be shared via email within 24 hours after the session.'
-          ]
+          'Live Zoom/Google Meet session links will be sent to you 2 hours before the start of the session.',
+          'Please join 10 minutes prior using a laptop/computer for the best hands-on learning experience.',
+          'Ensure you have a stable internet connection and Zoom/Meet application installed.',
+          'Workshop recording access and toolkits will be shared via email within 24 hours after the session.'
+        ]
         : [
-            `This is an offline, in-person session held at: ${venueStr}.`,
-            'Please reach the venue 15 minutes prior to the scheduled start time.',
-            'Bring a copy of this ticket (printed or on your phone) for check-in at the entrance.',
-            'Ensure you carry a laptop or writing materials if requested by the instructor.'
-          ];
+          `This is an offline, in-person session held at: ${venueStr}.`,
+          'Please reach the venue 15 minutes prior to the scheduled start time.',
+          'Bring a copy of this ticket (printed or on your phone) for check-in at the entrance.',
+          'Ensure you carry a laptop or writing materials if requested by the instructor.'
+        ];
 
       doc.fontSize(8.5)
         .fillColor(textColor)
@@ -352,7 +352,7 @@ const buildConfirmationHtml = (registration, workshop) => {
 
   const venue = determineVenue(registration, workshop);
   const isOnline = venue.toLowerCase().includes('online') || venue.toLowerCase().includes('zoom') || venue.toLowerCase().includes('meet');
-  const instructionsHtml = isOnline 
+  const instructionsHtml = isOnline
     ? `<strong>Important Session Join Info:</strong><br>
        A dedicated Zoom/Meet session link will be sent to your registered email and WhatsApp number exactly 2 hours prior to the workshop start time. Please join 10 minutes early via a laptop or desktop computer to complete the interactive activities.`
     : `<strong>Important Venue Entry Info:</strong><br>
@@ -517,110 +517,7 @@ const sendWorkshopConfirmationEmail = async (registration, workshopArg = null) =
 /**
  * Sends a contact form submission email to the company/admin email.
  * If SMTP settings are missing, saves the email as a HTML file in temp_mails folder (DEV mode).
- */
-const sendContactEmail = async (contactData) => {
-  try {
-    const { name, email, phone, topic, message } = contactData;
-    console.log(`[EmailService] Sending contact inquiry from ${name} (${email})`);
 
-    const transporter = getTransporter();
-    const emailFrom = process.env.EMAIL_FROM || 'noreply@aiscale.in';
-    const emailTo = process.env.EMAIL_FROM || 'shubhajitbasak45@gmail.com'; // Company email
-
-    const subject = `[Contact Inquiry] ${topic} - From ${name}`;
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>New Contact Inquiry</title>
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 0; }
-          .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-          .header { background-color: #001A5A; padding: 40px 30px; text-align: center; }
-          .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
-          .content { padding: 30px; }
-          .label { font-weight: bold; color: #0f172a; width: 150px; font-size: 14px; }
-          .value { color: #475569; font-size: 14px; }
-          .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-          .info-table td { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-          .message-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; }
-          .footer { text-align: center; font-size: 12px; color: #94a3b8; padding: 20px; border-top: 1px solid #f1f5f9; background-color: #f8fafc; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>New User Inquiry ✉️</h1>
-          </div>
-          <div class="content">
-            <h3 style="color: #0052FF; margin-top: 0; font-size: 16px; font-weight: 800;">Inquiry Details</h3>
-            <table class="info-table">
-              <tr>
-                <td class="label">Full Name:</td>
-                <td class="value"><strong>${name}</strong></td>
-              </tr>
-              <tr>
-                <td class="label">Email Address:</td>
-                <td class="value"><a href="mailto:${email}">${email}</a></td>
-              </tr>
-              <tr>
-                <td class="label">Phone Number:</td>
-                <td class="value"><a href="tel:${phone}">${phone}</a></td>
-              </tr>
-              <tr>
-                <td class="label">Subject:</td>
-                <td class="value"><span style="background-color: #eff6ff; color: #0052FF; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;">${topic}</span></td>
-              </tr>
-              <tr>
-                <td class="label">Submitted At:</td>
-                <td class="value">${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</td>
-              </tr>
-            </table>
-
-            <h3 style="color: #0f172a; font-size: 16px; font-weight: 800; margin-top: 20px; margin-bottom: 10px;">Message:</h3>
-            <div class="message-box">${message}</div>
-          </div>
-          <div class="footer">
-            This message was generated from the AI Scale Platform contact form.<br>
-            To reply to the user, simply reply directly to this email.
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    if (!transporter) {
-      // DEVELOPMENT FALLBACK
-      console.warn('[EmailService] SMTP credentials not configured. Saving contact email to temp_mails.');
-      const tempMailsDir = path.join(__dirname, '../../temp_mails');
-      if (!fs.existsSync(tempMailsDir)) {
-        fs.mkdirSync(tempMailsDir, { recursive: true });
-      }
-      const randId = Math.random().toString(36).substring(2, 15);
-      const htmlPath = path.join(tempMailsDir, `contact_${randId}.html`);
-      fs.writeFileSync(htmlPath, htmlContent);
-      console.log(`[EmailService] Local Contact Email HTML saved at: ${htmlPath}`);
-      return { success: true, localSaved: true, htmlPath };
-    }
-
-    const mailOptions = {
-      from: `"${name}" <${emailFrom}>`, // Must send from the authenticated address to prevent spoofing
-      to: emailTo, // Sends to company email
-      replyTo: email, // Sets replyTo to user's email so admin can reply directly!
-      subject: subject,
-      html: htmlContent
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`[EmailService] Contact email sent successfully. MessageID: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error(`[EmailService] Error sending contact email:`, error);
-    return { success: false, error: error.message };
-  }
-};
 
 /**
  * Constructs a responsive HTML email template for workshop cancellation.
@@ -770,6 +667,5 @@ module.exports = {
   sendWorkshopConfirmationEmail,
   generateInvoicePDF,
   formatWorkshopDates,
-  sendContactEmail,
   sendWorkshopCancellationEmail
 };
