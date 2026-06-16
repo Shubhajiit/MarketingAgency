@@ -28,6 +28,12 @@ import Synthesia from '../../../../../public/WorkshopsAILogos/Synthesia.webp';
 import TomeAI from '../../../../../public/WorkshopsAILogos/TomeAI.webp';
 import CopyAI from '../../../../../public/WorkshopsAILogos/copyAI.png';
 
+// Import tool logos from WorkshopsAILogos/Tool
+import GoogleAnalyticsLogo from '../../../../../public/WorkshopsAILogos/Tool/GoogleAnalytics.jpg';
+import GoogleAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Google-Ads.webp';
+import MetaAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Meta-Ads.webp';
+import WhatsAppLogo from '../../../../../public/WorkshopsAILogos/Tool/WhatsApp.webp';
+
 interface FormState {
   firstName: string;
   lastName: string;
@@ -1635,16 +1641,16 @@ Email: contact@aiscale.com
 
                 <div className="flex flex-wrap gap-8 md:gap-12 items-center justify-start w-full py-4">
                   {/* Google Analytics */}
-                  <img src="/WorkshopsAILogos/Tool/GoogleAnalytics.jpg" alt="Google Analytics" className="h-16 md:h-20 w-auto object-contain shrink-0 rounded-xl hover:scale-105 transition-transform duration-200" />
+                  <img src={GoogleAnalyticsLogo.src} alt="Google Analytics" className="h-16 md:h-20 w-auto object-contain shrink-0 rounded-xl hover:scale-105 transition-transform duration-200" />
 
                   {/* Google Ads */}
-                  <img src="/WorkshopsAILogos/Tool/Google-Ads.webp" alt="Google Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
+                  <img src={GoogleAdsLogo.src} alt="Google Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
 
                   {/* Meta Ads */}
-                  <img src="/WorkshopsAILogos/Tool/Meta-Ads.webp" alt="Meta Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
+                  <img src={MetaAdsLogo.src} alt="Meta Ads" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
 
                   {/* WhatsApp */}
-                  <img src="/WorkshopsAILogos/Tool/WhatsApp.webp" alt="WhatsApp" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
+                  <img src={WhatsAppLogo.src} alt="WhatsApp" className="h-16 md:h-20 w-auto object-contain shrink-0 hover:scale-105 transition-transform duration-200" />
                 </div>
               </div>
             </section>
