@@ -25,8 +25,8 @@ const libraryItems = [
 ];
 
 const standaloneItems = [
-	{ label: 'Upcoming Workshops', href: '/dashboard/upcoming-workshops', icon: Calendar },
-	{ label: 'Browse Courses', href: '/all-course', icon: BookOpen }
+	{ label: 'Upcoming Workshops', href: '/dashboard/upcoming-workshops', icon: Calendar, hasDropdown: false },
+	{ label: 'Browse Courses', href: '/all-course', icon: BookOpen, hasDropdown: false }
 ];
 
 export default function UserDashboardSidebar() {
