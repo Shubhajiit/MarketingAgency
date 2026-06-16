@@ -34,6 +34,10 @@ import GoogleAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Google-Ad
 import MetaAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Meta-Ads.webp';
 import WhatsAppLogo from '../../../../../public/WorkshopsAILogos/Tool/WhatsApp.webp';
 
+// Import mentor images from LandingPage
+import AmanSaurav from '../../../../../public/LandingPage/aman_saurav.png';
+import CoFounder from '../../../../../public/LandingPage/co_founder.png';
+
 interface FormState {
   firstName: string;
   lastName: string;
@@ -1513,24 +1517,6 @@ function ThreeDaysWorkshopsContent() {
               </section>
             )}
 
-            {/* Application Deadline Section */}
-            {workshop.deadline && (
-              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
-                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
-                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
-                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
-                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
-                        Application <span className="text-blue-600">Deadline</span>
-                      </h2>
-                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
-                        Apply by <span className="text-blue-600 font-extrabold">{formatDeadlineDate(workshop.deadline)}</span> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
             {/* Tools You'll Master Section */}
             <section className="bg-white pt-6 pb-8 md:pt-10 md:pb-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-tools-mastered">
               <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
@@ -1636,6 +1622,31 @@ function ThreeDaysWorkshopsContent() {
                 </div>
               </div>
             </section>
+
+            {/* Application Deadline Section */}
+            {(workshop.deadline || (workshop as any).bonusDeadlineText) && (
+              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
+                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
+                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
+                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
+                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+                        Application <span className="text-blue-600">Deadline</span>
+                      </h2>
+                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
+                        Apply by <span className="text-blue-600 font-extrabold">
+                          {workshop.deadline 
+                            ? formatDeadlineDate(workshop.deadline) 
+                            : (workshop as any).bonusDeadlineText}
+                        </span>
+                        {workshop.deadline && (
+                          <> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span></>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* What you'll learn in this Cohort Section */}
             {workshop.courseOutcomes && workshop.courseOutcomes.length > 0 && (
@@ -1895,7 +1906,7 @@ function ThreeDaysWorkshopsContent() {
                     <div className="md:col-span-5 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src="/LandingPage/aman_saurav.png"
+                          src={AmanSaurav.src}
                           alt="Aman Saurav"
                           className="w-full h-full object-cover rounded-[10px]"
                         />
@@ -2008,7 +2019,7 @@ function ThreeDaysWorkshopsContent() {
                     <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src="/LandingPage/co_founder.png"
+                          src={CoFounder.src}
                           alt="Aditya Kachave"
                           className="w-full h-full object-cover rounded-[10px]"
                         />

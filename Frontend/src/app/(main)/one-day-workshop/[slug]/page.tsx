@@ -34,6 +34,10 @@ import GoogleAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Google-Ad
 import MetaAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Meta-Ads.webp';
 import WhatsAppLogo from '../../../../../public/WorkshopsAILogos/Tool/WhatsApp.webp';
 
+// Import mentor images from LandingPage
+import AmanSaurav from '../../../../../public/LandingPage/aman_saurav.png';
+import CoFounder from '../../../../../public/LandingPage/co_founder.png';
+
 interface FormState {
   firstName: string;
   lastName: string;
@@ -1474,7 +1478,7 @@ Email: contact@aiscale.com
             </section>
 
             {/* What You'll Learn Section */}
-            {workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0 && (
+            {((workshop.modules && workshop.modules.length > 0) || (workshop.whatYouWillLearn && workshop.whatYouWillLearn.length > 0)) && (
               <section className="bg-white pt-6 pb-12 md:py-16 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-cohort-syllabus">
                 <div className="max-w-5xl w-full mx-auto flex flex-col items-start text-left">
                   <h2 className="text-2xl md:text-[48px] font-extrabold md:font-black italic text-left text-gray-900 leading-tight">
@@ -1498,127 +1502,108 @@ Email: contact@aiscale.com
                   </div>
 
                   <div className="flex flex-col gap-4 w-full text-left">
-                    {workshop.whatYouWillLearn.map((step, idx) => {
-                      const isOpen = activeModule === idx;
-                      const liveSessions = idx === 0 ? 5 : idx === 1 ? 10 : idx === 2 ? 8 : idx === 3 ? 6 : 5;
-                      const assignments = 2;
-                      const caseStudies = 3;
-                      const assessments = 1;
+                    {(() => {
+                      const displayModules = (workshop.modules && workshop.modules.length > 0)
+                        ? workshop.modules.map(m => ({ title: m.title, points: m.content || [] }))
+                        : (workshop.whatYouWillLearn || []).map(w => ({
+                            title: w.title,
+                            points: w.description
+                              ? w.description.split(/\n+/).map(p => p.trim().replace(/^[-*•\s✓]+/, '')).filter(Boolean)
+                              : []
+                          }));
 
-                      return (
-                        <div
-                          key={idx}
-                          className={`w-full border-[1.5px] border-black rounded-2xl overflow-hidden transition-all duration-200 ${isOpen ? 'bg-[#E5DEFF] shadow-[4px_4px_0px_#000000]' : 'bg-white shadow-[4px_4px_0px_#000000]'}`}
-                        >
-                          {/* Header */}
+                      return displayModules.map((step, idx) => {
+                        const isOpen = activeModule === idx;
+                        const liveSessions = idx === 0 ? 5 : idx === 1 ? 10 : idx === 2 ? 8 : idx === 3 ? 6 : 5;
+                        const assignments = 2;
+                        const caseStudies = 3;
+                        const assessments = 1;
+
+                        return (
                           <div
-                            onClick={() => setActiveModule(isOpen ? null : idx)}
-                            className="flex items-center justify-between p-6 sm:p-8 cursor-pointer select-none hover:bg-gray-50/50 transition-colors"
+                            key={idx}
+                            className={`w-full border-[1.5px] border-black rounded-2xl overflow-hidden transition-all duration-200 ${isOpen ? 'bg-[#E5DEFF] shadow-[4px_4px_0px_#000000]' : 'bg-white shadow-[4px_4px_0px_#000000]'}`}
                           >
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 flex-1 min-w-0">
-                              {/* Desktop-only Module Badge */}
-                              <div className="hidden sm:flex flex-col items-start leading-none shrink-0">
-                                <span className="text-[11px] font-bold text-gray-500 italic uppercase tracking-wider mb-0.5">Module</span>
-                                <span className="text-4xl sm:text-5xl font-black italic text-purple-700">{idx + 1}</span>
-                              </div>
+                            {/* Header */}
+                            <div
+                              onClick={() => setActiveModule(isOpen ? null : idx)}
+                              className="flex items-center justify-between p-6 sm:p-8 cursor-pointer select-none hover:bg-gray-50/50 transition-colors"
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 flex-1 min-w-0">
+                                {/* Desktop-only Module Badge */}
+                                <div className="hidden sm:flex flex-col items-start leading-none shrink-0">
+                                  <span className="text-[11px] font-bold text-gray-500 italic uppercase tracking-wider mb-0.5">Module</span>
+                                  <span className="text-4xl sm:text-5xl font-black italic text-purple-700">{idx + 1}</span>
+                                </div>
 
-                              {/* Content area */}
-                              <div className="flex-1 min-w-0 text-left">
-                                {/* Mobile-only Inline Title */}
-                                <h3 className="block sm:hidden text-base font-bold text-[#0a2540] pr-4 mb-3 leading-snug">
-                                  <span className="italic text-gray-900 font-medium mr-1.5">Module</span>
-                                  <span className="text-purple-700 font-black italic mr-2">{idx + 1}</span>
-                                  <span className="text-gray-450 font-bold mx-1.5">—</span>
-                                  <span className="text-gray-950 font-extrabold">{step.title}</span>
-                                </h3>
+                                {/* Content area */}
+                                <div className="flex-1 min-w-0 text-left">
+                                  {/* Mobile-only Inline Title */}
+                                  <h3 className="block sm:hidden text-base font-bold text-[#0a2540] pr-4 mb-3 leading-snug">
+                                    <span className="italic text-gray-900 font-medium mr-1.5">Module</span>
+                                    <span className="text-purple-700 font-black italic mr-2">{idx + 1}</span>
+                                    <span className="text-gray-450 font-bold mx-1.5">—</span>
+                                    <span className="text-gray-950 font-extrabold">{step.title}</span>
+                                  </h3>
 
-                                {/* Desktop-only Heading */}
-                                <h3 className="hidden sm:block text-lg sm:text-xl md:text-2xl font-bold text-[#0a2540] pr-4 mb-2">
-                                  {step.title}
-                                </h3>
+                                  {/* Desktop-only Heading */}
+                                  <h3 className="hidden sm:block text-lg sm:text-xl md:text-2xl font-bold text-[#0a2540] pr-4 mb-2">
+                                    {step.title}
+                                  </h3>
 
-                                {/* Badges */}
-                                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs font-semibold text-gray-800 w-full sm:w-auto">
-                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
-                                    <Radio className="w-3.5 h-3.5 text-purple-700 shrink-0" />
-                                    <span>{liveSessions} Live Sessions</span>
-                                  </span>
-                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
-                                    <ClipboardList className="w-3.5 h-3.5 shrink-0" />
-                                    <span>{assignments} Assignments</span>
-                                  </span>
-                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
-                                    <FileText className="w-3.5 h-3.5 shrink-0" />
-                                    <span>{caseStudies} Case Study</span>
-                                  </span>
-                                  <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
-                                    <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
-                                    <span>{assessments} Assessments</span>
-                                  </span>
+                                  {/* Badges */}
+                                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs font-semibold text-gray-800 w-full sm:w-auto">
+                                    <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                      <Radio className="w-3.5 h-3.5 text-purple-700 shrink-0" />
+                                      <span>{liveSessions} Live Sessions</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                      <ClipboardList className="w-3.5 h-3.5 shrink-0" />
+                                      <span>{assignments} Assignments</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                      <FileText className="w-3.5 h-3.5 shrink-0" />
+                                      <span>{caseStudies} Case Study</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 px-3 py-1 border border-black rounded-full bg-white select-none">
+                                      <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
+                                      <span>{assessments} Assessments</span>
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
+
+                              {/* Collapse indicator */}
+                              <div className="shrink-0 ml-4">
+                                {isOpen ? (
+                                  <Minus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
+                                ) : (
+                                  <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
+                                )}
+                              </div>
                             </div>
 
-                            {/* Collapse indicator */}
-                            <div className="shrink-0 ml-4">
-                              {isOpen ? (
-                                <Minus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
-                              ) : (
-                                <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-black stroke-[2.5]" />
-                              )}
-                            </div>
+                            {/* Collapsible content */}
+                            {isOpen && (
+                              <div className="border-t-[1.5px] border-black p-6 sm:p-8">
+                                {step.points && step.points.length > 0 ? (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                                    {step.points.map((point, pIdx) => (
+                                      <div key={pIdx} className="flex items-start gap-2.5">
+                                        <span className="text-gray-900 font-black text-sm mt-0.5 shrink-0">✓</span>
+                                        <span className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-bold leading-relaxed">
+                                          {point}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </div>
+                            )}
                           </div>
-
-                          {/* Collapsible content */}
-                          {isOpen && (
-                            <div className="border-t-[1.5px] border-black p-6 sm:p-8">
-                              {(() => {
-                                const points = step.description
-                                  ? step.description
-                                    .split(/\n+/)
-                                    .map(p => p.trim().replace(/^[-*•\s✓]+/, ''))
-                                    .filter(Boolean)
-                                  : [];
-
-                                if (points.length > 0) {
-                                  return (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-                                      {points.map((point, pIdx) => (
-                                        <div key={pIdx} className="flex items-start gap-2.5">
-                                          <span className="text-gray-900 font-black text-sm mt-0.5 shrink-0">✓</span>
-                                          <span className="text-xs sm:text-sm md:text-[14px] text-gray-900 font-bold leading-relaxed">
-                                            {point}
-                                          </span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Application Deadline Section */}
-            {workshop.deadline && (
-              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
-                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
-                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
-                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
-                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
-                        Application <span className="text-blue-600">Deadline</span>
-                      </h2>
-                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
-                        Apply by <span className="text-blue-600 font-extrabold">{formatDeadlineDate(workshop.deadline)}</span> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span>
-                      </p>
-                    </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               </section>
@@ -1725,6 +1710,31 @@ Email: contact@aiscale.com
                 </div>
               </div>
             </section>
+
+            {/* Application Deadline Section */}
+            {(workshop.deadline || (workshop as any).bonusDeadlineText) && (
+              <section className="bg-white py-8 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-b border-gray-100" id="workshop-application-deadline">
+                <div className="max-w-5xl w-full mx-auto flex justify-center py-4">
+                  <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 to-emerald-500 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-3xl">
+                    <div className="bg-white rounded-[22px] px-6 py-8 md:py-10 flex flex-col items-center justify-center text-center">
+                      <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900">
+                        Application <span className="text-blue-600">Deadline</span>
+                      </h2>
+                      <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
+                        Apply by <span className="text-blue-600 font-extrabold">
+                          {workshop.deadline 
+                            ? formatDeadlineDate(workshop.deadline) 
+                            : (workshop as any).bonusDeadlineText}
+                        </span>
+                        {workshop.deadline && (
+                          <> at <span className="text-gray-700 font-semibold">{formatDeadlineTime(workshop.deadline)}</span></>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
 
 
 
@@ -1986,7 +1996,7 @@ Email: contact@aiscale.com
                     <div className="md:col-span-5 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src="/LandingPage/aman_saurav.png"
+                          src={AmanSaurav.src}
                           alt="Aman Saurav"
                           className="w-full h-full object-cover rounded-[10px]"
                         />
@@ -2099,7 +2109,7 @@ Email: contact@aiscale.com
                     <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src="/LandingPage/co_founder.png"
+                          src={CoFounder.src}
                           alt="Aditya Kachave"
                           className="w-full h-full object-cover rounded-[10px]"
                         />
