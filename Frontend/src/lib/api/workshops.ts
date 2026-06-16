@@ -90,7 +90,8 @@ export interface Workshop {
   bonusDeadlineText: string;
   heroPoints: string[];
   workshopDates: any[];
-  deadline?: string;
+  deadline?: string | null;
+
 
   // Rich content
   highlights: WorkshopHighlight[];
