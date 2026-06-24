@@ -1237,8 +1237,8 @@ Email: contact@aiscale.com
 
                     {(workshop.deadline || (workshop as any).bonusDeadlineText) && (
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : (workshop as any).bonusDeadlineText}
                       </p>
                     )}
@@ -1455,8 +1455,8 @@ Email: contact@aiscale.com
 
                 <div className="flex flex-wrap gap-3 w-full">
                   {(() => {
-                    const pills = (workshop.tags && workshop.tags.length > 0)
-                      ? workshop.tags
+                    const pills = (workshop.highlights && workshop.highlights.length > 0)
+                      ? workshop.highlights.map(h => typeof h === 'string' ? h : h.title || '')
                       : [
                         "Digital Marketing", "WordPress Website Designing", "Ad Copy Writing", "Creative Designing", "Affiliate Marketing",
                         "Content Marketing", "SEO Auditing", "Google Ads", "Bing Ads", "Mobile App Advertising", "Remarketing",
@@ -1506,11 +1506,11 @@ Email: contact@aiscale.com
                       const displayModules = (workshop.modules && workshop.modules.length > 0)
                         ? workshop.modules.map(m => ({ title: m.title, points: m.content || [] }))
                         : (workshop.whatYouWillLearn || []).map(w => ({
-                            title: w.title,
-                            points: w.description
-                              ? w.description.split(/\n+/).map(p => p.trim().replace(/^[-*•\s✓]+/, '')).filter(Boolean)
-                              : []
-                          }));
+                          title: w.title,
+                          points: w.description
+                            ? w.description.split(/\n+/).map(p => p.trim().replace(/^[-*•\s✓]+/, '')).filter(Boolean)
+                            : []
+                        }));
 
                       return displayModules.map((step, idx) => {
                         const isOpen = activeModule === idx;
@@ -1722,8 +1722,8 @@ Email: contact@aiscale.com
                       </h2>
                       <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
                         Apply by <span className="text-blue-600 font-extrabold">
-                          {workshop.deadline 
-                            ? formatDeadlineDate(workshop.deadline) 
+                          {workshop.deadline
+                            ? formatDeadlineDate(workshop.deadline)
                             : (workshop as any).bonusDeadlineText}
                         </span>
                         {workshop.deadline && (
@@ -1902,8 +1902,8 @@ Email: contact@aiscale.com
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
@@ -1972,8 +1972,8 @@ Email: contact@aiscale.com
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
@@ -2407,8 +2407,8 @@ Email: contact@aiscale.com
               </div>
               <div className="flex flex-col items-start leading-tight text-left">
                 <span className="text-[11px] md:text-sm font-bold text-red-600 tracking-tight">
-                  {workshop.deadline 
-                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                  {workshop.deadline
+                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                     : ((workshop as any).bonusDeadlineText || "Register Before June 07, 2026")}
                 </span>
                 {selectedDate && (

@@ -25,9 +25,13 @@ const paymentLimiter = rateLimit({
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://scaleai-ashy.vercel.app',
     'https://aiscallex.vercel.app',
-    process.env.CLIENT_URL
+    'https://aiscallex.in',
+    'https://www.aiscallex.in',
+    'https://aiscallex.com/',
+    'https://www.aiscallex.com/',
+    process.env.CLIENT_URL,
+    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [])
   ].filter(Boolean),
   credentials: true
 }));
@@ -54,5 +58,7 @@ app.get('/health', (req, res) => {
     message: 'Backend is running'
   });
 });
+
+module.exports = app;
 
 module.exports = app;

@@ -152,11 +152,11 @@ exports.googleLogin = async (req, res) => {
     const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${token}` }
     });
-    
+
     if (!response.ok) {
       return res.status(400).json({ message: 'Invalid Google token' });
     }
-    
+
     const payload = await response.json();
     const { sub: googleId, email, name, picture } = payload;
 

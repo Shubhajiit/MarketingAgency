@@ -1013,10 +1013,10 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                           </td>
                           <td className="px-5 py-4">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${r.paymentStatus === 'paid'
-                                ? 'bg-green-50 text-green-700 border border-green-100'
-                                : r.paymentStatus === 'pending'
-                                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                  : 'bg-red-50 text-red-700 border border-red-100'
+                              ? 'bg-green-50 text-green-700 border border-green-100'
+                              : r.paymentStatus === 'pending'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                : 'bg-red-50 text-red-700 border border-red-100'
                               }`}>
                               {r.paymentStatus}
                             </span>
@@ -1620,7 +1620,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                               Remove Module
                             </button>
                           </div>
-                          
+
                           <FormInput
                             label="Module Title"
                             value={module.title}
@@ -1636,7 +1636,7 @@ export default function WorkshopsManager({ type }: WorkshopsManagerProps) {
                             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                               Module Points
                             </label>
-                            
+
                             {module.content && module.content.map((point, pIdx) => (
                               <div key={pIdx} className="flex items-center gap-2">
                                 <input

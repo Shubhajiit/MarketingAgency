@@ -103,14 +103,12 @@ async function delCachePattern(pattern) {
     return false;
   }
   try {
-    let cursor = 0;
-    do {
-      const reply = await client.scan(cursor, { MATCH: pattern, COUNT: 100 });
-      cursor = reply.cursor;
-      if (reply.keys.length > 0) {
-        await client.del(reply.keys);
-      }
-    } while (cursor !== 0);
+    for await (const key of client.scanIterator({
+      MATCH: pattern,
+      COUNT: 100
+    })) {
+      await client.del(key);
+    }
     return true;
   } catch (err) {
     console.error(`[Redis] delCachePattern error for pattern ${pattern}:`, err.message);

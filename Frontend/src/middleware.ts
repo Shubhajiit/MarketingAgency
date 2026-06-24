@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
 
   // Protected routes
   const protectedPaths = ['/dashboard', '/videos'];
-  
+
   const isAdmin = pathname.startsWith('/admin');
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
 

@@ -1205,8 +1205,8 @@ function ThreeDaysWorkshopsContent() {
 
                     {(workshop.deadline || workshop.bonusDeadlineText) && (
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-3 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : workshop.bonusDeadlineText}
                       </p>
                     )}
@@ -1634,8 +1634,8 @@ function ThreeDaysWorkshopsContent() {
                       </h2>
                       <p className="text-gray-500 text-sm md:text-lg font-semibold mt-3">
                         Apply by <span className="text-blue-600 font-extrabold">
-                          {workshop.deadline 
-                            ? formatDeadlineDate(workshop.deadline) 
+                          {workshop.deadline
+                            ? formatDeadlineDate(workshop.deadline)
                             : (workshop as any).bonusDeadlineText}
                         </span>
                         {workshop.deadline && (
@@ -1812,8 +1812,8 @@ function ThreeDaysWorkshopsContent() {
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
@@ -1882,8 +1882,8 @@ function ThreeDaysWorkshopsContent() {
                       </button>
 
                       <p className="text-xs md:text-sm font-bold text-gray-800 text-center mt-4 tracking-tight">
-                        {workshop.deadline 
-                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                        {workshop.deadline
+                          ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                           : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                       </p>
                     </>
@@ -2147,8 +2147,8 @@ function ThreeDaysWorkshopsContent() {
               </div>
               <div className="flex flex-col items-start leading-tight text-left">
                 <span className="text-[11px] md:text-sm font-bold text-red-600 tracking-tight">
-                  {workshop.deadline 
-                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}` 
+                  {workshop.deadline
+                    ? `Register Before ${formatDeadlineDate(workshop.deadline)}`
                     : (workshop.bonusDeadlineText || "Register Before June 07, 2026")}
                 </span>
                 {selectedDate && (
