@@ -5,7 +5,7 @@ const WorkshopRegistration = require('../models/WorkshopRegistration');
 const Course = require('../models/Course');
 const CourseEnrollment = require('../models/CourseEnrollment');
 const User = require('../models/User');
-const { sendWorkshopConfirmationEmail } = require('../utils/emailService');
+const { emailQueue } = require('../utils/queue');
 const { delCache } = require('../utils/redis');
 
 // Initialize Razorpay instance once (singleton, safe for concurrency)
@@ -181,9 +181,12 @@ exports.verifyPayment = async (req, res) => {
       await user.save();
     }
 
-    // Send confirmation email with PDF invoice asynchronously (non-blocking)
-    sendWorkshopConfirmationEmail(registration).catch((err) => {
-      console.error('[PaymentController] Error sending confirmation email:', err);
+    // Queue confirmation email job using BullMQ
+    emailQueue.add('workshop-confirmation', {
+      type: 'confirmation',
+      registrationId: registration._id.toString()
+    }).catch((err) => {
+      console.error('[PaymentController] Error queueing confirmation email:', err);
     });
 
     res.status(200).json({

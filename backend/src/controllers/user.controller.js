@@ -115,3 +115,34 @@ exports.removeWorkshop = async (req, res) => {
   }
 };
 
+exports.getPurchaseHistory = async (req, res) => {
+  try {
+    const CourseEnrollment = require('../models/CourseEnrollment');
+    const WorkshopRegistration = require('../models/WorkshopRegistration');
+    const userId = req.user.id;
+
+    // Fetch course enrollments
+    const coursePurchases = await CourseEnrollment.find({
+      userId,
+      paymentStatus: 'paid'
+    }).sort({ createdAt: -1 });
+
+    // Fetch workshop registrations
+    const workshopPurchases = await WorkshopRegistration.find({
+      userId,
+      paymentStatus: 'paid'
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        courses: coursePurchases,
+        workshops: workshopPurchases
+      }
+    });
+  } catch (error) {
+    console.error('Get purchase history error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+

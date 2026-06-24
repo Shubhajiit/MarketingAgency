@@ -54,7 +54,7 @@ export default function UpcomingWorkshopsPage() {
           {[...Array(4)].map((_, index) => (
             <div
               key={index}
-              className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[400px]"
+              className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col h-[400px]"
             >
               {/* Thumbnail Skeleton */}
               <div className="aspect-[16/9] w-full bg-slate-200" />
@@ -114,7 +114,7 @@ export default function UpcomingWorkshopsPage() {
             return (
               <div
                 key={workshop._id}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
               >
                 {/* Thumbnail */}
                 <div className="aspect-[16/9] w-full overflow-hidden relative bg-slate-100">
@@ -134,9 +134,15 @@ export default function UpcomingWorkshopsPage() {
                     <h3 className="text-base sm:text-lg font-semibold sm:font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2">
                       {workshop.title}
                     </h3>
-                    <p className="text-slate-500 text-xs mt-2 line-clamp-2 min-h-[2.5rem]">
+                    <div 
+                      className="text-slate-500 text-[11px] sm:text-xs mt-2 overflow-y-auto pr-1"
+                      style={{
+                        height: '2.8rem',
+                        scrollbarWidth: 'thin',
+                      }}
+                    >
                       {workshop.subtitle}
-                    </p>
+                    </div>
 
                     <div className="mt-4 flex items-center gap-2">
                       {workshop.instructorImage && (

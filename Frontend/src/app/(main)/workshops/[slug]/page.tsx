@@ -1,52 +1,42 @@
-"use client";
+import { redirect } from 'next/navigation';
 
-import React, { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { workshopApi } from '@/lib/api/workshops';
+export const revalidate = 60; // Revalidate every 60 seconds
 
-export default function WorkshopsRedirectPage() {
-  const params = useParams();
-  const router = useRouter();
-  const slug = typeof params.slug === 'string' ? params.slug : '';
+async function getWorkshop(slug: string) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  try {
+    const res = await fetch(`${apiUrl}/workshops/${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.data?.workshop;
+  } catch (error) {
+    console.error('Error fetching workshop details in ISR:', error);
+    return null;
+  }
+}
 
-  useEffect(() => {
-    if (!slug) {
-      router.replace('/');
-      return;
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function WorkshopsRedirectPage({ params }: PageProps) {
+  const { slug } = await params;
+
+  if (!slug) {
+    redirect('/');
+  }
+
+  const workshop = await getWorkshop(slug);
+
+  if (workshop) {
+    if (workshop.type === 'three-days') {
+      redirect(`/three-days-workshops/${slug}`);
+    } else {
+      redirect(`/one-day-workshop/${slug}`);
     }
+  }
 
-    const checkAndRedirect = async () => {
-      try {
-        const res = await workshopApi.getBySlug(slug);
-        const workshop = res.data?.workshop;
-        
-        if (workshop) {
-          if (workshop.type === 'three-days') {
-            router.replace(`/three-days-workshops/${slug}`);
-          } else {
-            router.replace(`/one-day-workshop/${slug}`);
-          }
-        } else {
-          router.replace('/');
-        }
-      } catch (err) {
-        console.error('Error finding workshop for redirect:', err);
-        router.replace('/');
-      }
-    };
-
-    checkAndRedirect();
-  }, [slug, router]);
-
-  return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center font-sans">
-      <div className="flex flex-col items-center gap-4">
-        {/* Loading Spinner */}
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#0052FF] rounded-full animate-spin" />
-        <p className="text-gray-500 text-sm font-semibold tracking-wide">
-          Redirecting to the correct workshop page...
-        </p>
-      </div>
-    </div>
-  );
+  redirect('/');
 }

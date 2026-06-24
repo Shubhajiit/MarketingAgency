@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import {
 	Book,
-	Video,
+	Presentation,
 	Bookmark,
 	Settings,
 	RefreshCw,
@@ -43,15 +43,15 @@ export default function MobileBottomNav() {
 
 	const tabs = [
 		{ label: 'Courses', href: '/dashboard/activecourse', icon: Book },
-		{ label: 'Explore', href: '/all-course', icon: Compass },
+		{ label: 'Workshops', href: '/dashboard/workshops', icon: Presentation },
 		{ label: 'Upcoming', href: '/dashboard/upcoming-workshops', icon: Calendar },
-		{ label: 'Workshops', href: '/dashboard/workshops', icon: Video }
+		{ label: 'Explore', href: '/all-course', icon: Compass }
 	];
 
 	const menuItems = [
 		{ label: 'Account settings', icon: Settings, href: '/dashboard/settings' },
 		{ label: 'Subscriptions', icon: RefreshCw },
-		{ label: 'Purchase History', icon: History },
+		{ label: 'Purchase History', icon: History, href: '/dashboard/purchase-history' },
 		{ label: 'Notifications', icon: Bell }
 	];
 

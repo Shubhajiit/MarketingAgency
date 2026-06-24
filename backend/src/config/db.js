@@ -6,7 +6,16 @@ const connectDB = async () => {
     throw new Error('MONGODB_URI is not defined in the environment');
   }
 
-  await mongoose.connect(process.env.MONGODB_URI);
+  let connectionString = process.env.MONGODB_URI;
+  if (!connectionString.includes('readPreference=')) {
+    const separator = connectionString.includes('?') ? '&' : '?';
+    connectionString = `${connectionString}${separator}readPreference=secondaryPreferred`;
+  }
+
+  await mongoose.connect(connectionString, {
+    maxPoolSize: 100,
+    minPoolSize: 10,
+  });
   console.log('MongoDB connected');
 };
 

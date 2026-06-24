@@ -80,7 +80,33 @@ export default function ProtectedLayout({
 
         {/* Page Content */}
         <main className="flex-1 p-6 md:p-12 pt-0 md:pt-0 pb-20 md:pb-0 overflow-x-hidden flex flex-col">
-          {renderContent()}
+          <style dangerouslySetInnerHTML={{ __html: `
+            @keyframes fadeInUp {
+              from {
+                opacity: 0;
+                transform: translateY(3px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            .animate-fade-in-up {
+              animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+              overflow: clip;
+            }
+            /* Hide scrollbars from all dashboard elements */
+            ::-webkit-scrollbar {
+              display: none !important;
+            }
+            * {
+              scrollbar-width: none !important;
+              -ms-overflow-style: none !important;
+            }
+          `}} />
+          <div key={pathname} className="flex-1 flex flex-col animate-fade-in-up">
+            {renderContent()}
+          </div>
         </main>
       </div>
       <MobileBottomNav />

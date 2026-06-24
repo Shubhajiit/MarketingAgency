@@ -15,4 +15,9 @@ export const userApi = {
     const res = await apiClient.delete(`/users/me/workshops/${workshopId}`);
     return res.data;
   },
+
+  getPurchaseHistory: async () => {
+    const res = await apiClient.get('/users/me/purchase-history');
+    return res.data;
+  },
 };

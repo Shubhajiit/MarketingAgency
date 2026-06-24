@@ -8,6 +8,10 @@ const PORT = process.env.PORT || 5000;
 connectDB()
   .then(async () => {
     await seedCourses();
+
+    // Start the BullMQ worker
+    const { startWorker } = require('./utils/queue');
+    startWorker();
     
     // Resume any pending workshop cancellation email queues
     const { resumePendingCancellations } = require('./utils/cancellationQueue');

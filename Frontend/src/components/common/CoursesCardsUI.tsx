@@ -245,9 +245,9 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
   return (
     <div
       onClick={() => onSecondaryClick && onSecondaryClick(course)}
-      className="bg-white border border-slate-100 rounded-xl md:rounded-2xl flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group cursor-pointer"
+      className="bg-white border border-slate-100 rounded-lg flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group cursor-pointer"
     >
-      <div className={`relative h-[100px] md:h-[155px] w-full bg-gradient-to-tr ${course.bgGradient} shrink-0`}>
+      <div className="relative h-[100px] md:h-[155px] w-full bg-slate-100 shrink-0">
         {course.circlesColor && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
         )}

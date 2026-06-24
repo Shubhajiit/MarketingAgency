@@ -62,7 +62,7 @@ export default function WorkshopsPage() {
             return (
               <div
                 key={workshop._id || workshop.id}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative"
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group relative"
               >
                 {/* Cross Button to Remove Workshop if Cancelled */}
                 {workshop.isCancelled && (
@@ -117,9 +117,15 @@ export default function WorkshopsPage() {
                     ) : (
                       <>
                         {workshop.subtitle && (
-                          <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-4 leading-relaxed">
+                          <div 
+                            className="text-xs text-slate-500 mb-4 overflow-y-auto pr-1"
+                            style={{
+                              height: '2.8rem',
+                              scrollbarWidth: 'thin',
+                            }}
+                          >
                             {workshop.subtitle}
-                          </p>
+                          </div>
                         )}
                         {workshop.instructor && (
                           <div className="flex items-center gap-2 mb-4">

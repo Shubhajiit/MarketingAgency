@@ -201,57 +201,56 @@ export default function AllCoursesPage() {
       )}
 
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-700 text-white py-14 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.08)_0%,transparent_60%)] pointer-events-none" />
+      <div className="bg-[#1b2a60] text-white py-5 px-4 md:py-8 md:px-6 text-center relative overflow-hidden">
         <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold mb-5">
-            <BookOpen className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-2.5 py-0.5 md:px-3 md:py-1 text-[10px] md:text-[11px] font-medium mb-2 md:mb-3">
+            <BookOpen className="w-3 h-3" />
             Professional Certification Courses
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-4">
-            Learn. Grow. <span className="text-yellow-300">Succeed.</span>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight mb-1">
+            Learn. Grow. Succeed.
           </h1>
-          <p className="text-white/80 text-base md:text-lg font-medium mb-8">
+          <p className="text-white/80 text-[11px] md:text-sm mb-4 md:mb-6 max-w-xl mx-auto leading-normal">
             Industry-recognised courses taught by top professionals. Lifetime access to videos once enrolled.
           </p>
-
+ 
           {/* Search */}
-          <div className="relative max-w-lg mx-auto">
+          <div className="relative max-w-md mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-lg outline-none focus:ring-2 focus:ring-indigo-300"
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-slate-800 placeholder-slate-400 text-sm font-medium shadow-md outline-none focus:ring-2 focus:ring-[#1b2a60]/20"
             />
           </div>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-8">
+ 
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
         {/* Tabs */}
-        <div className="flex gap-2 flex-wrap mb-8">
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 md:flex-wrap md:overflow-visible md:pb-0 whitespace-nowrap scrollbar-thin">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                  ? 'bg-[#1b2a60] text-white shadow-md'
                   : 'bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600'
               }`}
             >
               {tab.label}
             </button>
           ))}
-          <span className="ml-auto text-xs text-slate-400 self-center">{filtered.length} courses</span>
+          <span className="ml-auto text-xs text-slate-400 self-center pl-4">{filtered.length} courses</span>
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col h-[380px]">
+              <div key={i} className="bg-white rounded-lg border border-slate-100 overflow-hidden flex flex-col h-[380px]">
                 <div className="h-44 bg-slate-200 animate-pulse w-full"></div>
                 <div className="p-4 flex flex-col flex-1 gap-3">
                   <div className="h-5 bg-slate-200 animate-pulse rounded w-3/4"></div>
@@ -261,7 +260,7 @@ export default function AllCoursesPage() {
                     <div className="h-3 bg-slate-200 animate-pulse rounded w-1/4"></div>
                   </div>
                   <div className="h-6 bg-slate-200 animate-pulse rounded w-1/3 mt-2"></div>
-                  <div className="mt-auto h-10 bg-slate-200 animate-pulse rounded-xl w-full"></div>
+                  <div className="mt-auto h-10 bg-slate-200 animate-pulse rounded-lg w-full"></div>
                 </div>
               </div>
             ))}
@@ -283,11 +282,11 @@ export default function AllCoursesPage() {
               return (
                 <div
                   key={cid}
-                  className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col group"
+                  className="bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col group"
                 >
                   {/* Thumbnail */}
                   <div
-                    className={`relative h-44 bg-gradient-to-br ${course.bgGradient || 'from-indigo-500 to-purple-600'} overflow-hidden`}
+                    className="relative h-44 bg-slate-100 overflow-hidden"
                   >
                     {courseImg ? (
                       <img
@@ -297,12 +296,12 @@ export default function AllCoursesPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center opacity-30">
-                        <BookOpen className="w-14 h-14 text-white" />
+                        <BookOpen className="w-14 h-14 text-[#1b2a60]" />
                       </div>
                     )}
 
                     {/* Tag badge */}
-                    <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                    <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider">
                       {course.tag || course.category}
                     </div>
 
@@ -360,12 +359,10 @@ export default function AllCoursesPage() {
                     <button
                       onClick={() => handleBuyNow(course)}
                       disabled={isPaying}
-                      className={`mt-4 w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2
+                      className={`mt-4 w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2
                         ${enrolled
                           ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
-                          : course.price === 0
-                            ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200'
-                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md shadow-indigo-200'
+                          : 'bg-[#1b2a60] hover:bg-[#15204a] text-white shadow-sm'
                         } disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
                       {isPaying ? (
@@ -399,9 +396,9 @@ export default function AllCoursesPage() {
 
         {/* Info Banner */}
         {!user && (
-          <div className="mt-12 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-              <Lock className="w-6 h-6 text-indigo-600" />
+          <div className="mt-12 bg-slate-50 border border-slate-200 rounded-lg p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+              <Lock className="w-6 h-6 text-[#1b2a60]" />
             </div>
             <div className="flex-1">
               <h3 className="font-bold text-slate-800 text-base">Login to Enroll</h3>
@@ -411,7 +408,7 @@ export default function AllCoursesPage() {
             </div>
             <button
               onClick={() => router.push('/login')}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors shrink-0"
+              className="px-6 py-2.5 bg-[#1b2a60] hover:bg-[#15204a] text-white rounded-lg text-sm font-bold transition-colors shrink-0"
             >
               Login / Sign Up
             </button>

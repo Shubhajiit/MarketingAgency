@@ -40,8 +40,8 @@ export default function UserDashboardSidebar() {
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 
 	const isActive = (href: string) => pathname === href;
-	const activeClass = 'flex items-center gap-3 px-4 py-2.5 rounded-xl font-normal text-sm bg-[#eef2ff] text-[#2d2f54]';
-	const inactiveClass = 'flex items-center gap-3 px-4 py-2.5 rounded-xl font-normal text-sm text-[#5f6368] hover:bg-[#f6f7fb] hover:text-[#2d2f54] transition-colors';
+	const activeClass = 'flex items-center gap-3 px-4 py-2.5 rounded-xl font-normal text-sm bg-[#eef2ff] text-[#2d2f54] transition-all duration-200';
+	const inactiveClass = 'flex items-center gap-3 px-4 py-2.5 rounded-xl font-normal text-sm text-[#5f6368] hover:bg-[#f6f7fb] hover:text-[#2d2f54] transition-all duration-200';
 
 	return (
 		<>
@@ -94,10 +94,14 @@ export default function UserDashboardSidebar() {
 							<RefreshCw size={20} className="text-[#9aa0a6] group-hover:text-slate-800" />
 							<span className="text-sm font-bold">Subscriptions</span>
 						</div>
-						<div className="flex items-center gap-4 px-4 py-2.5 text-slate-600 hover:text-[#111827] hover:bg-slate-50 cursor-pointer transition-all duration-150 rounded-none group active:scale-[0.99]">
+						<Link
+							href="/dashboard/purchase-history"
+							onClick={() => setIsProfileOpen(false)}
+							className="flex items-center gap-4 px-4 py-2.5 text-slate-600 hover:text-[#111827] hover:bg-slate-50 cursor-pointer transition-all duration-150 rounded-none group active:scale-[0.99]"
+						>
 							<History size={20} className="text-[#9aa0a6] group-hover:text-slate-800" />
 							<span className="text-sm font-bold">Purchase History</span>
-						</div>
+						</Link>
 						<div className="flex items-center gap-4 px-4 py-2.5 text-slate-600 hover:text-[#111827] hover:bg-slate-50 cursor-pointer transition-all duration-150 rounded-none group active:scale-[0.99]">
 							<Bell size={20} className="text-[#9aa0a6] group-hover:text-slate-800" />
 							<span className="text-sm font-bold">Notifications</span>
@@ -132,8 +136,8 @@ export default function UserDashboardSidebar() {
 						{isLibraryOpen && (
 							<nav className="mt-1 space-y-1">
 								{libraryItems.map((item) => {
-									const activeClassSub = 'flex items-center pl-[48px] pr-4 py-2.5 rounded-xl font-normal text-sm bg-[#eef2ff] text-[#2d2f54]';
-									const inactiveClassSub = 'flex items-center pl-[48px] pr-4 py-2.5 rounded-xl font-normal text-sm text-[#5f6368] hover:bg-[#f6f7fb] hover:text-[#2d2f54] transition-colors';
+									const activeClassSub = 'flex items-center pl-[48px] pr-4 py-2.5 rounded-xl font-normal text-sm bg-[#eef2ff] text-[#2d2f54] transition-all duration-200';
+									const inactiveClassSub = 'flex items-center pl-[48px] pr-4 py-2.5 rounded-xl font-normal text-sm text-[#5f6368] hover:bg-[#f6f7fb] hover:text-[#2d2f54] transition-all duration-200';
 									return (
 										<Link
 											key={item.label}
