@@ -26,7 +26,7 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
       <LogoCard
         className="relative border-r border-b border-[#e5e7eb]"
         logo={{
-          src: "/Logo/ScrollingLogo/chatgpt.png",
+          src: "/Logo/ScrollingLogo/ChatGPT.svg",
           alt: "ChatGPT Logo",
         }}
       />
@@ -74,7 +74,7 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
       <LogoCard
         className="border-r border-[#e5e7eb]"
         logo={{
-          src: "/Logo/ScrollingLogo/chatgpt.png",
+          src: "/Logo/ScrollingLogo/ChatGPT.svg",
           alt: "ChatGPT Logo",
         }}
       />

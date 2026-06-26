@@ -113,7 +113,7 @@ export default function UserDashboardSidebar() {
 			<aside className="hidden md:flex w-64 bg-white border-r border-[#eef0f4] flex-col fixed h-full z-30">
 				<div className="px-6 py-5 flex items-center justify-between">
 					<Link href="/dashboard" className="flex items-center gap-2">
-						<img src="/Logo/Logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+						<img src="/Logo/Logo.webp" alt="Logo" className="h-8 w-auto object-contain" />
 					</Link>
 				</div>
 
@@ -184,7 +184,7 @@ export default function UserDashboardSidebar() {
 				</div>
 
 				<div className="p-4 border-t border-[#f2f4f8] flex items-center justify-between relative">
-					<div 
+					<div
 						onClick={() => setIsProfileOpen(!isProfileOpen)}
 						className="flex items-center gap-3 min-w-0 cursor-pointer hover:bg-slate-50 p-1.5 -ml-1.5 rounded-xl transition-colors flex-1"
 					>

@@ -1077,7 +1077,7 @@ function ThreeDaysWorkshopsContent() {
                     <div className="relative overflow-hidden">
                       <div className="flex w-max select-none">
                         <div className="marquee flex shrink-0 items-center gap-8 pr-8">
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ChatGPT.svg" alt="ChatGPT" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />
@@ -1092,7 +1092,7 @@ function ThreeDaysWorkshopsContent() {
 
                         {/* duplicate for seamless loop */}
                         <div className="marquee flex shrink-0 items-center gap-8 pr-8" aria-hidden="true">
-                          <img src="/Logo/ScrollingLogo/ChatGPT.png" alt="ChatGPT" className="h-7 object-contain shrink-0" />
+                          <img src="/Logo/ScrollingLogo/ChatGPT.svg" alt="ChatGPT" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/ClaudeAI.png" alt="Claude" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/Gemini.png" alt="Gemini" className="h-7 object-contain shrink-0" />
                           <img src="/Logo/ScrollingLogo/CanvaLogo.webp" alt="Canva" className="h-7 object-contain shrink-0" />

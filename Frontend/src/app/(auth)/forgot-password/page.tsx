@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       <div className="px-8 pt-8 pb-2 text-left">
         <Link href="/" className="inline-block mb-6">
           <img
-            src="/Logo/Logo.png"
+            src="/Logo/Logo.webp"
             alt="Logo"
             className="h-8 w-auto object-contain"
           />
