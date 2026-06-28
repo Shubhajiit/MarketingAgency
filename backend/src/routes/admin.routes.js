@@ -15,5 +15,7 @@ router.get('/users', protect, adminController.getUsers);
 
 // Admin: workshop registrations
 router.get('/workshop-registrations', protect, adminController.getWorkshopRegistrations);
+router.delete('/workshop-registrations/:id', protect, adminController.deleteWorkshopRegistration);
+router.delete('/workshop-registrations', protect, adminController.deleteWorkshopRegistrationsBulk);
 
 module.exports = router;

@@ -58,16 +58,16 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
       <LogoCard
         className="relative border-r border-b md:border-b-0 border-[#e5e7eb]"
         logo={{
-          src: "/Logo/ScrollingLogo/Grok.webp",
-          alt: "Grok Logo",
+          src: "/Logo/ScrollingLogo/DescriptAI.webp",
+          alt: "Descript AI Logo",
         }}
       />
 
       <LogoCard
         className="border-b md:border-r md:border-b-0 border-[#e5e7eb]"
         logo={{
-          src: "/Logo/ScrollingLogo/canva.webp",
-          alt: "Canva Logo",
+          src: "/Logo/ScrollingLogo/jasperAI.png",
+          alt: "Jasper AI Logo",
         }}
       />
 
@@ -81,8 +81,8 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
 
       <LogoCard
         logo={{
-          src: "/Logo/ScrollingLogo/Perplexity.webp",
-          alt: "Perplexity Logo",
+          src: "/Logo/ScrollingLogo/notionLOGO.png",
+          alt: "Notion Logo",
         }}
       />
 

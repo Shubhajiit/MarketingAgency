@@ -183,8 +183,12 @@ export default function ActiveCoursesPage() {
         ) : (
           /* Empty state */
           <div className="py-20 text-center max-w-md mx-auto space-y-5">
-            <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mx-auto">
-              <BookOpen className="w-10 h-10 text-indigo-300" />
+            <div className="w-24 h-24 flex items-center justify-center mx-auto">
+              <img
+                src="/UserDashBoard/empty-folder.png"
+                alt="No courses"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-800">

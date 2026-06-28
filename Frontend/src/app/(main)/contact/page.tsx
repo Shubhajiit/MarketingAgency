@@ -25,45 +25,34 @@ export default function ContactUsPage() {
             {/* Contact Links */}
             <div className="flex flex-col gap-6 text-sm md:text-lg font-medium">
               {/* WhatsApp Link */}
-              <a
-                href="https://wa.me/918388865431"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3.5 hover:text-green-400 transition-colors w-fit"
-              >
+              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
                 <img
                   src="/Social_Icons/icons8-whatsapp-logo.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
                   alt="WhatsApp"
                 />
-                <span>+91-8388865431 (WhatsApp)</span>
-              </a>
+                <span>WhatsApp: Coming Soon</span>
+              </div>
 
               {/* Phone Link */}
-              <a
-                href="tel:+918388865431"
-                className="flex items-center gap-3.5 hover:text-green-450 transition-colors w-fit"
-              >
+              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
                 <img
                   src="/Social_Icons/icons8-call.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
                   alt="Phone Call"
                 />
-                <span>+91-8388865431 (Call)</span>
-              </a>
+                <span>Call: Coming Soon</span>
+              </div>
 
               {/* Email Link */}
-              <a
-                href="mailto:shubhajitbasak45@gmail.com"
-                className="flex items-center gap-3.5 hover:text-blue-300 transition-colors w-fit"
-              >
+              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
                 <img
                   src="/Social_Icons/icons8-gmail.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
                   alt="Gmail"
                 />
-                <span>shubhajitbasak45@gmail.com</span>
-              </a>
+                <span>Gmail: Coming Soon</span>
+              </div>
             </div>
           </div>
 

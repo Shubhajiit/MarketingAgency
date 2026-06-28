@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { authApi } from '@/lib/api/auth';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -15,10 +16,10 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      // Not implemented in backend yet
-      throw new Error("Forgot password is not implemented yet");
+      await authApi.forgotPassword(email);
+      setSent(true);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }

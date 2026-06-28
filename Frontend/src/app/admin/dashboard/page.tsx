@@ -99,17 +99,6 @@ export default function AdminStatsPage() {
     fetchStats();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-24 min-h-[60vh]">
-        <svg className="animate-spin w-8 h-8 text-[#6366f1]" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
-    );
-  }
-
   const displayBookings = recentBookings.map((b) => ({
     _id: b._id,
     user: {
@@ -284,11 +273,11 @@ export default function AdminStatsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 w-full">
       {/* Greetings Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-[#1f2937] tracking-tight">
-          Welcome back, <span className="text-[#6366f1]">{authUser?.name || 'Onam Sarker'}!</span>
+          Welcome back, Admin
         </h1>
         <p className="text-sm text-gray-500">
           Track your manage and LMS platform performance
@@ -302,9 +291,13 @@ export default function AdminStatsPage() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Workshops Buyers</span>
-              <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalWorkshopBuyers || 0).toLocaleString('en-US')}
-              </h3>
+              {isLoading ? (
+                <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md mt-1"></div>
+              ) : (
+                <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
+                  {(stats?.totalWorkshopBuyers || 0).toLocaleString('en-US')}
+                </h3>
+              )}
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#efeefc] text-[#6366f1] flex items-center justify-center">
               <GraduationCap size={20} />
@@ -317,9 +310,13 @@ export default function AdminStatsPage() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Course</span>
-              <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalCourses || 0).toLocaleString('en-US')}
-              </h3>
+              {isLoading ? (
+                <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md mt-1"></div>
+              ) : (
+                <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
+                  {(stats?.totalCourses || 0).toLocaleString('en-US')}
+                </h3>
+              )}
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#eef2ff] text-[#3b82f6] flex items-center justify-center">
               <BookOpen size={20} />
@@ -332,9 +329,13 @@ export default function AdminStatsPage() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Video</span>
-              <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                {(stats?.totalVideos || 0).toLocaleString('en-US')}
-              </h3>
+              {isLoading ? (
+                <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md mt-1"></div>
+              ) : (
+                <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
+                  {(stats?.totalVideos || 0).toLocaleString('en-US')}
+                </h3>
+              )}
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#fae8ff] text-[#d946ef] flex items-center justify-center">
               <Video size={20} />
@@ -347,9 +348,13 @@ export default function AdminStatsPage() {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-gray-400">Total Earning</span>
-              <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
-                ₹{(stats?.totalRevenue || 0).toLocaleString('en-IN')}
-              </h3>
+              {isLoading ? (
+                <div className="h-8 w-28 bg-gray-100 animate-pulse rounded-md mt-1"></div>
+              ) : (
+                <h3 className="text-2xl font-extrabold text-[#1f2937] tracking-tight">
+                  ₹{(stats?.totalRevenue || 0).toLocaleString('en-IN')}
+                </h3>
+              )}
             </div>
             <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#f59e0b] flex items-center justify-center">
               <DollarSign size={20} />
@@ -365,30 +370,26 @@ export default function AdminStatsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-bold text-[#1f2937]">Overview</h2>
-              <span className="flex items-center gap-0.5 text-[10px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-full">
-                <TrendingUp size={10} />
-                23.5%
-              </span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               {/* Legends Toggles */}
               <div className="flex items-center gap-3 text-xs">
-                <button 
-                  onClick={() => setOverviewFilter('teachers')} 
+                <button
+                  onClick={() => setOverviewFilter('teachers')}
                   className={`flex items-center gap-1.5 font-medium transition-colors ${overviewFilter === 'teachers' ? 'text-[#6366f1]' : 'text-gray-400'}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-[#6366f1]"></span>
                   Teachers
                 </button>
-                <button 
-                  onClick={() => setOverviewFilter('students')} 
+                <button
+                  onClick={() => setOverviewFilter('students')}
                   className={`flex items-center gap-1.5 font-medium transition-colors ${overviewFilter === 'students' ? 'text-[#8f8af4]' : 'text-gray-400'}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-[#8f8af4]"></span>
                   Students
                 </button>
-                <button 
-                  onClick={() => setOverviewFilter('other')} 
+                <button
+                  onClick={() => setOverviewFilter('other')}
                   className={`flex items-center gap-1.5 font-medium transition-colors ${overviewFilter === 'other' ? 'text-[#c7c4f7]' : 'text-gray-400'}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-[#c7c4f7]"></span>
@@ -406,7 +407,15 @@ export default function AdminStatsPage() {
 
           {/* Bar Chart Canvas */}
           <div className="flex-1 w-full relative min-h-0">
-            <Bar data={overviewData} options={overviewOptions} />
+            {isLoading ? (
+              <div className="w-full h-full flex items-end gap-3 pt-6 pb-2">
+                {[60, 40, 75, 50, 90, 65, 80].map((h, i) => (
+                  <div key={i} className="flex-1 bg-gray-100 animate-pulse rounded-t-lg" style={{ height: `${h}%` }}></div>
+                ))}
+              </div>
+            ) : (
+              <Bar data={overviewData} options={overviewOptions} />
+            )}
           </div>
         </div>
 
@@ -415,23 +424,19 @@ export default function AdminStatsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 shrink-0">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-bold text-[#1f2937]">Student Analysis</h2>
-              <span className="flex items-center gap-0.5 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                <TrendingDown size={10} />
-                3.5%
-              </span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               {/* Legends Toggles */}
               <div className="flex items-center gap-3 text-xs">
-                <button 
-                  onClick={() => setAnalysisFilter('enrolled')} 
+                <button
+                  onClick={() => setAnalysisFilter('enrolled')}
                   className={`flex items-center gap-1.5 font-medium transition-colors ${analysisFilter === 'enrolled' ? 'text-[#8f8af4]' : 'text-gray-400'}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-[#8f8af4]"></span>
                   Enrolled
                 </button>
-                <button 
-                  onClick={() => setAnalysisFilter('left')} 
+                <button
+                  onClick={() => setAnalysisFilter('left')}
                   className={`flex items-center gap-1.5 font-medium transition-colors ${analysisFilter === 'left' ? 'text-red-500' : 'text-gray-400'}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
@@ -449,7 +454,15 @@ export default function AdminStatsPage() {
 
           {/* Line Chart Canvas */}
           <div className="flex-1 w-full relative min-h-0">
-            <Line data={studentAnalysisData} options={studentAnalysisOptions} />
+            {isLoading ? (
+              <div className="w-full h-full flex flex-col justify-between py-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-full h-0.5 bg-gray-100 animate-pulse"></div>
+                ))}
+              </div>
+            ) : (
+              <Line data={studentAnalysisData} options={studentAnalysisOptions} />
+            )}
           </div>
         </div>
       </div>
@@ -467,7 +480,29 @@ export default function AdminStatsPage() {
 
         {/* Mobile View (Cards) */}
         <div className="md:hidden divide-y divide-[#f4f5f8] px-4 bg-white">
-          {displayBookings.length === 0 ? (
+          {isLoading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="py-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse shrink-0"></div>
+                    <div className="flex flex-col gap-2">
+                      <div className="h-3 w-28 bg-gray-100 animate-pulse rounded"></div>
+                      <div className="h-2 w-16 bg-gray-100 animate-pulse rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="h-3 w-16 bg-gray-100 animate-pulse rounded"></div>
+                    <div className="h-2.5 w-12 bg-gray-100 animate-pulse rounded"></div>
+                  </div>
+                </div>
+                <div className="bg-[#f8f9fe]/60 rounded-xl p-3 space-y-2">
+                  <div className="h-3 bg-gray-100 animate-pulse rounded w-full"></div>
+                  <div className="h-3 bg-gray-100 animate-pulse rounded w-2/3"></div>
+                </div>
+              </div>
+            ))
+          ) : displayBookings.length === 0 ? (
             <div className="py-8 text-center text-gray-500 font-medium">
               No transactions found
             </div>
@@ -483,10 +518,10 @@ export default function AdminStatsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {booking.user.avatar ? (
-                        <img 
-                          src={booking.user.avatar} 
-                          alt={booking.user.name} 
-                          className="w-9 h-9 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
+                        <img
+                          src={booking.user.avatar}
+                          alt={booking.user.name}
+                          className="w-9 h-9 rounded-full object-cover border border-gray-100 shadow-xs shrink-0"
                         />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-[#efeefc] border border-indigo-100 text-[#6366f1] flex items-center justify-center font-bold text-xs shrink-0">
@@ -575,7 +610,7 @@ export default function AdminStatsPage() {
 
                   <div className="flex items-center justify-end gap-2 pt-1">
                     {booking.user.phone && (
-                      <a 
+                      <a
                         href={`tel:${booking.user.phone}`}
                         title={`Call ${booking.user.name}`}
                         className="flex-1 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center transition-colors text-xs font-semibold gap-1"
@@ -585,7 +620,7 @@ export default function AdminStatsPage() {
                       </a>
                     )}
                     {(booking.user.whatsappNumber || booking.user.phone) && (
-                      <a 
+                      <a
                         href={`https://wa.me/${(booking.user.whatsappNumber || booking.user.phone).replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -597,7 +632,7 @@ export default function AdminStatsPage() {
                       </a>
                     )}
                     {booking.user.email && (
-                      <a 
+                      <a
                         href={`mailto:${booking.user.email}`}
                         title={`Email ${booking.user.name}`}
                         className="flex-1 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors text-xs font-semibold gap-1"
@@ -652,7 +687,40 @@ export default function AdminStatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f4f5f8] text-sm text-[#1f2937]">
-              {displayBookings.length === 0 ? (
+              {isLoading ? (
+                [1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 animate-pulse shrink-0"></div>
+                        <div className="flex flex-col gap-2">
+                          <div className="h-3.5 w-32 bg-gray-100 animate-pulse rounded"></div>
+                          <div className="h-2.5 w-20 bg-gray-100 animate-pulse rounded"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4.5">
+                      <div className="h-3.5 w-48 bg-gray-100 animate-pulse rounded"></div>
+                    </td>
+                    <td className="px-6 py-4.5">
+                      <div className="h-3.5 w-16 bg-gray-100 animate-pulse rounded"></div>
+                    </td>
+                    <td className="px-6 py-4.5">
+                      <div className="h-6 w-24 bg-gray-100 animate-pulse rounded-lg"></div>
+                    </td>
+                    <td className="px-6 py-4.5">
+                      <div className="h-6 w-16 bg-gray-100 animate-pulse rounded-lg"></div>
+                    </td>
+                    <td className="px-6 py-4.5">
+                      <div className="flex gap-2">
+                        <div className="w-7 h-7 bg-gray-100 animate-pulse rounded-lg"></div>
+                        <div className="w-7 h-7 bg-gray-100 animate-pulse rounded-lg"></div>
+                        <div className="w-7 h-7 bg-gray-100 animate-pulse rounded-lg"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : displayBookings.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-gray-500 font-medium bg-white">
                     No transactions found
@@ -671,10 +739,10 @@ export default function AdminStatsPage() {
                       <td className="px-6 py-4.5">
                         <div className="flex items-center gap-3">
                           {booking.user.avatar ? (
-                            <img 
-                              src={booking.user.avatar} 
-                              alt={booking.user.name} 
-                              className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0" 
+                            <img
+                              src={booking.user.avatar}
+                              alt={booking.user.name}
+                              className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-xs shrink-0"
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-[#efeefc] border border-indigo-100 text-[#6366f1] flex items-center justify-center font-bold text-sm shrink-0">
@@ -763,7 +831,7 @@ export default function AdminStatsPage() {
                         <div className="flex items-center gap-2">
                           {/* Call icon */}
                           {booking.user.phone && (
-                            <a 
+                            <a
                               href={`tel:${booking.user.phone}`}
                               title={`Call ${booking.user.name}`}
                               className="w-7 h-7 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center transition-colors border border-green-200"
@@ -774,7 +842,7 @@ export default function AdminStatsPage() {
 
                           {/* Message/WhatsApp icon */}
                           {(booking.user.whatsappNumber || booking.user.phone) && (
-                            <a 
+                            <a
                               href={`https://wa.me/${(booking.user.whatsappNumber || booking.user.phone).replace(/[^0-9]/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -787,7 +855,7 @@ export default function AdminStatsPage() {
 
                           {/* Email icon */}
                           {booking.user.email && (
-                            <a 
+                            <a
                               href={`mailto:${booking.user.email}`}
                               title={`Email ${booking.user.name}`}
                               className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors border border-blue-200"
@@ -805,6 +873,6 @@ export default function AdminStatsPage() {
           </table>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

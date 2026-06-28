@@ -275,6 +275,19 @@ export const workshopApi = {
     );
     return res.data;
   },
+  deleteWorkshopRegistration: async (id: string) => {
+    const res = await apiClient.delete<{ success: boolean; message: string }>(
+      `/admin/workshop-registrations/${id}`
+    );
+    return res.data;
+  },
+  deleteWorkshopRegistrationsBulk: async (ids?: string[]) => {
+    const res = await apiClient.delete<{ success: boolean; message: string }>(
+      '/admin/workshop-registrations',
+      { data: { ids } }
+    );
+    return res.data;
+  },
 
   // ─── Razorpay Payment Flow ─────────────────────────────────
 

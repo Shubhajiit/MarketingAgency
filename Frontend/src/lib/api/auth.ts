@@ -28,5 +28,13 @@ export const authApi = {
   googleLogin: async (token: string) => {
     const res = await apiClient.post<{ message: string, data: { session: { access_token: string }, user: AuthUser } }>('/auth/google', { token });
     return res.data;
+  },
+  forgotPassword: async (email: string) => {
+    const res = await apiClient.post<{ message: string }>('/auth/forgot-password', { email });
+    return res.data;
+  },
+  resetPassword: async (token: string, password: string) => {
+    const res = await apiClient.post<{ message: string, data: { session: { access_token: string }, user: AuthUser } }>('/auth/reset-password', { token, password });
+    return res.data;
   }
 };

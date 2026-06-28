@@ -147,3 +147,35 @@ exports.getWorkshopRegistrations = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+// Delete single workshop registration
+exports.deleteWorkshopRegistration = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const registration = await WorkshopRegistration.findByIdAndDelete(id);
+    if (!registration) {
+      return res.status(404).json({ success: false, message: 'Registration not found' });
+    }
+    res.status(200).json({ success: true, message: 'Registration deleted successfully' });
+  } catch (error) {
+    console.error('Delete Workshop Registration Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Delete all or selected workshop registrations
+exports.deleteWorkshopRegistrationsBulk = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (ids && Array.isArray(ids)) {
+      await WorkshopRegistration.deleteMany({ _id: { $in: ids } });
+      return res.status(200).json({ success: true, message: 'Selected registrations deleted successfully' });
+    }
+    
+    await WorkshopRegistration.deleteMany({});
+    res.status(200).json({ success: true, message: 'All registrations deleted successfully' });
+  } catch (error) {
+    console.error('Delete Bulk Workshop Registrations Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};

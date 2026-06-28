@@ -663,9 +663,116 @@ const sendWorkshopCancellationEmail = async (registration, workshopArg = null) =
   }
 };
 
+/**
+ * Constructs a responsive HTML email template for password reset.
+ */
+const buildPasswordResetHtml = (resetUrl, name) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Reset Your Password</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #334155; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .header { background-color: #0F172A; padding: 40px 30px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+        .content { padding: 30px; }
+        .greeting { font-size: 16px; line-height: 1.5; margin-bottom: 20px; }
+        .button-container { text-align: center; margin-top: 30px; margin-bottom: 30px; }
+        .btn-primary { display: inline-block; padding: 14px 30px; background-color: #0052FF; color: #ffffff !important; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(0, 82, 255, 0.2); }
+        .warning-text { font-size: 13px; line-height: 1.6; color: #64748b; background-color: #f8fafc; border-left: 4px solid #cbd5e1; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 25px; }
+        .footer { text-align: center; font-size: 12px; color: #94a3b8; padding: 20px; border-top: 1px solid #f1f5f9; background-color: #f8fafc; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Reset Your Password 🔒</h1>
+        </div>
+        <div class="content">
+          <p class="greeting">Hello <strong>${name}</strong>,</p>
+          <p class="greeting">We received a request to reset the password for your AI Scale account. Click the button below to choose a new password. This link is valid for 10 minutes:</p>
+          
+          <div class="button-container">
+            <a href="${resetUrl}" class="btn-primary" target="_blank">Reset Password</a>
+          </div>
+
+          <div class="warning-text">
+            If you did not request a password reset, please ignore this email. Your password will remain unchanged and your account secure.
+          </div>
+          
+          <p class="greeting" style="margin-top: 30px;">Best regards,<br><strong>AI Scale Learning Team</strong></p>
+        </div>
+        <div class="footer">
+          &copy; 2026 AI Scale Platform. All rights reserved.<br>
+          For help, email us at contact@aiscale.com.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+/**
+ * Sends a password reset email to a user.
+ */
+const sendPasswordResetEmail = async (email, resetUrl, name) => {
+  try {
+    console.log(`[EmailService] Starting password reset email flow for Email: ${email}`);
+
+    // Setup transporter
+    const transporter = getTransporter();
+    const emailFrom = process.env.EMAIL_FROM || 'noreply@aiscale.in';
+
+    if (!transporter) {
+      // DEVELOPMENT FALLBACK: Log details and save HTML locally
+      console.warn('[EmailService] SMTP credentials not configured. Saving password reset email locally.');
+
+      const tempMailsDir = path.join(__dirname, '../../temp_mails');
+      if (!fs.existsSync(tempMailsDir)) {
+        fs.mkdirSync(tempMailsDir, { recursive: true });
+      }
+
+      const safeEmail = email.replace(/[@.]/g, '_');
+      const htmlPath = path.join(tempMailsDir, `reset_email_${safeEmail}.html`);
+      const emailHtmlContent = buildPasswordResetHtml(resetUrl, name);
+      fs.writeFileSync(htmlPath, emailHtmlContent);
+
+      console.log(`[EmailService] [DEV LOG] Password Reset Email DETAILS:`);
+      console.log(`  - From: ${emailFrom}`);
+      console.log(`  - To: ${email}`);
+      console.log(`  - Subject: Reset Your Password`);
+      console.log(`  - Reset Link: ${resetUrl}`);
+      console.log(`  - Local Email HTML saved at: ${htmlPath}`);
+      return { success: true, localSaved: true, htmlPath, resetUrl };
+    }
+
+    // Send Email via SMTP
+    const emailHtmlContent = buildPasswordResetHtml(resetUrl, name);
+
+    const mailOptions = {
+      from: `"AI Scale" <${emailFrom}>`,
+      to: email,
+      subject: `Reset Your Password`,
+      html: emailHtmlContent
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[EmailService] Password reset email sent successfully. MessageID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+
+  } catch (error) {
+    console.error(`[EmailService] Error in password reset email flow:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendWorkshopConfirmationEmail,
   generateInvoicePDF,
   formatWorkshopDates,
-  sendWorkshopCancellationEmail
+  sendWorkshopCancellationEmail,
+  sendPasswordResetEmail
 };

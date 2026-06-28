@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const crypto = require('crypto');
+const emailService = require('../utils/emailService');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -202,5 +204,102 @@ exports.googleLogin = async (req, res) => {
   } catch (error) {
     console.error('Google Login Error:', error);
     res.status(500).json({ message: 'Invalid token or Internal server error' });
+  }
+};
+
+// Forgot Password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User with this email does not exist' });
+    }
+
+    // Generate reset token
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    // Send reset email
+    const frontendUrls = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000'];
+    const frontendUrl = frontendUrls[0].trim();
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    const emailResult = await emailService.sendPasswordResetEmail(user.email, resetUrl, user.name);
+
+    if (!emailResult.success) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ message: 'There was an error sending the email. Try again later.' });
+    }
+
+    res.status(200).json({ message: 'Token sent to email!' });
+
+  } catch (error) {
+    console.error('ForgotPassword Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and password are required' });
+    }
+
+    // Hash the token from URL param
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with matching token and expiry > now
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token is invalid or has expired' });
+    }
+
+    // Update password, clear reset fields
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save(); // pre-save hook will hash the password
+
+    res.status(200).json({
+      message: 'Password reset successful',
+      data: {
+        session: {
+          access_token: generateToken(user._id),
+        },
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phoneNumber: user.phoneNumber || '',
+          whatsappNumber: user.whatsappNumber || '',
+          enrolledCourses: user.enrolledCourses || [],
+          enrolledWorkshops: user.enrolledWorkshops || []
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('ResetPassword Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -103,13 +103,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-white font-bold shadow-sm shadow-[#6366f1]/20">
-              {user?.name ? user.name.charAt(0) : 'N'}
+              {user?.name ? user.name.charAt(0) : 'A'}
             </div>
             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-[#111827] leading-none">
-              {user?.name || 'Neurotic Spy'}
+              {user?.name || 'Admin'}
             </span>
             <span className="text-[10px] text-gray-500 mt-1 uppercase font-semibold tracking-wider">
               {user?.role || 'Administrator'}

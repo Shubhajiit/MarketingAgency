@@ -127,7 +127,7 @@ export default function AdminLayout({
 
             {/* Profile Avatar */}
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-[#6366f1] to-[#8b5cf6] border-2 border-[#e2e0fb] overflow-hidden flex items-center justify-center text-white font-bold text-sm shadow-sm shadow-[#6366f1]/10 cursor-pointer">
-              {user?.name ? user.name.charAt(0) : 'N'}
+              {user?.name ? user.name.charAt(0) : 'A'}
             </div>
           </div>
         </header>
