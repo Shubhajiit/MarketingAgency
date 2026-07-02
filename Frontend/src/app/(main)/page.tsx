@@ -4,8 +4,11 @@ import React from "react";
 import { LogoCloud } from "@/components/ui/logo-cloud-2";
 import Image from "next/image";
 import Link from "next/link";
-import GrowthStats from "@/components/ui/growth-stats";
+import InsideDA360 from "@/components/ui/inside-da360";
+import GlobalCommunity from "@/components/ui/global-community";
 import CertificationCoursesSection from "@/components/MainWebsite/Courses/certification-courses";
+import { usePublicWorkshops } from "@/lib/hooks/useWorkshops";
+
 
 const COURSE_LEVELS = [
     {
@@ -79,7 +82,96 @@ const REVIEWS = [
     }
 ];
 
+const FALLBACK_WORKSHOPS = [
+    {
+        _id: "one-day-ai-workshop",
+        title: "One Day AI Workshop",
+        type: "one-day",
+        slug: "one-day-ai-workshop",
+        thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+        description: "The rise of AI in marketing is clear. Learn how to use 20+ powerful AI tools for content creation, video editing, thumbnail making, and platform growth.",
+        workshopDates: [
+            { date: "2026-07-25", place: "Mumbai" },
+            { date: "2026-06-26", place: "Online" },
+            { date: "2026-07-27", place: "Delhi" }
+        ]
+    },
+    {
+        _id: "three-days-ai-workshop",
+        title: "Digital Marketing with AI",
+        type: "three-days",
+        slug: "digital-marketing-with-ai-1",
+        thumbnail: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+        description: "Intensive three-day workshop on integrating AI with digital marketing. Learn hands-on strategy, prompt engineering, and campaign optimization.",
+        workshopDates: [
+            { date: "2026-06-21", place: "Delhi" },
+            { date: "2026-06-25", place: "Mumbai" },
+            { date: "2026-07-01", place: "Online" }
+        ]
+    }
+];
+
+const getUpcomingDetails = (workshopDates: any[], type: string) => {
+    if (!workshopDates || workshopDates.length === 0) {
+        return {
+            dateStr: "Coming Soon",
+            place: "Online",
+            timeStr: type === "three-days" ? "19:00 - 21:00" : "09:00 - 11:00"
+        };
+    }
+
+    const parsed = workshopDates.map(item => {
+        const dVal = typeof item === 'string' ? item : (item?.date || '');
+        const placeVal = typeof item === 'string' ? 'Online' : (item?.place || 'Online');
+        return { date: new Date(dVal), place: placeVal.trim() };
+    }).filter(item => !isNaN(item.date.getTime()));
+
+    if (parsed.length === 0) {
+        return {
+            dateStr: "Coming Soon",
+            place: "Online",
+            timeStr: type === "three-days" ? "19:00 - 21:00" : "09:00 - 11:00"
+        };
+    }
+
+    // Sort ascending by date
+    parsed.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Find the first date >= today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const upcoming = parsed.find(item => item.date >= today) || parsed[0];
+
+    const day = upcoming.date.getDate();
+    const month = upcoming.date.toLocaleDateString('en-IN', { month: 'short' });
+    const year = upcoming.date.getFullYear();
+
+    const getSuffix = (d: number) => {
+        if (d > 3 && d < 21) return 'th';
+        switch (d % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    };
+
+    const dateStr = `${day}${getSuffix(day)} ${month} ${year}`;
+    const timeStr = type === "three-days" ? "19:00 - 21:00" : "09:00 - 11:00";
+
+    return {
+        dateStr,
+        place: upcoming.place,
+        timeStr
+    };
+};
+
 export default function Page() {
+    const { data: workshopResponse, isLoading } = usePublicWorkshops({ limit: 100 });
+    const activeWorkshops = workshopResponse?.data?.workshops || [];
+    const displayWorkshops = activeWorkshops.length > 0 ? activeWorkshops : FALLBACK_WORKSHOPS;
+
     const [currentIndex, setCurrentIndex] = React.useState(0);
     const [transitionEnabled, setTransitionEnabled] = React.useState(true);
     const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -114,102 +206,70 @@ export default function Page() {
         setCurrentIndex(index);
         startTimer();
     };
+
+    const [heroSlideIndex, setHeroSlideIndex] = React.useState(0);
+    const heroSlides = [
+        "/LandingPage/HeroSectionAssets/Slide1.jpg",
+        "/LandingPage/HeroSectionAssets/Slide2.jpg",
+        "/LandingPage/HeroSectionAssets/Slide3.jpg"
+    ];
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setHeroSlideIndex((prev) => (prev + 1) % heroSlides.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col">
 
             {/* Hero Section */}
-            <section className="relative isolate w-full min-h-[450px] flex items-center overflow-hidden">
-                {/* <ParticlesBg /> */}
-
+            <section className="relative isolate w-full min-h-[500px] sm:min-h-[650px] flex items-center justify-center overflow-hidden py-12 sm:py-20">
                 {/* Background Image & Overlay */}
                 <div className="absolute inset-0 z-0 w-full h-full bg-zinc-900 overflow-hidden">
-                    <img
-                        src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-                        alt="Professional Woman"
-                        className="w-full h-full object-cover object-top opacity-30"
-                    />
-                    {/* Gradient to darken the left side slightly more */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                    {heroSlides.map((slide, index) => (
+                        <img
+                            key={slide}
+                            src={slide}
+                            alt={`Hero Background ${index + 1}`}
+                            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out ${heroSlideIndex === index ? "opacity-100" : "opacity-0"
+                                }`}
+                        />
+                    ))}
+                    {/* Slight black overlay */}
+                    <div className="absolute inset-0 bg-black/60"></div>
                 </div>
 
                 {/* Hero Content */}
-                <div className="relative z-20 w-full px-4 md:px-36 text-white flex flex-col pt-6">
-                    <h1 className="text-[26px] md:text-[32px] font-semibold tracking-wide mb-3 uppercase">
-                        AI For Marketing Professionals Course
+                <div className="relative z-20 w-full max-w-5xl px-6 text-center text-white flex flex-col items-center justify-center -mt-4 sm:-mt-12">
+                    <p className="text-lg sm:text-2xl md:text-3xl font-bold italic tracking-wide mb-4 text-slate-100">
+                        School Of Digital Marketing
+                    </p>
+
+                    <h1 className="text-4xl sm:text-6xl md:text-7.5xl font-black italic tracking-tight leading-none mb-6 text-white relative">
+                        <span className="block">Endorsed By</span>
+                        <span className="block mt-2">Marketing Leaders.</span>
                     </h1>
 
-                    {/* Ratings */}
-                    <div className="flex items-center gap-2 mb-6 text-[13px]">
-                        <div className="flex text-[#fca130] text-base">
-                            ★★★★★
-                        </div>
-                        <span className="font-semibold">4.9</span>
-                        <span className="text-gray-300">(9,000) reviews</span>
-                    </div>
+                    <p className="text-sm sm:text-base md:text-lg font-medium text-slate-200 mb-8 max-w-2xl">
+                        Built in Collaboration with Top Digital Marketing Professionals.
+                    </p>
 
-                    {/* Bullet Points */}
-                    <div className="flex flex-col gap-3 mb-10 max-w-3xl text-sm text-gray-100">
-                        <p className="flex items-start gap-2">
-                            <span className="mt-1.5 w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0"></span>
-                            Designed for marketing and growth professionals to apply AI and analytics across acquisition, retention, personalization, and measurement
-                        </p>
-                        <p className="flex items-start gap-2">
-                            <span className="mt-1.5 w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0"></span>
-                            Focuses on decision-making, experimentation, and revenue impact rather than coding
-                        </p>
-                        <p className="flex items-start gap-2">
-                            <span className="mt-1.5 w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0"></span>
-                            Enables confident collaboration with data, product, and martech teams
-                        </p>
-                    </div>
-
-                    {/* Bottom Bar in Hero */}
-                    <div className="flex flex-col md:flex-row items-start md:items-end gap-6 md:gap-10 mt-auto pb-8 w-full">
-
-                        <div className="flex flex-row md:contents gap-3 sm:gap-6 items-end">
-                            {/* Accreditation */}
-                            <div className="flex flex-col">
-                                <span className="text-xs md:text-sm font-bold mb-2">Accredited by</span>
-                                <div className="flex items-center gap-2 md:gap-3">
-                                    {/* Mock IABAC Logo */}
-                                    <div className="w-8 h-8 md:w-10 md:h-10 border border-white rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold shrink-0">
-                                        IABAC
-                                    </div>
-                                    <div className="text-[10px] md:text-xs leading-tight text-gray-300 max-w-[100px] md:max-w-[120px]">
-                                        International Association of Business Analytics Certification
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Download Brochure */}
-                            <div className="flex items-center gap-2 md:gap-3 md:mt-0 cursor-pointer group pb-0.5 md:pb-0 shrink-0">
-                                <svg className="w-6 h-6 md:w-8 md:h-8 text-white group-hover:text-gray-300 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                                <span className="font-bold text-xs md:text-sm leading-tight">Download<br />Brochure</span>
-                            </div>
-                        </div>
-
-                        {/* Price Details */}
-                        <div className="flex flex-col mt-2 md:mt-0 md:ml-12 w-full md:w-auto">
-                            <span className="line-through text-gray-400 text-sm font-medium">₹ 55,000</span>
-                            <div className="flex items-start gap-1">
-                                <span className="text-[#fca130] text-3xl font-bold">₹ 41,559*</span>
-                            </div>
-                            <span className="text-xs mt-1"><span className="font-bold">NO COST EMI :</span> ₹ 6,926 p.m for 6 Months</span>
-                            <span className="text-[10px] text-gray-400 mt-0.5">*Offer valid till 24th May 2026</span>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 md:gap-8 w-full md:w-auto md:ml-auto mt-4 md:mt-0 md:mr-12 md:mb-3">
-                            <button className="w-full sm:w-auto px-8 py-2.5 bg-[#001A5A] hover:bg-[#003063] transition-colors text-white text-sm font-semibold rounded shadow-md">
-                                Enquiry
-                            </button>
-                            <button className="w-full sm:w-auto px-8 py-2.5 bg-[#001A5A] hover:bg-[#003063] transition-colors text-white text-sm font-semibold rounded shadow-md">
-                                Enroll Now
-                            </button>
-                        </div>
-
+                    {/* Action Buttons */}
+                    <div className="flex flex-row gap-4 justify-center">
+                        <Link
+                            href="/courses"
+                            className="px-6 py-2.5 sm:px-8 sm:py-3 bg-[#0055ff] hover:bg-[#0044cc] transition-all duration-200 text-white font-bold text-sm sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                            Apply Now
+                        </Link>
+                        <Link
+                            href="/courses"
+                            className="px-6 py-2.5 sm:px-8 sm:py-3 bg-white hover:bg-slate-50 transition-all duration-200 text-black font-bold text-sm sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                            Explore Programs
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -224,183 +284,151 @@ export default function Page() {
                 </span>
             </div>
 
-            {/* Workshop steps + testimonial */}
-            <section className="w-full px-4 md:px-36 py-12 md:py-16 bg-white">
-                <div className="max-w-[1180px] mx-auto">
-                    <h2 className="text-[24px] md:text-[30px] font-semibold text-[#0f1b2d]">
-                        A Workshop Worth Your Time. Guaranteed
+            {/* Brightest Minds Grid Section */}
+            <section className="w-full py-12 md:py-16 bg-white">
+                <div className="max-w-[1240px] mx-auto px-4">
+                    <h2 className="text-center text-[28px] sm:text-[36px] md:text-[42px] font-normal text-[#961a1a] tracking-tight mb-10">
+                        See why the brightest minds choose Apscale X
                     </h2>
-                    <p className="text-sm md:text-base text-[#6b7280] mt-2">
-                        No strings attached - just pure learning
-                    </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-8">
-                        {[
-                            {
-                                step: "STEP 1",
-                                text: "Register and attend for free",
-                            },
-                            {
-                                step: "STEP 2",
-                                text: "Dive into hands-on, practical learning",
-                            },
-                            {
-                                step: "STEP 3",
-                                text: "Walk away with real, actionable value",
-                            },
-                        ].map((item) => (
-                            <div
-                                key={item.step}
-                                className="rounded-xl border border-slate-100 bg-[#f8fafd] px-6 py-5 md:px-7 md:py-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-0 overflow-hidden border border-gray-200">
+                        {/* Row 1, Col 1: Text */}
+                        <div className="flex flex-col justify-center p-6 bg-white text-[#001a5a] min-h-[220px]">
+                            <h3 className="text-sm sm:text-base font-semibold leading-tight tracking-tight uppercase">
+                                Start Your Success Story At Apscale X, India's Premier Digital Academy
+                            </h3>
+                        </div>
+
+                        {/* Row 1, Col 2: Image */}
+                        <div className="relative min-h-[220px]">
+                            <img
+                                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80"
+                                alt="Student laughing"
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Row 1, Col 3: Red Box */}
+                        <div className="bg-[#b91c1c] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
+                            <span className="text-3xl md:text-4xl font-extrabold">250,000+</span>
+                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">alumni worldwide</span>
+                        </div>
+
+                        {/* Row 1, Col 4: Navy Box */}
+                        <div className="bg-[#001a5a] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
+                            <span className="text-3xl md:text-4xl font-extrabold">#26</span>
+                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">public university in the nation</span>
+                        </div>
+
+                        {/* Row 1, Col 5: Image */}
+                        <div className="relative min-h-[220px]">
+                            <img
+                                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
+                                alt="Students group walking"
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Row 2, Col 1: Image */}
+                        <div className="relative min-h-[220px]">
+                            <img
+                                src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&w=600&q=80"
+                                alt="Students discussing"
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Row 2, Col 2: Teal Box */}
+                        <div className="bg-[#0f766e] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
+                            <span className="text-3xl md:text-4xl font-extrabold">Over 300</span>
+                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">fields of study</span>
+                        </div>
+
+                        {/* Row 2, Col 3: Maroon Box */}
+                        <div className="bg-[#850b0b] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
+                            <span className="text-3xl md:text-4xl font-extrabold">2700+</span>
+                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">inventions by faculty</span>
+                        </div>
+
+                        {/* Row 2, Col 4: Image */}
+                        <div className="relative min-h-[220px]">
+                            <img
+                                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80"
+                                alt="Mentor showing laptop screen"
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
+
+                        {/* Row 2, Col 5: Olive Circle Button */}
+                        <div className="bg-[#f3f4f6] flex items-center justify-center p-4 min-h-[220px]">
+                            <Link
+                                href="/courses"
+                                className="w-36 h-36 rounded-full bg-[#b8c599] hover:bg-[#a5b287] hover:scale-105 text-[#001a5a] font-extrabold text-[11px] flex flex-col items-center justify-center text-center p-3 transition-all duration-300 shadow-sm border border-[#9ba97d] tracking-wider leading-tight"
                             >
-                                <div className="text-[11px] tracking-widest text-[#7b7b7b] font-semibold">
-                                    {item.step}
-                                </div>
-                                <div className="text-sm md:text-base font-medium text-[#1f2937] mt-2">
-                                    {item.text}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-10 md:mt-12 rounded-2xl bg-[#f8fafd] border border-slate-100 px-6 md:px-12 py-9 md:py-12 relative overflow-hidden">
-                        <div className="absolute -left-2 top-5 text-[#f6d9a4] text-[100px] md:text-[125px] leading-none select-none z-0">
-                            "
-                        </div>
-                        <div className="absolute -right-2 bottom-4 text-[#f6d9a4] text-[100px] md:text-[125px] leading-none select-none z-0">
-                            "
-                        </div>
-
-                        <div className="overflow-hidden w-full relative z-10">
-                            <div
-                                className={`flex ${transitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''}`}
-                                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-                            >
-                                {[...REVIEWS, REVIEWS[0]].map((review, idx) => (
-                                    <div key={idx} className="w-full shrink-0 flex flex-col items-center px-4">
-                                        <p className="text-center text-[#334155] text-sm md:text-base leading-relaxed max-w-4xl mx-auto min-h-[60px] flex items-center justify-center">
-                                            {review.text}
-                                        </p>
-                                        <div className="text-center text-[#1f2937] font-semibold mt-6 text-sm md:text-base">
-                                            {review.author}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-center gap-2 mt-6 relative z-20">
-                            {REVIEWS.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleDotClick(index)}
-                                    className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${(currentIndex % REVIEWS.length) === index ? 'bg-[#111827]' : 'bg-[#c7c7c7] hover:bg-[#a3a3a3]'
-                                        }`}
-                                    aria-label={`Go to slide ${index + 1}`}
-                                />
-                            ))}
+                                <span className="underline decoration-2 underline-offset-4 font-black">VIEW ALL FACTS & RANKINGS</span>
+                            </Link>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* AI-native competitor section */}
-            <section className="w-full px-4 md:px-36 py-12 md:py-16 bg-[#f8fafd]">
-                <div className="max-w-[1180px] mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:pr-6">
-                            <h3 className="text-[24px] md:text-[30px] font-semibold text-[#111827] leading-tight">
-                                The Gap Between
-                                <br />
-                                you & your <span className="text-[#0b7a2a]">AI-</span>
-                                <br />
-                                <span className="text-[#0b7a2a]">Native</span> Competitor
-                            </h3>
-                            <p className="text-sm md:text-base text-[#6b7280] mt-4">
-                                In 2026, the best-performing marketing teams aren't bigger. They're AI-native.
-                            </p>
-                        </div>
+            <section className="relative w-full h-[350px] sm:h-[550px] md:h-[750px] overflow-hidden bg-black">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                >
+                    <source src="/LandingPage/Video/Video1.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+                <div className="absolute inset-0 bg-black/15 pointer-events-none" />
 
-                        <div className="rounded-2xl bg-white border border-[#f0f0f0] p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-                            <div className="w-10 h-10 rounded-md bg-[#78f07f] text-[#0f6a2d] flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M3 11h3v10H3z" />
-                                    <path d="M10 7h3v14h-3z" />
-                                    <path d="M17 4h3v17h-3z" />
-                                </svg>
-                            </div>
-                            <h4 className="mt-4 text-base font-semibold text-[#111827]">
-                                60% of Searches Never Reach Your Website Anymore
-                            </h4>
-                            <p className="mt-3 text-sm text-[#6b7280]">
-                                If your brand isn't showing up when ChatGPT, Perplexity or Google AI answers - you're already losing customers to brands that figured out AEO and GEO first.
-                            </p>
-                        </div>
+                {/* White shadow type separators */}
+                <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-white/60 to-transparent pointer-events-none z-10" />
+                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/60 to-transparent pointer-events-none z-10" />
+            </section>
 
-                        <div className="rounded-2xl bg-white border border-[#f0f0f0] p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-                            <div className="w-10 h-10 rounded-md bg-[#78f07f] text-[#0f6a2d] flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M4 5h16" />
-                                    <path d="M6 5l6 9 6-9" />
-                                </svg>
-                            </div>
-                            <h4 className="mt-4 text-base font-semibold text-[#111827]">
-                                Daily Use Is Not The Same As Daily Results.
-                            </h4>
-                            <p className="mt-3 text-sm text-[#6b7280]">
-                                Checking AI every morning doesn't make you AI-first. Results come from systems, not habits.
-                            </p>
-                        </div>
+            {/* Stats / Yellow Section */}
+            <section className="w-full bg-[#FFE342] text-black py-8 md:py-10 px-6 md:px-12 lg:px-24">
+                <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-4">
+                    {/* Left content */}
+                    <div className="flex flex-col">
+                        <span className="text-[17px] sm:text-[19px] font-semibold tracking-wide text-neutral-800">
+                            Be A Skilled Professional
+                        </span>
+                        <span className="text-2xl sm:text-3xl md:text-[34px] font-semibold tracking-tight mt-1 text-black">
+                            Learn Today. Lead Tomorrow
+                        </span>
+                    </div>
 
-                        <div className="rounded-2xl bg-white border border-[#f0f0f0] p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-                            <div className="w-10 h-10 rounded-md bg-[#78f07f] text-[#0f6a2d] flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5 1.34 3.5 3 3.5z" />
-                                    <path d="M8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11z" />
-                                    <path d="M2 20c0-3 4-5 6-5" />
-                                    <path d="M22 20c0-3-4-5-6-5" />
-                                </svg>
-                            </div>
-                            <h4 className="mt-4 text-base font-semibold text-[#111827]">
-                                Your Team Is Working Hard. AI-Native Teams Are Working Fast.
-                            </h4>
-                            <p className="mt-3 text-sm text-[#6b7280]">
-                                10 hours of research, writing, and designing. An AI-powered team does the same in 47 minutes.
-                            </p>
+                    {/* Right stats */}
+                    <div className="flex flex-wrap sm:flex-nowrap gap-8 sm:gap-10 md:gap-14 lg:gap-20">
+                        <div className="flex flex-col">
+                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                                100,000+
+                            </span>
+                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                                Careers Transformed Since 2015
+                            </span>
                         </div>
-
-                        <div className="rounded-2xl bg-white border border-[#f0f0f0] p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-                            <div className="w-10 h-10 rounded-md bg-[#78f07f] text-[#0f6a2d] flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="3" width="7" height="7" />
-                                    <rect x="14" y="3" width="7" height="7" />
-                                    <rect x="3" y="14" width="7" height="7" />
-                                    <rect x="14" y="14" width="7" height="7" />
-                                </svg>
-                            </div>
-                            <h4 className="mt-4 text-base font-semibold text-[#111827]">
-                                The Businesses That Figure This Out In 2026 Will Be Impossible To Catch In 2027.
-                            </h4>
-                            <p className="mt-3 text-sm text-[#6b7280]">
-                                This is not a trend. It's a structural shift. The window to get ahead is open right now. It won't stay open much longer.
-                            </p>
+                        <div className="flex flex-col">
+                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                                95,000+
+                            </span>
+                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                                Successfully Placed
+                            </span>
                         </div>
-
-                        <div className="rounded-2xl bg-white border border-[#f0f0f0] p-6 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-                            <div className="w-10 h-10 rounded-md bg-[#78f07f] text-[#0f6a2d] flex items-center justify-center">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="4" y="3" width="16" height="18" rx="2" />
-                                    <path d="M8 7h8" />
-                                    <path d="M8 11h8" />
-                                    <path d="M8 15h6" />
-                                </svg>
-                            </div>
-                            <h4 className="mt-4 text-base font-semibold text-[#111827]">
-                                Everyone Has The Subscription. Nobody Has The System.
-                            </h4>
-                            <p className="mt-3 text-sm text-[#6b7280]">
-                                ChatGPT, Gemini, Claude. Both you and our competitor have all three. The difference is they've wired it into their business instead of copy-pasting outputs into a Doc.
-                            </p>
+                        <div className="flex flex-col">
+                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                                2,000+
+                            </span>
+                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                                Hiring Partners
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -408,7 +436,7 @@ export default function Page() {
 
             <section className="w-full px-4 md:px-24 lg:px-32 py-12 md:py-16 bg-white">
                 <div className="max-w-[1200px] mx-auto">
-                    <h3 className="text-center text-[24px] md:text-[30px] font-semibold text-[#111827] mb-4 -mt-2">
+                    <h3 className="text-center text-[28px] md:text-[36px] font-semibold text-[#111827] mb-8 -mt-2">
                         Tools That You'll Learn
                     </h3>
                     <LogoCloud />
@@ -417,138 +445,161 @@ export default function Page() {
 
             <section className="w-full px-4 md:px-24 lg:px-32 py-12 md:py-16 bg-[#f8fafd]">
                 <div className="max-w-[1200px] mx-auto">
-                    <div className="flex items-center justify-between mb-6">
-                        <h4 className="text-[22px] md:text-[28px] font-semibold text-[#1f2a44]">
-                            Upcoming events & webinars
-                        </h4>
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 className="text-[24px] md:text-[32px] font-extrabold text-[#1f2a44] tracking-tight">
+                                Upcoming Workshops & Events
+                            </h4>
+                            <p className="text-sm text-slate-500 mt-1">
+                                Join our live, interactive sessions led by industry experts.
+                            </p>
+                        </div>
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 aria-label="Previous"
-                                className="w-9 h-9 rounded-full bg-[#eef1f6] text-[#1f2a44] flex items-center justify-center hover:bg-[#e2e6ee] transition-colors"
+                                className="w-10 h-10 rounded-full bg-white border border-slate-200 text-[#1f2a44] flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M15 18l-6-6 6-6" />
                                 </svg>
                             </button>
                             <button
                                 type="button"
                                 aria-label="Next"
-                                className="w-9 h-9 rounded-full bg-[#eef1f6] text-[#1f2a44] flex items-center justify-center hover:bg-[#e2e6ee] transition-colors"
+                                className="w-10 h-10 rounded-full bg-white border border-slate-200 text-[#1f2a44] flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M9 6l6 6-6 6" />
                                 </svg>
                             </button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-8">
-                        {[
-                            {
-                                title: "The Value of AI",
-                                date: "16th Jun 2026",
-                                time: "09:00 - 11:00",
-                                location: "London",
-                                image:
-                                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
-                                highlight: false,
-                                lock: false,
-                                description:
-                                    "The rise of AI in marketing is clear, but the evidence on effectiveness is still emerging. Join us f...",
-                            },
-                            {
-                                title: "Next Gen Meet Up: An Evening with an Agency",
-                                date: "17th Jun 2026",
-                                time: "17:30 - 19:30",
-                                location: "London",
-                                image:
-                                    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
-                                highlight: false,
-                                lock: false,
-                                description: "",
-                            },
-                            {
-                                title: "DMA Member Lunch in Cannes",
-                                date: "24th Jun 2026",
-                                time: "13:00 - 15:00",
-                                location: "Cannes, France",
-                                image:
-                                    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
-                                highlight: false,
-                                lock: true,
-                                description:
-                                    "Join DMA CEO Rachel Aldighieri and Operations Director Ellie Turner for an exclusive members' lunch ...",
-                            },
-                        ].map((event) => (
-                            <article
-                                key={event.title}
-                                className="group rounded-2xl bg-[#f9fafb] border border-[#e5e7eb] overflow-hidden shadow-[0_6px_18px_rgba(16,24,40,0.08)] md:min-w-[340px] flex flex-col"
-                            >
-                                <div className="relative h-[190px]">
-                                    <img
-                                        src={event.image}
-                                        alt={event.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <span className="absolute left-4 bottom-4 bg-white text-[#1d4ed8] text-xs font-bold px-3 py-1 rounded-full shadow">
-                                        EVENT
-                                    </span>
-                                    {event.lock ? (
-                                        <span className="absolute right-4 top-4 w-10 h-10 rounded-full bg-[#facc15] text-[#111827] flex items-center justify-center shadow">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <rect x="5" y="11" width="14" height="10" rx="2" />
-                                                <path d="M7 11V8a5 5 0 0110 0v3" />
-                                            </svg>
-                                        </span>
-                                    ) : null}
-                                </div>
-
-                                <div
-                                    className={
-                                        event.highlight
-                                            ? "bg-[#1f2a5b] text-white px-5 py-5 min-h-[150px] flex-1"
-                                            : "bg-[#f9fafb] text-[#111827] px-5 py-5 min-h-[150px] flex-1 transition-colors group-hover:bg-[#1f2a5b] group-hover:text-white"
-                                    }
-                                >
-                                    <div
-                                        className={
-                                            event.highlight
-                                                ? "text-xs font-semibold tracking-wide text-[#c7d2fe] mb-2"
-                                                : "text-xs font-semibold tracking-wide text-[#6b7280] mb-2 transition-colors group-hover:text-[#c7d2fe]"
-                                        }
-                                    >
-                                        {event.date} <span className="mx-2">•</span> {event.time} <span className="mx-2">•</span> {event.location}
+                    {isLoading ? (
+                        <div className={
+                            displayWorkshops.length === 2
+                                ? "grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto"
+                                : displayWorkshops.length === 1
+                                    ? "grid grid-cols-1 max-w-xl mx-auto"
+                                    : "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[1200px] mx-auto"
+                        }>
+                            {Array.from({ length: displayWorkshops.length > 0 ? displayWorkshops.length : 3 }).map((_, i) => (
+                                <div key={i} className="animate-pulse rounded-3xl bg-white border border-slate-100 overflow-hidden flex flex-col h-[400px] shadow-sm">
+                                    <div className="h-[220px] bg-slate-200 w-full" />
+                                    <div className="p-6 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div className="h-4 bg-slate-200 rounded w-1/2 mb-3" />
+                                            <div className="h-4 bg-slate-200 rounded w-1/3 mb-4" />
+                                            <div className="h-6 bg-slate-200 rounded w-4/5 mb-3" />
+                                            <div className="h-4 bg-slate-200 rounded w-full mb-2" />
+                                            <div className="h-4 bg-slate-200 rounded w-5/6" />
+                                        </div>
+                                        <div className="h-8 bg-slate-200 rounded w-1/3 mt-4" />
                                     </div>
-                                    <h5
-                                        className={
-                                            event.highlight
-                                                ? "text-lg font-semibold text-white leading-snug"
-                                                : "text-lg font-semibold text-[#111827] leading-snug transition-colors group-hover:text-white"
-                                        }
-                                    >
-                                        {event.title}
-                                    </h5>
-                                    {event.description ? (
-                                        <p className="mt-3 text-sm text-[#6b7280] transition-colors group-hover:text-[#e5e7eb]">
-                                            {event.description}
-                                        </p>
-                                    ) : null}
                                 </div>
-                            </article>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={
+                            displayWorkshops.length === 2
+                                ? "grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto"
+                                : displayWorkshops.length === 1
+                                    ? "grid grid-cols-1 max-w-xl mx-auto"
+                                    : "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[1200px] mx-auto"
+                        }>
+                            {displayWorkshops.map((w) => {
+                                const details = getUpcomingDetails(w.workshopDates || [], w.type || 'one-day');
+                                const destinationUrl = w.type === 'three-days'
+                                    ? `/three-days-workshops/${w.slug}`
+                                    : `/one-day-workshop/${w.slug}`;
+                                return (
+                                    <Link
+                                        key={w._id || w.slug || w.title}
+                                        href={destinationUrl}
+                                        className="group cursor-pointer flex flex-col flex-1 h-full w-full"
+                                    >
+                                        <article className="group relative flex flex-col flex-1 h-full w-full rounded-3xl bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(31,42,91,0.08)] hover:border-indigo-100">
+                                            {/* Thumbnail Area with Inner Image Zoom */}
+                                            <div className="relative h-[220px] w-full shrink-0 overflow-hidden">
+                                                <img
+                                                    src={w.thumbnail || "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"}
+                                                    alt={w.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                                />
+                                                {/* Pulsing Live Badge */}
+                                                <span className="absolute left-4 top-4 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full shadow-sm border border-white/20 tracking-wider uppercase flex items-center gap-1.5 z-10">
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                                    </span>
+                                                    {w.type === 'three-days' ? '3-Day Workshop' : '1-Day Workshop'}
+                                                </span>
+                                            </div>
 
-                    <div className="flex items-center gap-2 mt-6">
-                        <span className="w-2 h-2 rounded-full bg-[#111827]"></span>
-                        <span className="w-2 h-2 rounded-full bg-[#c7c7c7]"></span>
-                        <span className="w-2 h-2 rounded-full bg-[#c7c7c7]"></span>
-                        <span className="w-2 h-2 rounded-full bg-[#c7c7c7]"></span>
+                                            {/* Content Details */}
+                                            <div className="p-6 flex-1 flex flex-col justify-between bg-white transition-colors duration-500 group-hover:bg-[#1f2a5b] group-hover:text-white">
+                                                <div>
+                                                    {/* Vector Icon Info List */}
+                                                    <div className="flex flex-col gap-2.5 text-[13px] font-semibold text-slate-500 mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4 text-slate-400 shrink-0 transition-colors group-hover:text-indigo-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                            </svg>
+                                                            <span className="group-hover:text-indigo-200 transition-colors duration-500">
+                                                                {details.dateStr} <span className="text-slate-300 group-hover:text-slate-500 mx-1">•</span> {details.timeStr}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4 text-slate-400 shrink-0 transition-colors group-hover:text-indigo-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                                                <circle cx="12" cy="10" r="3"></circle>
+                                                            </svg>
+                                                            <span className="group-hover:text-indigo-200 transition-colors duration-500">
+                                                                {details.place}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <h5 className="text-[20px] font-bold text-slate-900 leading-snug tracking-tight mb-2.5 transition-colors duration-500 group-hover:text-white">
+                                                        {w.title}
+                                                    </h5>
+                                                    {w.description ? (
+                                                        <p className="text-sm text-slate-600 leading-relaxed line-clamp-3 transition-colors duration-500 group-hover:text-slate-200">
+                                                            {w.description}
+                                                        </p>
+                                                    ) : null}
+                                                </div>
+
+                                                {/* Premium interactive action footer */}
+                                                <div className="mt-6 pt-5 border-t border-slate-100 group-hover:border-slate-800/20 flex items-center justify-between text-sm font-bold text-indigo-600 transition-colors duration-500 group-hover:text-indigo-300">
+                                                    <span>Learn More & Register</span>
+                                                    <svg className="w-5 h-5 transform transition-transform duration-500 group-hover:translate-x-2" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 mt-8 justify-center">
+                        {displayWorkshops.map((_, idx) => (
+                            <span key={idx} className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === 0 ? "w-4 bg-indigo-600" : "bg-slate-300"}`}></span>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            <GrowthStats />
+
+            <InsideDA360 />
+            <GlobalCommunity />
             <CertificationCoursesSection bgColor="bg-[#f8fafd]" />
 
             {/* Course Level Selector Section */}

@@ -17,3 +17,12 @@ export function useWorkshop(id: string) {
     staleTime: 10 * 60 * 1000, // 10 min
   });
 }
+
+export function usePublicWorkshops(params?: { page?: number; limit?: number; tag?: string; type?: string }) {
+  return useQuery({
+    queryKey: ['public-workshops', params],
+    queryFn: () => workshopApi.listPublic(params),
+    staleTime: 5 * 60 * 1000, // 5 min
+  });
+}
+

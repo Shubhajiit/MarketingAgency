@@ -589,7 +589,7 @@ export default function AdminCoursesPage() {
                 <tr className="border-b border-gray-100 bg-gray-50/60">
                   <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Course</th>
                   <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tag</th>
+
                   <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Duration</th>
                   <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price (INR)</th>
                   <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -617,11 +617,7 @@ export default function AdminCoursesPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4 text-sm text-gray-600 capitalize">{c.category}</td>
-                      <td className="px-5 py-4 text-sm text-gray-600">
-                        <span className="text-[10px] font-bold text-[#6366f1] bg-[#efeefc] px-2 py-0.5 rounded tracking-wide uppercase">
-                          {c.tag || 'DMI'}
-                        </span>
-                      </td>
+
                       <td className="px-5 py-4 text-sm text-gray-600">{c.hours}</td>
                       <td className="px-5 py-4 text-sm font-semibold text-gray-900">
                         ₹{c.price} <span className="text-xs text-gray-400 line-through">₹{c.originalPrice}</span>

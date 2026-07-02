@@ -260,9 +260,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           />
         )}
 
-        <div className="absolute top-0 left-0 bg-[#0c102a] text-white text-[7px] md:text-[9px] font-extrabold px-1.5 md:px-3 py-1 md:py-1.5 uppercase rounded-br-lg tracking-wider z-20 select-none shadow-sm">
-          {course.tag}
-        </div>
+
 
         <div className="absolute bottom-[-14px] md:bottom-[-18px] right-2 md:right-5 w-8 h-8 md:w-12 md:h-12 bg-[#a3ff12] text-[#0c102a] rounded-full flex flex-col items-center justify-center border border-white shadow-md z-20">
           <span className="text-[9px] md:text-[13px] font-black leading-none">{course.discount}</span>

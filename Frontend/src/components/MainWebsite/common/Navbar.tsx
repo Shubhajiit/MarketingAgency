@@ -144,22 +144,25 @@ export default function Navbar() {
                 </div>
 
                 <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium text-gray-800 tracking-wide">
-                    <Link href="/" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                    <Link href="/" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
                         Home
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
                     </Link>
-                    <Link href="/courses" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                    <Link href="/courses" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
                         Courses
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
                     </Link>
                     <div
                         className="h-full flex items-center"
                         onMouseEnter={handleWorkshopsMouseEnter}
                         onMouseLeave={handleWorkshopsMouseLeave}
                     >
-                        <a href="#" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        <a href="#" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
                             One Day Workshop
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isWorkshopsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
+                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
                         </a>
                     </div>
                     <div
@@ -167,15 +170,22 @@ export default function Navbar() {
                         onMouseEnter={handleThreeDaysMouseEnter}
                         onMouseLeave={handleThreeDaysMouseLeave}
                     >
-                        <Link href="/three-days-workshops" className="hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        <Link href="/three-days-workshops" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
                             Three Days Workshops
                             <svg className={`w-3 h-3 transition-transform duration-200 ${isThreeDaysOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
+                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
                         </Link>
                     </div>
-                    <Link href="/about" className="hover:text-[#009ee3] flex items-center gap-1">About Us</Link>
-                    <Link href="/contact" className="hover:text-[#009ee3]">Contact Us</Link>
+                    <Link href="/about" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        About Us
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
+                    <Link href="/contact" className="relative group hover:text-[#009ee3] flex items-center gap-1 py-4">
+                        Contact Us
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009ee3] transition-all duration-300 group-hover:w-full"></span>
+                    </Link>
 
                     {/* Cart Button */}
                     <button
