@@ -39,7 +39,7 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
   return (
     <div
       className={cn(
-        "grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-3 gap-y-5 bg-white",
+        "grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-x-3 gap-y-2 sm:gap-y-5 bg-white",
         className
       )}
       {...props}
@@ -47,12 +47,12 @@ export function LogoCloud({ className, ...props }: LogoCloudProps) {
       {logos.map((logo, index) => (
         <div
           key={index}
-          className="flex items-center justify-center bg-white p-2 h-28 transition-all duration-300 hover:scale-105"
+          className="flex items-center justify-center bg-white p-1 h-16 sm:h-28 transition-all duration-300 hover:scale-105"
         >
           <img
             alt={logo.alt}
             src={logo.src}
-            className="pointer-events-none select-none max-w-full max-h-24 object-contain transition-all duration-300"
+            className="pointer-events-none select-none max-w-full max-h-12 sm:max-h-24 object-contain transition-all duration-300"
           />
         </div>
       ))}

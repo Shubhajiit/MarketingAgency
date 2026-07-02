@@ -99,44 +99,43 @@ export default function InsideDA360() {
     };
 
     return (
-        <section className="w-full bg-black py-16 md:py-24 px-4 md:px-6 lg:px-8 text-white border-t border-b border-neutral-900">
+        <section className="w-full bg-black py-8 sm:py-16 md:py-20 px-4 md:px-6 lg:px-8 text-white border-t border-b border-neutral-900">
             <div className="max-w-full mx-auto">
                 {/* Header with Navigation Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 md:mb-16">
-                    <div className="text-left">
-                        <h2 className="text-3xl md:text-5xl font-black italic tracking-wider text-white uppercase">
+                <div className="flex flex-col gap-3 mb-6 md:mb-12">
+                    <div className="flex items-center justify-between w-full">
+                        <h2 className="text-2xl sm:text-3xl md:text-5xl font-black italic tracking-wider text-white uppercase">
                             Inside DA360
                         </h2>
-                        <p className="text-xs md:text-sm text-neutral-400 max-w-xl mt-4 font-normal tracking-wide leading-relaxed">
-                            Student life at Digital Academy 360, a premier digital marketing school, is far from ordinary — it's extraordinary!
-                        </p>
+                        {/* Pagination Arrows */}
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={prevPage}
+                                type="button"
+                                aria-label="Previous Page"
+                                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 text-white flex items-center justify-center hover:bg-neutral-800 hover:border-neutral-700 transition-colors shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                disabled={currentPage === 0 || isTransitioning}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M15 18l-6-6 6-6" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={nextPage}
+                                type="button"
+                                aria-label="Next Page"
+                                className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 text-white flex items-center justify-center hover:bg-neutral-800 hover:border-neutral-700 transition-colors shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                disabled={currentPage === totalPages - 1 || isTransitioning}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9 6l6 6-6 6" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-
-                    {/* Pagination Arrows */}
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                        <button
-                            onClick={prevPage}
-                            type="button"
-                            aria-label="Previous Page"
-                            className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 text-white flex items-center justify-center hover:bg-neutral-800 hover:border-neutral-700 transition-colors shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                            disabled={currentPage === 0 || isTransitioning}
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M15 18l-6-6 6-6" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={nextPage}
-                            type="button"
-                            aria-label="Next Page"
-                            className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 text-white flex items-center justify-center hover:bg-neutral-800 hover:border-neutral-700 transition-colors shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                            disabled={currentPage === totalPages - 1 || isTransitioning}
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9 6l6 6-6 6" />
-                            </svg>
-                        </button>
-                    </div>
+                    <p className="text-xs md:text-sm text-neutral-400 max-w-xl font-normal tracking-wide leading-relaxed">
+                        Student life at Digital Academy 360, a premier digital marketing school, is far from ordinary — it's extraordinary!
+                    </p>
                 </div>
 
                 {/* Bento Grid container with pre-rendered pages */}
@@ -144,14 +143,17 @@ export default function InsideDA360() {
                     {[0, 1, 2].map((pageIndex) => {
                         const pageItems = getPageItemsForIndex(pageIndex);
                         const isActive = pageIndex === currentPage;
+                        const isPrev = pageIndex < currentPage;
 
                         return (
                             <div
                                 key={pageIndex}
                                 className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-9 gap-3 md:gap-4 transition-all duration-500 absolute inset-0 w-full ${
                                     isActive
-                                        ? "opacity-100 scale-100 pointer-events-auto z-10"
-                                        : "opacity-0 scale-[0.98] pointer-events-none z-0"
+                                        ? "opacity-100 translate-x-0 pointer-events-auto z-10"
+                                        : isPrev
+                                            ? "opacity-0 -translate-x-full pointer-events-none z-0"
+                                            : "opacity-0 translate-x-full pointer-events-none z-0"
                                 }`}
                             >
                                 {pageItems.map((item) => (

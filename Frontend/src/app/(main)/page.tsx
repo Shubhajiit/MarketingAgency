@@ -392,41 +392,41 @@ export default function Page() {
             </section>
 
             {/* Stats / Yellow Section */}
-            <section className="w-full bg-[#FFE342] text-black py-8 md:py-10 px-6 md:px-12 lg:px-24">
-                <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-4">
+            <section className="w-full bg-[#FFE342] text-black py-3.5 sm:py-6 md:py-8 px-4 sm:px-12 lg:px-24">
+                <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-4">
                     {/* Left content */}
                     <div className="flex flex-col">
-                        <span className="text-[17px] sm:text-[19px] font-semibold tracking-wide text-neutral-800">
+                        <span className="text-[15px] sm:text-[19px] font-medium tracking-wide text-neutral-800">
                             Be A Skilled Professional
                         </span>
-                        <span className="text-2xl sm:text-3xl md:text-[34px] font-semibold tracking-tight mt-1 text-black">
+                        <span className="text-xl sm:text-3xl md:text-[34px] font-semibold tracking-tight mt-0.5 text-black">
                             Learn Today. Lead Tomorrow
                         </span>
                     </div>
 
                     {/* Right stats */}
-                    <div className="flex flex-wrap sm:flex-nowrap gap-8 sm:gap-10 md:gap-14 lg:gap-20">
+                    <div className="grid grid-cols-3 gap-2 xs:gap-3 sm:flex sm:flex-nowrap sm:gap-10 md:gap-14 lg:gap-20 w-full sm:w-auto">
                         <div className="flex flex-col">
-                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                            <span className="text-xl xs:text-2xl sm:text-4xl md:text-[42px] font-medium tracking-tight text-black leading-none">
                                 100,000+
                             </span>
-                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                            <span className="text-[10px] xs:text-[11px] sm:text-[13px] font-normal text-neutral-800 mt-1 sm:whitespace-nowrap">
                                 Careers Transformed Since 2015
                             </span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                            <span className="text-xl xs:text-2xl sm:text-4xl md:text-[42px] font-medium tracking-tight text-black leading-none">
                                 95,000+
                             </span>
-                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                            <span className="text-[10px] xs:text-[11px] sm:text-[13px] font-normal text-neutral-800 mt-1 sm:whitespace-nowrap">
                                 Successfully Placed
                             </span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-3xl sm:text-4xl md:text-[42px] font-semibold tracking-tight text-black leading-none">
+                            <span className="text-xl xs:text-2xl sm:text-4xl md:text-[42px] font-medium tracking-tight text-black leading-none">
                                 2,000+
                             </span>
-                            <span className="text-[12px] sm:text-[13px] font-medium text-neutral-800 mt-2 whitespace-nowrap">
+                            <span className="text-[10px] xs:text-[11px] sm:text-[13px] font-normal text-neutral-800 mt-1 sm:whitespace-nowrap">
                                 Hiring Partners
                             </span>
                         </div>
@@ -447,14 +447,14 @@ export default function Page() {
                 <div className="max-w-[1200px] mx-auto">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h4 className="text-[24px] md:text-[32px] font-extrabold text-[#1f2a44] tracking-tight">
+                            <h4 className="text-[20px] sm:text-[24px] md:text-[32px] font-extrabold text-[#1f2a44] tracking-tight">
                                 Upcoming Workshops & Events
                             </h4>
-                            <p className="text-sm text-slate-500 mt-1">
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1">
                                 Join our live, interactive sessions led by industry experts.
                             </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-2">
                             <button
                                 type="button"
                                 aria-label="Previous"
