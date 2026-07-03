@@ -286,7 +286,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           {course.instructorName ? (
             <div className="flex items-center gap-2 mt-3.5 w-full justify-start">
               <img
-                src={course.mentorPicture || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80"}
+                src={course.instructorImage && course.instructorImage !== course.mentorPicture ? course.instructorImage : "/Mentors/Founder.svg"}
                 alt={course.instructorName}
                 className="w-5 h-5 rounded-full object-cover border border-slate-200"
               />

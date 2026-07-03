@@ -553,7 +553,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
             <div className={`w-9 h-9 rounded-full overflow-hidden border border-slate-200 shrink-0 ${!course ? 'animate-pulse bg-slate-200' : ''}`}>
               {course && (
                 <img
-                  src={course.mentorPicture || course.instructorImage || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80"}
+                  src={course.instructorImage && course.instructorImage !== course.mentorPicture ? course.instructorImage : "/Mentors/Founder.svg"}
                   alt={detailMeta.instructorName}
                   className="w-full h-full object-cover"
                 />

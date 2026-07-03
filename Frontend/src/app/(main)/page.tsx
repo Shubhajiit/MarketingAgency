@@ -257,16 +257,16 @@ export default function Page() {
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-row gap-4 justify-center">
+                    <div className="flex flex-row gap-3 sm:gap-4 justify-center w-full max-w-md mx-auto">
                         <Link
                             href="/courses"
-                            className="px-6 py-2.5 sm:px-8 sm:py-3 bg-[#0055ff] hover:bg-[#0044cc] transition-all duration-200 text-white font-bold text-sm sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                            className="whitespace-nowrap px-4 py-2.5 sm:px-8 sm:py-3 bg-[#0055ff] hover:bg-[#0044cc] transition-all duration-200 text-white font-bold text-[13px] sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                         >
                             Apply Now
                         </Link>
                         <Link
                             href="/courses"
-                            className="px-6 py-2.5 sm:px-8 sm:py-3 bg-white hover:bg-slate-50 transition-all duration-200 text-black font-bold text-sm sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                            className="whitespace-nowrap px-4 py-2.5 sm:px-8 sm:py-3 bg-white hover:bg-slate-50 transition-all duration-200 text-black font-bold text-[13px] sm:text-base rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                         >
                             Explore Programs
                         </Link>
@@ -285,22 +285,22 @@ export default function Page() {
             </div>
 
             {/* Brightest Minds Grid Section */}
-            <section className="w-full py-12 md:py-16 bg-white">
+            <section className="w-full py-4 md:py-8 bg-white">
                 <div className="max-w-[1240px] mx-auto px-4">
-                    <h2 className="text-center text-[28px] sm:text-[36px] md:text-[42px] font-normal text-[#961a1a] tracking-tight mb-10">
+                    <h2 className="text-center text-[18px] sm:text-[26px] md:text-[32px] font-normal text-[#961a1a] tracking-tight mb-4 md:mb-6">
                         See why the brightest minds choose Apscale X
                     </h2>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-0 overflow-hidden border border-gray-200">
+                    <div className="grid grid-cols-5 gap-0 overflow-hidden border border-gray-200">
                         {/* Row 1, Col 1: Text */}
-                        <div className="flex flex-col justify-center p-6 bg-white text-[#001a5a] min-h-[220px]">
-                            <h3 className="text-sm sm:text-base font-semibold leading-tight tracking-tight uppercase">
+                        <div className="flex flex-col justify-center p-2 sm:p-4 md:p-6 bg-white text-[#001a5a] min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
+                            <h3 className="text-[6px] sm:text-[10px] md:text-sm lg:text-base font-semibold leading-tight tracking-tight uppercase">
                                 Start Your Success Story At Apscale X, India's Premier Digital Academy
                             </h3>
                         </div>
 
                         {/* Row 1, Col 2: Image */}
-                        <div className="relative min-h-[220px]">
+                        <div className="relative min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
                             <img
                                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80"
                                 alt="Student laughing"
@@ -309,19 +309,19 @@ export default function Page() {
                         </div>
 
                         {/* Row 1, Col 3: Red Box */}
-                        <div className="bg-[#b91c1c] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
-                            <span className="text-3xl md:text-4xl font-extrabold">250,000+</span>
-                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">alumni worldwide</span>
+                        <div className="bg-[#b91c1c] text-white flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 text-center min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
+                            <span className="text-[10px] sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">250,000+</span>
+                            <span className="text-[4px] sm:text-[8px] md:text-[10px] lg:text-[11px] uppercase mt-1 sm:mt-2 font-bold tracking-wider">alumni worldwide</span>
                         </div>
 
                         {/* Row 1, Col 4: Navy Box */}
-                        <div className="bg-[#001a5a] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
-                            <span className="text-3xl md:text-4xl font-extrabold">#26</span>
-                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">public university in the nation</span>
+                        <div className="bg-[#001a5a] text-white flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 text-center min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
+                            <span className="text-[10px] sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">#26</span>
+                            <span className="text-[4px] sm:text-[8px] md:text-[10px] lg:text-[11px] uppercase mt-1 sm:mt-2 font-bold tracking-wider">public university in the nation</span>
                         </div>
 
                         {/* Row 1, Col 5: Image */}
-                        <div className="relative min-h-[220px]">
+                        <div className="relative min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
                             <img
                                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
                                 alt="Students group walking"
@@ -330,7 +330,7 @@ export default function Page() {
                         </div>
 
                         {/* Row 2, Col 1: Image */}
-                        <div className="relative min-h-[220px]">
+                        <div className="relative min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
                             <img
                                 src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&w=600&q=80"
                                 alt="Students discussing"
@@ -339,19 +339,19 @@ export default function Page() {
                         </div>
 
                         {/* Row 2, Col 2: Teal Box */}
-                        <div className="bg-[#0f766e] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
-                            <span className="text-3xl md:text-4xl font-extrabold">Over 300</span>
-                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">fields of study</span>
+                        <div className="bg-[#0f766e] text-white flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 text-center min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
+                            <span className="text-[10px] sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">Over 300</span>
+                            <span className="text-[4px] sm:text-[8px] md:text-[10px] lg:text-[11px] uppercase mt-1 sm:mt-2 font-bold tracking-wider">fields of study</span>
                         </div>
 
                         {/* Row 2, Col 3: Maroon Box */}
-                        <div className="bg-[#850b0b] text-white flex flex-col items-center justify-center p-6 text-center min-h-[220px]">
-                            <span className="text-3xl md:text-4xl font-extrabold">2700+</span>
-                            <span className="text-[10px] sm:text-[11px] uppercase mt-2 font-bold tracking-wider">inventions by faculty</span>
+                        <div className="bg-[#850b0b] text-white flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 text-center min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
+                            <span className="text-[10px] sm:text-2xl md:text-3xl lg:text-4xl font-extrabold">2700+</span>
+                            <span className="text-[4px] sm:text-[8px] md:text-[10px] lg:text-[11px] uppercase mt-1 sm:mt-2 font-bold tracking-wider">inventions by faculty</span>
                         </div>
 
                         {/* Row 2, Col 4: Image */}
-                        <div className="relative min-h-[220px]">
+                        <div className="relative min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
                             <img
                                 src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80"
                                 alt="Mentor showing laptop screen"
@@ -360,10 +360,10 @@ export default function Page() {
                         </div>
 
                         {/* Row 2, Col 5: Olive Circle Button */}
-                        <div className="bg-[#f3f4f6] flex items-center justify-center p-4 min-h-[220px]">
+                        <div className="bg-[#f3f4f6] flex items-center justify-center p-1 sm:p-2 md:p-4 min-h-[70px] sm:min-h-[120px] md:min-h-[220px]">
                             <Link
                                 href="/courses"
-                                className="w-36 h-36 rounded-full bg-[#b8c599] hover:bg-[#a5b287] hover:scale-105 text-[#001a5a] font-extrabold text-[11px] flex flex-col items-center justify-center text-center p-3 transition-all duration-300 shadow-sm border border-[#9ba97d] tracking-wider leading-tight"
+                                className="w-14 h-14 sm:w-24 sm:h-24 md:w-36 md:h-36 rounded-full bg-[#b8c599] hover:bg-[#a5b287] hover:scale-105 text-[#001a5a] font-extrabold text-[4px] sm:text-[7px] md:text-[11px] flex flex-col items-center justify-center text-center p-1 sm:p-2 md:p-3 transition-all duration-300 shadow-sm border border-[#9ba97d] tracking-wider leading-tight"
                             >
                                 <span className="underline decoration-2 underline-offset-4 font-black">VIEW ALL FACTS & RANKINGS</span>
                             </Link>

@@ -34,9 +34,9 @@ import GoogleAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Google-Ad
 import MetaAdsLogo from '../../../../../public/WorkshopsAILogos/Tool/Meta-Ads.webp';
 import WhatsAppLogo from '../../../../../public/WorkshopsAILogos/Tool/WhatsApp.webp';
 
-// Import mentor images from LandingPage
-import AmanSaurav from '../../../../../public/LandingPage/aman_saurav.png';
-import CoFounder from '../../../../../public/LandingPage/co_founder.png';
+// Import mentor images from Mentors
+import FounderImage from '../../../../../public/Mentors/Founder.svg';
+import CoFounderImage from '../../../../../public/Mentors/Co-Founder.svg';
 
 interface FormState {
   firstName: string;
@@ -1906,8 +1906,8 @@ function ThreeDaysWorkshopsContent() {
                     <div className="md:col-span-5 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src={AmanSaurav.src}
-                          alt="Aman Saurav"
+                          src={FounderImage.src}
+                          alt="Founder"
                           className="w-full h-full object-cover rounded-[10px]"
                         />
                       </div>
@@ -1936,33 +1936,20 @@ function ThreeDaysWorkshopsContent() {
                         ))}
                       </div>
 
-                      {/* Paragraphs */}
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
-                        Hello, I'm a graduate of{" "}
+                       <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        Hello, I have successfully conducted{" "}
                         <span className="text-blue-600 underline font-bold cursor-pointer">
-                          IIT Delhi
+                          over 90 workshops
                         </span>{" "}
-                        and currently work as a{" "}
+                        and taught more than{" "}
                         <span className="text-blue-600 underline font-bold cursor-pointer">
-                          Senior Data Analyst
-                        </span>{" "}
-                        and Program{" "}
-                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
-                          Director at AI for Techies
+                          1,000 students
                         </span>
-                        . With over a decade of experience in the field, I've been teaching and mentoring learners in AI/ML, data analysis, Python, Excel, SQL, and related technologies.
-                      </p>
-
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
-                        I've had the privilege of guiding{" "}
+                        . With a focus on practical, results-driven learning,{" "}
                         <span className="text-blue-600 underline font-bold cursor-pointer">
-                          over 20,000 students
+                          over 300 of my students
                         </span>{" "}
-                        and{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          professionals
-                        </span>{" "}
-                        through their data and AI journeys. Passionate about simplifying complex concepts and building real-world skills, I aim to empower individuals to confidently step into the world of data and technology.
+                        are now actively earning and thriving in their careers.
                       </p>
                     </div>
                   </div>
@@ -2019,8 +2006,8 @@ function ThreeDaysWorkshopsContent() {
                     <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
                       <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
                         <img
-                          src={CoFounder.src}
-                          alt="Aditya Kachave"
+                          src={CoFounderImage.src}
+                          alt="Co-Founder"
                           className="w-full h-full object-cover rounded-[10px]"
                         />
                       </div>
