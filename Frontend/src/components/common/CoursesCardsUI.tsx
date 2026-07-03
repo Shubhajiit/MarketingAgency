@@ -247,7 +247,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
       onClick={() => onSecondaryClick && onSecondaryClick(course)}
       className="bg-white border border-black rounded-lg flex flex-col justify-between shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden relative group cursor-pointer"
     >
-      <div className="relative h-[135px] md:h-[190px] w-full bg-slate-100 shrink-0">
+      <div className="relative h-[115px] md:h-[190px] w-full bg-slate-100 shrink-0">
         {course.circlesColor && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,transparent_70%)]" />
         )}
@@ -262,15 +262,15 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
 
 
 
-        <div className="absolute bottom-[-14px] md:bottom-[-18px] right-2 md:right-5 w-8 h-8 md:w-12 md:h-12 bg-[#a3ff12] text-[#0c102a] rounded-full flex flex-col items-center justify-center border border-white shadow-md z-20">
+        <div className="absolute bottom-[-12px] md:bottom-[-18px] right-2 md:right-5 w-8 h-8 md:w-12 md:h-12 bg-[#a3ff12] text-[#0c102a] rounded-full flex flex-col items-center justify-center border border-white shadow-md z-20">
           <span className="text-[9px] md:text-[13px] font-black leading-none">{course.discount}</span>
           <span className="text-[6px] md:text-[8px] font-extrabold leading-none mt-0.5">OFF</span>
         </div>
       </div>
 
-      <div className="p-4 pt-3.5 flex flex-col items-start text-left flex-1 justify-between w-full">
+      <div className="p-3 pt-2 md:p-4 md:pt-3.5 flex flex-col items-start text-left flex-1 justify-between w-full">
         <div className="w-full flex flex-col items-start">
-          <h3 className="text-[17px] sm:text-[18px] md:text-[20px] font-extrabold text-[#0c102a] tracking-tight leading-snug text-left w-full min-h-[32px] md:min-h-[44px] flex items-center justify-start">
+          <h3 className="text-[17px] sm:text-[18px] md:text-[20px] font-extrabold text-[#0c102a] tracking-tight leading-snug text-left w-full min-h-[24px] md:min-h-[44px] flex items-center justify-start">
             {course.title}
           </h3>
 
@@ -284,7 +284,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           </div>
 
           {course.instructorName ? (
-            <div className="flex items-center gap-2 mt-3.5 w-full justify-start">
+            <div className="flex items-center gap-2 mt-2 md:mt-3.5 w-full justify-start">
               <img
                 src={course.instructorImage && course.instructorImage !== course.mentorPicture ? course.instructorImage : "/Mentors/Founder.svg"}
                 alt={course.instructorName}
@@ -296,7 +296,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
             </div>
           ) : (
             course.hours && (
-              <div className="flex items-center gap-1.5 mt-3.5 w-full justify-start">
+              <div className="flex items-center gap-1.5 mt-2 md:mt-3.5 w-full justify-start">
                 <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
@@ -309,13 +309,13 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
           )}
         </div>
 
-        <div className="w-full flex flex-col gap-1 mt-4">
+        <div className="w-full flex flex-col gap-1 mt-3 md:mt-4">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onPrimaryClick && onPrimaryClick(course);
             }}
-            className="w-full py-1.5 md:py-2 bg-blue-600 border border-blue-600 text-white hover:bg-blue-700 font-extrabold text-[9px] sm:text-[10px] md:text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap overflow-hidden text-ellipsis"
+            className="w-full py-1 md:py-2 bg-blue-600 border border-blue-600 text-white hover:bg-blue-700 font-extrabold text-[9px] sm:text-[10px] md:text-[12px] rounded transition-all duration-150 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap overflow-hidden text-ellipsis"
           >
             {course.primaryCtaText || "Buy Now"}
           </button>
@@ -324,7 +324,7 @@ export function CourseCard({ course, onPrimaryClick, onSecondaryClick }: CourseC
               e.stopPropagation();
               onSecondaryClick && onSecondaryClick(course);
             }}
-            className="w-full py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[9px] sm:text-[10px] md:text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
+            className="w-full py-0.5 md:py-1 text-[#0c102a] hover:text-[#009ee3] font-bold text-[9px] sm:text-[10px] md:text-[12px] transition-colors uppercase tracking-wide cursor-pointer flex items-center justify-center gap-0.5"
           >
             {course.secondaryCtaText || "View Course"}
           </button>

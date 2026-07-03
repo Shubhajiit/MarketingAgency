@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import {
@@ -44,9 +45,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Logo */}
       <div className="px-6 py-6 flex items-center justify-between border-b border-[#f4f5f8]">
         <Link href="/admin/dashboard" className="flex items-center">
-          <img
+          <Image
             src="/Logo/Logo.svg"
             alt="Logo"
+            width={178}
+            height={34}
+            priority
             className="h-8 w-auto object-contain"
           />
         </Link>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { authApi } from '@/lib/api/auth';
 
 export default function ForgotPasswordPage() {
@@ -29,9 +30,12 @@ export default function ForgotPasswordPage() {
     <div className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
       <div className="px-8 pt-8 pb-2 text-left">
         <Link href="/" className="inline-block mb-6">
-          <img
+          <Image
             src="/Logo/Logo.svg"
             alt="Logo"
+            width={178}
+            height={34}
+            priority
             className="h-8 w-auto object-contain"
           />
         </Link>

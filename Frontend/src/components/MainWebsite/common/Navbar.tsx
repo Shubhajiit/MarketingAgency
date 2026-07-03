@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { workshopApi, Workshop } from '@/lib/api/workshops';
@@ -139,7 +140,14 @@ export default function Navbar() {
             <header className="relative bg-white border-b border-gray-100 py-3 px-4 md:px-36 flex justify-between items-center z-50 w-full">
                 <div className="flex items-center">
                     <Link href="/">
-                        <img src="/Logo/Logo.svg" alt="Datamites Logo" className="h-12 w-auto object-contain cursor-pointer" />
+                        <Image
+                            src="/Logo/Logo.svg"
+                            alt="Datamites Logo"
+                            width={178}
+                            height={34}
+                            priority
+                            className="h-12 w-auto object-contain cursor-pointer"
+                        />
                     </Link>
                 </div>
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import {
@@ -113,7 +114,14 @@ export default function UserDashboardSidebar() {
 			<aside className="hidden md:flex w-64 bg-white border-r border-[#eef0f4] flex-col fixed h-full z-30">
 				<div className="px-6 py-5 flex items-center justify-between">
 					<Link href="/dashboard" className="flex items-center gap-2">
-						<img src="/Logo/Logo.svg" alt="Logo" className="h-8 w-auto object-contain" />
+						<Image
+							src="/Logo/Logo.svg"
+							alt="Logo"
+							width={178}
+							height={34}
+							priority
+							className="h-8 w-auto object-contain"
+						/>
 					</Link>
 				</div>
 

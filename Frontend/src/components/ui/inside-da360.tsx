@@ -49,22 +49,21 @@ export default function InsideDA360() {
     ];
 
     const gridLayout = [
-        { colSpan: "col-span-2 md:col-span-2", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-2 md:row-span-2", heightClass: "h-[372px] sm:h-[456px] md:h-[516px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-2 md:col-span-2", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        // Row 2
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
-        { colSpan: "col-span-1 md:col-span-1", rowSpan: "row-span-1", heightClass: "h-[180px] sm:h-[220px] md:h-[250px]" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-1 md:col-end-3 md:row-start-1 md:row-end-4" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-3 md:col-end-5 md:row-start-1 md:row-end-3" },
+        { layoutClass: "col-span-2 sm:col-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-5 md:col-end-8 md:row-start-1 md:row-end-3" },
+        { layoutClass: "col-span-2 sm:col-span-2 h-[372px] sm:h-[456px] md:h-auto md:col-start-8 md:col-end-11 md:row-start-1 md:row-end-4" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-11 md:col-end-13 md:row-start-1 md:row-end-3" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-1 md:col-end-3 md:row-start-4 md:row-end-6" },
+        { layoutClass: "col-span-2 sm:col-span-2 h-[372px] sm:h-[456px] md:h-auto md:col-start-3 md:col-end-6 md:row-start-3 md:row-end-6" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-6 md:col-end-8 md:row-start-3 md:row-end-5" },
+        { layoutClass: "col-span-2 sm:col-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-8 md:col-end-11 md:row-start-4 md:row-end-5" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-11 md:col-end-13 md:row-start-3 md:row-end-5" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-1 md:col-end-4 md:row-start-6 md:row-end-7" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-4 md:col-end-6 md:row-start-6 md:row-end-7" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-6 md:col-end-8 md:row-start-5 md:row-end-7" },
+        { layoutClass: "col-span-1 row-span-1 h-[180px] sm:h-[220px] md:h-auto md:col-start-8 md:col-end-10 md:row-start-5 md:row-end-7" },
+        { layoutClass: "col-span-2 sm:col-span-2 h-[180px] sm:h-[220px] md:h-auto md:col-start-10 md:col-end-13 md:row-start-5 md:row-end-7" },
     ];
 
     const totalPages = 3;
@@ -92,9 +91,7 @@ export default function InsideDA360() {
 
         return pagePhotos.map((photo, index) => ({
             ...photo,
-            colSpan: gridLayout[index].colSpan,
-            rowSpan: gridLayout[index].rowSpan,
-            heightClass: gridLayout[index].heightClass,
+            layoutClass: gridLayout[index].layoutClass,
         }));
     };
 
@@ -139,7 +136,7 @@ export default function InsideDA360() {
                 </div>
 
                 {/* Bento Grid container with pre-rendered pages */}
-                <div className="relative h-[372px] sm:h-[456px] md:h-[516px] w-full overflow-hidden">
+                <div className="relative h-[372px] sm:h-[456px] md:h-[600px] w-full overflow-hidden">
                     {[0, 1, 2].map((pageIndex) => {
                         const pageItems = getPageItemsForIndex(pageIndex);
                         const isActive = pageIndex === currentPage;
@@ -148,18 +145,17 @@ export default function InsideDA360() {
                         return (
                             <div
                                 key={pageIndex}
-                                className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-9 gap-3 md:gap-4 transition-all duration-500 absolute inset-0 w-full ${
-                                    isActive
-                                        ? "opacity-100 translate-x-0 pointer-events-auto z-10"
-                                        : isPrev
-                                            ? "opacity-0 -translate-x-full pointer-events-none z-0"
-                                            : "opacity-0 translate-x-full pointer-events-none z-0"
-                                }`}
+                                className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-12 md:grid-rows-6 gap-3 md:gap-4 transition-all duration-500 absolute inset-0 w-full ${isActive
+                                    ? "opacity-100 translate-x-0 pointer-events-auto z-10"
+                                    : isPrev
+                                        ? "opacity-0 -translate-x-full pointer-events-none z-0"
+                                        : "opacity-0 translate-x-full pointer-events-none z-0"
+                                    }`}
                             >
                                 {pageItems.map((item) => (
                                     <div
                                         key={item.src}
-                                        className={`${item.colSpan} ${item.rowSpan} ${item.heightClass} relative group overflow-hidden bg-neutral-950 flex flex-col items-center justify-center`}
+                                        className={`${item.layoutClass} relative group overflow-hidden bg-neutral-950 flex flex-col items-center justify-center`}
                                     >
                                         {/* Student Life Photo */}
                                         <Image

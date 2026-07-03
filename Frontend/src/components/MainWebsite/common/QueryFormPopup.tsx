@@ -20,14 +20,25 @@ export default function QueryFormPopup() {
   useEffect(() => {
     // Check if the user has already closed/interacted with the form in this session
     const hasDismissed = sessionStorage.getItem("queryFormDismissed");
-    if (hasDismissed) return;
+    
+    let timer: NodeJS.Timeout;
+    if (!hasDismissed) {
+      // Trigger popup after 10 seconds
+      timer = setTimeout(() => {
+        setIsOpen(true);
+      }, 10000);
+    }
 
-    // Trigger popup after 10 seconds
-    const timer = setTimeout(() => {
+    const handleOpenPopup = () => {
       setIsOpen(true);
-    }, 10000);
+    };
 
-    return () => clearTimeout(timer);
+    window.addEventListener("openQueryForm", handleOpenPopup);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("openQueryForm", handleOpenPopup);
+    };
   }, []);
 
   const handleClose = () => {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -431,9 +432,12 @@ function LoginPageContent() {
       >
         <div className="relative z-20">
           <Link href="/" className="flex items-center w-fit">
-            <img
+            <Image
               src="/Logo/Logo.svg"
               alt="Logo"
+              width={178}
+              height={34}
+              priority
               className="h-12 w-auto object-contain"
             />
           </Link>
@@ -633,9 +637,12 @@ function LoginPageContent() {
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center mb-8">
             <Link href="/" className="flex items-center">
-              <img
+              <Image
                 src="/Logo/Logo.svg"
                 alt="Logo"
+                width={178}
+                height={34}
+                priority
                 className="h-12 w-auto object-contain"
               />
             </Link>
