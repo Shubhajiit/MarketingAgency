@@ -6,6 +6,7 @@ import Navbar from "@/components/MainWebsite/common/Navbar";
 import Footer from "@/components/MainWebsite/common/Footer";
 import AnnoucementBar from "@/components/MainWebsite/common/AnnoucementBar";
 import CartDrawer from "@/components/MainWebsite/common/CartDrawer";
+import QueryFormPopup from "@/components/MainWebsite/common/QueryFormPopup";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -27,6 +28,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
             <Footer />
             <CartDrawer />
+            <QueryFormPopup />
         </div>
     );
 }
