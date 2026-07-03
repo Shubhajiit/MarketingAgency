@@ -242,12 +242,12 @@ export default function Page() {
                 </div>
 
                 {/* Hero Content */}
-                <div className="relative z-20 w-full max-w-5xl px-6 text-center text-white flex flex-col items-center justify-center -mt-4 sm:-mt-12">
+                <div className="relative z-20 w-full max-w-5xl px-4 sm:px-6 text-center text-white flex flex-col items-center justify-center -mt-4 sm:-mt-12">
                     <p className="text-lg sm:text-2xl md:text-3xl font-bold italic tracking-wide mb-4 text-slate-100">
                         School Of Digital Marketing
                     </p>
 
-                    <h1 className="text-4xl sm:text-6xl md:text-7.5xl font-black italic tracking-tight leading-none mb-6 text-white relative">
+                    <h1 className="text-[29px] sm:text-6xl md:text-7.5xl font-black italic tracking-tight leading-none mb-6 text-white relative w-full">
                         <span className="block">Endorsed By</span>
                         <span className="block mt-2">Marketing Leaders.</span>
                     </h1>
