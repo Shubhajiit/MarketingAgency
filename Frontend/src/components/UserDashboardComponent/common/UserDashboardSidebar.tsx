@@ -113,7 +113,7 @@ export default function UserDashboardSidebar() {
 			<aside className="hidden md:flex w-64 bg-white border-r border-[#eef0f4] flex-col fixed h-full z-30">
 				<div className="px-6 py-5 flex items-center justify-between">
 					<Link href="/dashboard" className="flex items-center gap-2">
-						<img src="/Logo/Logo.webp" alt="Logo" className="h-8 w-auto object-contain" />
+						<img src="/Logo/Logo.svg" alt="Logo" className="h-8 w-auto object-contain" />
 					</Link>
 				</div>
 

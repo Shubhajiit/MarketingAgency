@@ -139,7 +139,7 @@ export default function Navbar() {
             <header className="relative bg-white border-b border-gray-100 py-3 px-4 md:px-36 flex justify-between items-center z-50 w-full">
                 <div className="flex items-center">
                     <Link href="/">
-                        <img src="/Logo/Logo.webp" alt="Datamites Logo" className="h-12 w-auto object-contain cursor-pointer" />
+                        <img src="/Logo/Logo.svg" alt="Datamites Logo" className="h-12 w-auto object-contain cursor-pointer" />
                     </Link>
                 </div>
 

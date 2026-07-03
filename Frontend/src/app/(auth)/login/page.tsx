@@ -432,7 +432,7 @@ function LoginPageContent() {
         <div className="relative z-20">
           <Link href="/" className="flex items-center w-fit">
             <img
-              src="/Logo/Logo.webp"
+              src="/Logo/Logo.svg"
               alt="Logo"
               className="h-12 w-auto object-contain"
             />
@@ -634,7 +634,7 @@ function LoginPageContent() {
           <div className="lg:hidden flex items-center justify-center mb-8">
             <Link href="/" className="flex items-center">
               <img
-                src="/Logo/Logo.webp"
+                src="/Logo/Logo.svg"
                 alt="Logo"
                 className="h-12 w-auto object-contain"
               />

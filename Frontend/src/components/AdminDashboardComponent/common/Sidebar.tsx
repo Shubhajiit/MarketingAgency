@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="px-6 py-6 flex items-center justify-between border-b border-[#f4f5f8]">
         <Link href="/admin/dashboard" className="flex items-center">
           <img
-            src="/Logo/Logo.webp"
+            src="/Logo/Logo.svg"
             alt="Logo"
             className="h-8 w-auto object-contain"
           />
