@@ -7,6 +7,7 @@ A scalable workshop-booking and paid video-learning platform built with a separa
 
 # 🚀 Codebase Scalability Review (100K Concurrent Users)
 
+
 This review evaluates the current state of the AI Scale codebase for handling **100,000 (1 Lakh) concurrent users**.
 
 ## 📊 Scale Readiness Rating: `5 / 10` (Scalability Grade: C)
