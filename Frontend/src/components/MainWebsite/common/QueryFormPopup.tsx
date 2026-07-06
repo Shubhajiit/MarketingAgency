@@ -230,7 +230,7 @@ export default function QueryFormPopup() {
                     name="learningMode"
                     value="Online"
                     checked={formData.learningMode === "Online"}
-                    onChange={(e) => setFormData({ ...formData, learningMode: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, learningMode: e.target.value as "Online" | "Classroom" })}
                     className="w-3.5 h-3.5 text-rose-600 focus:ring-rose-500 accent-rose-600"
                   />
                   Online
@@ -241,7 +241,7 @@ export default function QueryFormPopup() {
                     name="learningMode"
                     value="Classroom"
                     checked={formData.learningMode === "Classroom"}
-                    onChange={(e) => setFormData({ ...formData, learningMode: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, learningMode: e.target.value as "Online" | "Classroom" })}
                     className="w-3.5 h-3.5 text-rose-600 focus:ring-rose-500 accent-rose-600"
                   />
                   Classroom
