@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { queriesApi } from "@/lib/api/queries";
 
 export default function QueryFormPopup() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,14 +13,14 @@ export default function QueryFormPopup() {
     countryCode: "+91",
     phone: "",
     experience: "",
-    center: "",
-    learningMode: "Online",
+    querySection: "",
+    learningMode: "Online" as "Online" | "Classroom",
     consent: true,
   });
 
   useEffect(() => {
-    // Check if the user has already closed/interacted with the form in this session
-    const hasDismissed = sessionStorage.getItem("queryFormDismissed");
+    // Check if the user has already closed/interacted with the form
+    const hasDismissed = localStorage.getItem("queryFormDismissed");
     
     let timer: NodeJS.Timeout;
     if (!hasDismissed) {
@@ -43,17 +44,23 @@ export default function QueryFormPopup() {
 
   const handleClose = () => {
     setIsOpen(false);
-    sessionStorage.setItem("queryFormDismissed", "true");
+    localStorage.setItem("queryFormDismissed", "true");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    // Persist status so it doesn't open again during the session
-    sessionStorage.setItem("queryFormDismissed", "true");
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 2000);
+    try {
+      await queriesApi.submitQuery(formData);
+      setIsSubmitted(true);
+      // Persist status so it doesn't open again
+      localStorage.setItem("queryFormDismissed", "true");
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error submitting query:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   if (!isOpen) return null;
@@ -202,21 +209,16 @@ export default function QueryFormPopup() {
                 </select>
               </div>
 
-              {/* Learning Center Dropdown */}
+              {/* Query Section Input */}
               <div>
-                <select
-                  value={formData.center}
+                <input
+                  type="text"
+                  placeholder="Query Section*"
                   required
-                  onChange={(e) => setFormData({ ...formData, center: e.target.value })}
-                  className="w-full px-4 py-2 md:py-2.5 rounded-none border border-slate-200 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-xs font-semibold text-slate-700 bg-white cursor-pointer"
-                >
-                  <option value="" disabled>Learning Center*</option>
-                  <option value="Online">Online / Live Virtual</option>
-                  <option value="Bangalore">Bangalore Campus</option>
-                  <option value="Delhi NCR">Delhi NCR Campus</option>
-                  <option value="Mumbai">Mumbai Campus</option>
-                  <option value="Pune">Pune Campus</option>
-                </select>
+                  value={formData.querySection}
+                  onChange={(e) => setFormData({ ...formData, querySection: e.target.value })}
+                  className="w-full px-4 py-2 md:py-2.5 rounded-none border border-slate-200 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-xs font-medium text-slate-800 placeholder-slate-400 transition-all"
+                />
               </div>
 
               {/* Learning Mode Radio Buttons */}

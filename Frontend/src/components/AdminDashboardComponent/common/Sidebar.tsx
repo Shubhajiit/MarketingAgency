@@ -84,6 +84,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Users size={18} />
               <span>Courses Buyers</span>
             </Link>
+            <Link href="/admin/queries" className={isActive('/admin/queries') ? activeClass : inactiveClass}>
+              <HelpCircle size={18} />
+              <span>Queries</span>
+            </Link>
           </nav>
         </div>
 
