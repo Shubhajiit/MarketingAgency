@@ -184,6 +184,18 @@ export default function Page() {
         }, 2000);
     }, []);
 
+    const [isLoaded, setIsLoaded] = React.useState(false);
+
+    React.useEffect(() => {
+        if (typeof window !== "undefined") {
+            if ('scrollRestoration' in window.history) {
+                window.history.scrollRestoration = 'manual';
+            }
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            setIsLoaded(true);
+        }
+    }, []);
+
     React.useEffect(() => {
         startTimer();
         return () => {
@@ -242,7 +254,9 @@ export default function Page() {
                 </div>
 
                 {/* Hero Content */}
-                <div className="relative z-20 w-full max-w-5xl px-2 sm:px-6 text-center text-white flex flex-col items-center justify-center -mt-4 sm:-mt-12">
+                <div className={`relative z-20 w-full max-w-5xl px-2 sm:px-6 text-center text-white flex flex-col items-center justify-center -mt-4 sm:-mt-12 transition-all duration-1000 ease-out transform ${
+                    isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                }`}>
                     <p className="text-lg sm:text-2xl md:text-3xl font-bold italic tracking-wide mb-4 text-slate-100">
                         School Of Digital Marketing
                     </p>
@@ -601,6 +615,134 @@ export default function Page() {
             <InsideDA360 />
             <GlobalCommunity />
             <CertificationCoursesSection bgColor="bg-[#f8fafd]" />
+
+            {/* Meet your Mentors Section */}
+            <section className="bg-white py-16 md:py-24 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-t border-b border-gray-100" id="meet-mentors">
+              <div className="max-w-6xl w-full mx-auto flex flex-col items-center">
+                <h2 className="text-[28px] md:text-[38px] font-semibold text-gray-900 tracking-tight text-center mb-16">
+                  Meet your Mentors
+                </h2>
+
+                <div className="flex flex-col gap-16 md:gap-24 w-full">
+                  {/* Mentor 1: Founder */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                    {/* Left Column: Image and Name */}
+                    <div className="md:col-span-5 flex flex-col items-center">
+                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                        <img
+                          src="/Mentors/Founder.svg"
+                          alt="Founder"
+                          className="w-full h-full object-cover rounded-[10px]"
+                        />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                        Aman Saurav
+                      </h3>
+                    </div>
+
+                    {/* Right Column: Details */}
+                    <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
+                      {/* Founder Heading */}
+                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                        Founder
+                      </h4>
+                      {/* Checkmarks list */}
+                      <div className="flex flex-col gap-3 mb-6">
+                        {[
+                          "IIT Delhi Alumni",
+                          "Director of AI for Techies",
+                          "Senior Data Analyst"
+                        ].map((text, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                       <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        Hello, I have successfully conducted{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          over 90 workshops
+                        </span>{" "}
+                        and taught more than{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          1,000 students
+                        </span>
+                        . With a focus on practical, results-driven learning,{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          over 300 of my students
+                        </span>{" "}
+                        are now actively earning and thriving in their careers.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mentor 2: Co-Founder */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
+                    {/* Left Column (Details) - Shows first on mobile, but second on desktop */}
+                    <div className="md:col-span-7 order-2 md:order-1 flex flex-col items-start text-left font-sans text-gray-800">
+                      {/* Co-Founder Heading */}
+                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
+                        Co-Founder
+                      </h4>
+                      {/* Checkmarks list */}
+                      <div className="flex flex-col gap-3 mb-6">
+                        {[
+                          "IIT Kharagpur Alumni",
+                          "Co-Founder of AI for Techies",
+                          "Senior AI & Tech Mentor"
+                        ].map((text, idx) => (
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
+                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Paragraphs */}
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
+                        Hello, I'm a graduate of{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          IIT Kharagpur
+                        </span>{" "}
+                        and Co-Founder at{" "}
+                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
+                          AI for Techies
+                        </span>
+                        . With a deep passion for technology and artificial intelligence, I have spent years building scalable AI systems and designing educational programs that bridge the gap between academic theory and industry application.
+                      </p>
+
+                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
+                        Over my career, I've mentored{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          thousands of developers
+                        </span>{" "}
+                        and{" "}
+                        <span className="text-blue-600 underline font-bold cursor-pointer">
+                          professionals
+                        </span>{" "}
+                        in prompt engineering, generative AI, Python programming, and advanced automation. My goal is to equip every learner with the practical tools and logic required to excel in today's fast-paced tech landscape.
+                      </p>
+                    </div>
+
+                    {/* Right Column (Image) - Shows second on mobile, but first on desktop relative to its side */}
+                    <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
+                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
+                        <img
+                          src="/Mentors/Co-Founder.svg"
+                          alt="Co-Founder"
+                          className="w-full h-full object-cover rounded-[10px]"
+                        />
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
+                        Aditya Kachave
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
             {/* Course Level Selector Section */}
             <section className="w-full bg-white py-16 md:py-24 px-4 md:px-36 border-t border-slate-100">
