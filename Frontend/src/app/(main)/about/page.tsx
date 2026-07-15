@@ -8,7 +8,7 @@ export default function AboutUsPage() {
 
   const team = [
     {
-      name: "Aman Saurav",
+      name: "Naveen Mishra",
       role: "Founder",
       image: "/Mentors/Founder.svg",
       tag: "Founder",
@@ -17,10 +17,10 @@ export default function AboutUsPage() {
         "Director of AI for Techies",
         "Senior Data Analyst"
       ],
-      bio: "Hello, I have successfully conducted over 90 workshops and taught more than 1,000 students. With a focus on practical, results-driven learning, over 300 of my students are now actively earning and thriving in their careers."
+      bio: "I have successfully conducted over 90 workshops and trained more than 1,000 students. Through my career-focused mentoring programs, I have helped over 300+ students transition into successful professional opportunities."
     },
     {
-      name: "Aditya Kachave",
+      name: "Aditya Shukla",
       role: "Co-Founder",
       image: "/Mentors/Co-Founder.svg",
       tag: "Co-Founder",
@@ -29,7 +29,7 @@ export default function AboutUsPage() {
         "Co-Founder of AI for Techies",
         "Senior AI & Tech Mentor"
       ],
-      bio: "Hello, I'm a graduate of IIT Kharagpur and Co-Founder at AI for Techies. With a deep passion for technology and artificial intelligence, I have spent years building scalable AI systems and designing educational programs that bridge the gap between academic theory and industry application."
+      bio: "I lead the management and operations of the company, focusing on scaling business processes, optimizing team workflows, and driving strategic execution across all marketing and educational campaigns."
     }
   ];
 
@@ -108,14 +108,6 @@ export default function AboutUsPage() {
           <div className="lg:col-span-8 flex flex-col gap-8 w-full">
             {team.map((member, i) => (
               <div key={i} className="relative w-full group">
-                {/* Glowing background shadow (outside overflow-hidden - custom zoom-in/out glow) */}
-                <div
-                  className="absolute inset-[-4px] rounded-3xl animate-custom-glow pointer-events-none transition-opacity duration-500"
-                  style={{
-                    background: 'conic-gradient(from 0deg at 50% 50%, #3b82f6 0%, #8b5cf6 25%, #f43f5e 50%, #10b981 75%, #3b82f6 100%)'
-                  }}
-                />
-
                 {/* Border wrapper with overflow-hidden */}
                 <div className="relative p-[2px] overflow-hidden rounded-3xl w-full shadow-[0_15px_40px_-15px_rgba(0,0,0,0.5)]">
                   {/* Rotating border gradient (moving lighting - fully vibrant neon colors) */}
@@ -129,46 +121,31 @@ export default function AboutUsPage() {
                   {/* Card Content Wrapper (Light Gray Background) */}
                   <div className="relative w-full h-full bg-gradient-to-br from-zinc-50 to-zinc-100 rounded-[22px] p-6 sm:p-8 flex flex-col sm:flex-row gap-8 items-center sm:items-start z-10">
 
-                    {/* Photo area */}
-                    <div className="relative shrink-0 w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden bg-white shadow-sm border border-zinc-200 transition-transform duration-500 group-hover:scale-[1.03]">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                    {/* Photo & Name area */}
+                    <div className="flex flex-col items-center gap-3 shrink-0 w-36 sm:w-44 text-center">
+                      <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden bg-white shadow-sm border border-zinc-200 transition-transform duration-500 group-hover:scale-[1.03]">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors leading-tight">
+                          {member.name}
+                        </h3>
+                      </div>
                     </div>
 
-                    {/* Text area */}
-                    <div className="flex-1 flex flex-col gap-4 text-center sm:text-left">
-                      <div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center sm:justify-start">
-                          <h3 className="text-2xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
-                            {member.name}
-                          </h3>
-                          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100 w-fit mx-auto sm:mx-0 uppercase tracking-wider">
-                            {member.role}
-                          </span>
-                        </div>
+                    {/* Bio text area */}
+                    <div className="flex-1 flex flex-col gap-2 text-center sm:text-left justify-start pt-2">
+                      <div className="flex justify-center sm:justify-start">
+                        <span className="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100 uppercase tracking-wider">
+                          {member.role}
+                        </span>
                       </div>
-
-                      {/* Bullet Highlights */}
-                      <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                        {member.bullets.map((bullet, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold rounded-lg shadow-sm"
-                          >
-                            <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            {bullet}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Bio text */}
-                      <p className="text-sm text-zinc-600 leading-relaxed pt-3 border-t border-dashed border-zinc-200">
+                      <p className="text-sm md:text-base text-zinc-600 leading-relaxed mt-2">
                         {member.bio}
                       </p>
                     </div>
@@ -179,6 +156,81 @@ export default function AboutUsPage() {
             ))}
           </div>
 
+        </div>
+      </div>
+
+      {/* ── Meet the Team (Employees) ── */}
+      <div className="bg-white px-6 sm:px-12 md:px-24 py-16 border-b border-zinc-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-12 flex flex-col gap-3">
+            <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-blue-600">
+              Our Core Team
+            </span>
+            <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 tracking-tight">
+              The Minds Behind the Magic
+            </h2>
+            <p className="text-zinc-500 text-sm md:text-base leading-relaxed">
+              Our dedicated professionals work tirelessly behind the scenes to deliver exceptional digital experiences and ensure client success.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                name: "Sangram Rao",
+                role: "Performance Marketing & Meta Ads Expert",
+                image: "/Mentors/Performance-Marketing.jpeg",
+                description: "With over 8 years of experience, specializes in Meta Ads, paid advertising, budget scaling, conversion funnels, and data-driven marketing campaigns.",
+              },
+              {
+                name: "Harsh Pandey",
+                role: "Video Editor & Founder of Social Rise Up",
+                image: "/Mentors/Editor.jpeg",
+                description: "With 7 years of professional editing experience, crafts compelling visual stories, high-converting video ads, dynamic content layouts, and drives social growth.",
+              },
+              {
+                name: "Vishnu Rao",
+                role: "Video Editor & Online Educator",
+                image: "/Mentors/Online-Editor.jpeg",
+                description: "With over 4 years of professional video editing experience, conducts online editing workshops and mentors aspiring creators in advanced editing techniques.",
+              }
+            ].map((emp, i) => (
+              <div
+                key={i}
+                className="group relative bg-gradient-to-b from-zinc-50 to-zinc-100/50 hover:from-white hover:to-white border border-zinc-200/80 hover:border-blue-400 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(59,130,246,0.15)] flex flex-col"
+              >
+                {/* Card Top: Full-width Image or Gradient Fallback */}
+                <div className="relative w-full h-80 overflow-hidden bg-zinc-100 border-b border-zinc-100">
+                  {emp.image ? (
+                    <img
+                      src={emp.image}
+                      alt={emp.name}
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-500/10 to-indigo-600/10 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                        {emp.name.split(" ").map(n => n[0]).join("")}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Card Bottom: Content info */}
+                <div className="p-6 flex flex-col flex-1 gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
+                      {emp.name}
+                    </h3>
+                    <p className="text-xs text-blue-600 font-semibold mt-0.5">{emp.role}</p>
+                  </div>
+                  <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed flex-1">
+                    {emp.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

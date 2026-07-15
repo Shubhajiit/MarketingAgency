@@ -617,130 +617,84 @@ export default function Page() {
             <CertificationCoursesSection bgColor="bg-[#f8fafd]" />
 
             {/* Meet your Mentors Section */}
-            <section className="bg-white py-16 md:py-24 px-4 md:px-8 w-full flex flex-col items-center z-10 font-sans border-t border-b border-gray-100" id="meet-mentors">
-              <div className="max-w-6xl w-full mx-auto flex flex-col items-center">
-                <h2 className="text-[28px] md:text-[38px] font-semibold text-gray-900 tracking-tight text-center mb-16">
-                  Meet your Mentors
-                </h2>
+            <section className="bg-slate-50/50 px-6 sm:px-12 md:px-24 py-16 md:py-24 border-t border-b border-zinc-100 relative" id="meet-mentors">
+              <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
 
-                <div className="flex flex-col gap-16 md:gap-24 w-full">
-                  {/* Mentor 1: Founder */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
-                    {/* Left Column: Image and Name */}
-                    <div className="md:col-span-5 flex flex-col items-center">
-                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
-                        <img
-                          src="/Mentors/Founder.svg"
-                          alt="Founder"
-                          className="w-full h-full object-cover rounded-[10px]"
-                        />
-                      </div>
-                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
-                        Aman Saurav
-                      </h3>
-                    </div>
-
-                    {/* Right Column: Details */}
-                    <div className="md:col-span-7 flex flex-col items-start text-left font-sans text-gray-800">
-                      {/* Founder Heading */}
-                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
-                        Founder
-                      </h4>
-                      {/* Checkmarks list */}
-                      <div className="flex flex-col gap-3 mb-6">
-                        {[
-                          "IIT Delhi Alumni",
-                          "Director of AI for Techies",
-                          "Senior Data Analyst"
-                        ].map((text, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5">
-                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
-                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                       <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
-                        Hello, I have successfully conducted{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          over 90 workshops
-                        </span>{" "}
-                        and taught more than{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          1,000 students
-                        </span>
-                        . With a focus on practical, results-driven learning,{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          over 300 of my students
-                        </span>{" "}
-                        are now actively earning and thriving in their careers.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Mentor 2: Co-Founder */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center w-full max-w-5xl mx-auto">
-                    {/* Left Column (Details) - Shows first on mobile, but second on desktop */}
-                    <div className="md:col-span-7 order-2 md:order-1 flex flex-col items-start text-left font-sans text-gray-800">
-                      {/* Co-Founder Heading */}
-                      <h4 className="text-xs sm:text-sm font-black text-[#0052FF] tracking-wider uppercase mb-3">
-                        Co-Founder
-                      </h4>
-                      {/* Checkmarks list */}
-                      <div className="flex flex-col gap-3 mb-6">
-                        {[
-                          "IIT Kharagpur Alumni",
-                          "Co-Founder of AI for Techies",
-                          "Senior AI & Tech Mentor"
-                        ].map((text, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5">
-                            <span className="text-gray-900 font-extrabold text-sm md:text-base">✓</span>
-                            <span className="text-sm md:text-base font-bold text-gray-900 leading-snug">{text}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Paragraphs */}
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed mb-4 text-gray-700">
-                        Hello, I'm a graduate of{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          IIT Kharagpur
-                        </span>{" "}
-                        and Co-Founder at{" "}
-                        <span className="text-blue-600 underline font-bold italic cursor-pointer">
-                          AI for Techies
-                        </span>
-                        . With a deep passion for technology and artificial intelligence, I have spent years building scalable AI systems and designing educational programs that bridge the gap between academic theory and industry application.
-                      </p>
-
-                      <p className="text-sm md:text-[15px] font-semibold leading-relaxed text-gray-700">
-                        Over my career, I've mentored{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          thousands of developers
-                        </span>{" "}
-                        and{" "}
-                        <span className="text-blue-600 underline font-bold cursor-pointer">
-                          professionals
-                        </span>{" "}
-                        in prompt engineering, generative AI, Python programming, and advanced automation. My goal is to equip every learner with the practical tools and logic required to excel in today's fast-paced tech landscape.
-                      </p>
-                    </div>
-
-                    {/* Right Column (Image) - Shows second on mobile, but first on desktop relative to its side */}
-                    <div className="md:col-span-5 order-1 md:order-2 flex flex-col items-center">
-                      <div className="relative w-full aspect-square max-w-[320px] rounded-2xl overflow-hidden p-1.5 bg-gradient-to-tr from-blue-700 via-blue-500 to-indigo-900 shadow-lg">
-                        <img
-                          src="/Mentors/Co-Founder.svg"
-                          alt="Co-Founder"
-                          className="w-full h-full object-cover rounded-[10px]"
-                        />
-                      </div>
-                      <h3 className="text-2xl md:text-3xl font-semibold text-gray-900 mt-4 text-center">
-                        Aditya Kachave
-                      </h3>
-                    </div>
-                  </div>
+                {/* Left side: Sticky info header */}
+                <div className="lg:col-span-4 lg:sticky lg:top-28 flex flex-col gap-5">
+                  <h2 className="text-3xl md:text-4xl font-normal text-black tracking-tight leading-tight">
+                    Meet Our Mentors &amp; Founders
+                  </h2>
+                  <p className="text-zinc-500 text-sm md:text-base leading-relaxed">
+                    Learn directly from creators and industry veterans who have built products and systems at premier organizations. We focus on real-world application, not just theory.
+                  </p>
                 </div>
+
+                {/* Right side: Modern, high-end list cards with dark gradient and moving borders */}
+                <div className="lg:col-span-8 flex flex-col gap-8 w-full">
+                  {[
+                    {
+                      name: "Naveen Mishra",
+                      role: "Founder",
+                      image: "/Mentors/Founder.svg",
+                      bio: "I have successfully conducted over 90 workshops and trained more than 1,000 students. Through my career-focused mentoring programs, I have helped over 300+ students transition into successful professional opportunities."
+                    },
+                    {
+                      name: "Aditya Shukla",
+                      role: "Co-Founder",
+                      image: "/Mentors/Co-Founder.svg",
+                      bio: "I lead the management and operations of the company, focusing on scaling business processes, optimizing team workflows, and driving strategic execution across all marketing and educational campaigns."
+                    }
+                  ].map((member, i) => (
+                    <div key={i} className="relative w-full group">
+                      {/* Border wrapper with overflow-hidden */}
+                      <div className="relative p-[2px] overflow-hidden rounded-3xl w-full shadow-[0_15px_40px_-15px_rgba(0,0,0,0.5)]">
+                        {/* Rotating border gradient */}
+                        <div
+                          className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] opacity-100"
+                          style={{
+                            background: 'conic-gradient(from 0deg at 50% 50%, #3b82f6 0%, #8b5cf6 25%, #f43f5e 50%, #10b981 75%, #3b82f6 100%)'
+                          }}
+                        />
+
+                        {/* Card Content Wrapper */}
+                        <div className="relative w-full h-full bg-gradient-to-br from-zinc-50 to-zinc-100 rounded-[22px] p-6 sm:p-8 flex flex-col sm:flex-row gap-8 items-center sm:items-start z-10">
+
+                          {/* Photo & Name area */}
+                          <div className="flex flex-col items-center gap-3 shrink-0 w-36 sm:w-44 text-center">
+                            <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden bg-white shadow-sm border border-zinc-200 transition-transform duration-500 group-hover:scale-[1.03]">
+                              <img
+                                src={member.image}
+                                alt={member.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors leading-tight">
+                                {member.name}
+                              </h3>
+                            </div>
+                          </div>
+
+                          {/* Bio text area */}
+                          <div className="flex-1 flex flex-col gap-2 text-center sm:text-left justify-start pt-2">
+                            <div className="flex justify-center sm:justify-start">
+                              <span className="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-600 border border-blue-100 uppercase tracking-wider">
+                                {member.role}
+                              </span>
+                            </div>
+                            <p className="text-sm md:text-base text-zinc-600 leading-relaxed mt-2">
+                              {member.bio}
+                            </p>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             </section>
 

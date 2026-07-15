@@ -25,34 +25,45 @@ export default function ContactUsPage() {
             {/* Contact Links */}
             <div className="flex flex-col gap-6 text-sm md:text-lg font-medium">
               {/* WhatsApp Link */}
-              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
+              <a
+                href="https://wa.me/918604527667"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3.5 text-slate-300 hover:text-white transition-colors w-fit"
+              >
                 <img
                   src="/Social_Icons/icons8-whatsapp-logo.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-85"
                   alt="WhatsApp"
                 />
-                <span>WhatsApp: Coming Soon</span>
-              </div>
+                <span>WhatsApp: 8604527667</span>
+              </a>
 
               {/* Phone Link */}
-              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
+              <a
+                href="tel:+918604527667"
+                className="flex items-center gap-3.5 text-slate-300 hover:text-white transition-colors w-fit"
+              >
                 <img
                   src="/Social_Icons/icons8-call.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-85"
                   alt="Phone Call"
                 />
-                <span>Call: Coming Soon</span>
-              </div>
+                <span>Call: 8604527667</span>
+              </a>
 
               {/* Email Link */}
-              <div className="flex items-center gap-3.5 text-slate-300 w-fit select-none">
+              <a
+                href="mailto:aitrainwithnaveen@gmail.com"
+                className="flex items-center gap-3.5 text-slate-300 hover:text-white transition-colors w-fit"
+              >
                 <img
                   src="/Social_Icons/icons8-gmail.svg"
-                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-60"
+                  className="w-7 h-7 md:w-9 md:h-9 object-contain opacity-85"
                   alt="Gmail"
                 />
-                <span>Gmail: Coming Soon</span>
-              </div>
+                <span className="break-all">Gmail: aitrainwithnaveen@gmail.com</span>
+              </a>
             </div>
           </div>
 
