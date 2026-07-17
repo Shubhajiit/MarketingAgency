@@ -8,10 +8,9 @@ import { coursesApi } from "@/lib/api/courses";
 export const coursesData: Course[] = [];
 
 const tabs = [
-  { id: "popular", label: "Popular Courses" },
-  { id: "pro-specialist", label: "Pro & Specialist Courses" },
-  { id: "short", label: "Short Courses" },
-  { id: "advanced", label: "Advanced Courses" }
+  { id: "offline", label: "Offline Courses" },
+  { id: "online", label: "Online Courses" },
+  { id: "crash", label: "Crash Courses" }
 ];
 
 const countryCodes = [

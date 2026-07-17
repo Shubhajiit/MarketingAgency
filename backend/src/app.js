@@ -28,18 +28,32 @@ const paymentLimiter = rateLimit({
   }),
 });
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://aiscallex.vercel.app',
+  'https://aiscallex.in',
+  'https://www.aiscallex.in',
+  'https://aiscallex.com',
+  'https://www.aiscallex.com',
+  process.env.CLIENT_URL,
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [])
+]
+  .filter(Boolean)
+  .map(url => url.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://aiscallex.vercel.app',
-    'https://aiscallex.in',
-    'https://www.aiscallex.in',
-    'https://aiscallex.com/',
-    'https://www.aiscallex.com/',
-    process.env.CLIENT_URL,
-    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [])
-  ].filter(Boolean),
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const cleanedOrigin = origin.trim().replace(/\/$/, '');
+    if (allowedOrigins.includes(cleanedOrigin)) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
